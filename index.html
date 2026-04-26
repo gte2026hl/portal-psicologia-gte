@@ -1,83 +1,148 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTE - Conexión Blindada HDC</title>
+    <title>GTE - Sistema Clínico HDC 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { navy: '#001f3f', orange: '#ff851b' }
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-wireframe {
+            background-color: #001f3f;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+    </style>
 </head>
-<body id="main-body" class="bg-[#001f3f] min-h-screen font-sans text-white">
+<body id="main-body" class="bg-wireframe min-h-screen font-sans text-white transition-all duration-700">
 
-    <div id="app" class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl text-slate-800">
-            <div class="text-center mb-8">
-                <h1 class="text-2xl font-black text-navy">Guacara Te Escucha</h1>
-                <p class="text-[10px] text-orange-600 font-bold uppercase tracking-widest">Verificación de Especialista</p>
+    <div id="app-container" class="min-h-screen flex items-center justify-center p-4">
+        
+        <div id="login-card" class="w-full max-w-4xl grid md:grid-cols-2 bg-navy border border-gray-700 shadow-2xl rounded-xl overflow-hidden animate-in fade-in duration-500">
+            
+            <div class="p-10 flex flex-col justify-center items-center text-center border-r border-gray-700 bg-navy/50">
+                <svg class="w-24 h-24 text-orange mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                <h1 class="text-3xl font-bold mb-2">Guacara Te Escucha</h1>
+                <p class="text-gray-300 text-sm tracking-widest uppercase">Transformando Silencios en Esperanza</p>
+                <div class="mt-8 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Fase 3: Atención Especializada</div>
             </div>
 
-            <form id="loginForm" class="space-y-5">
-                <input type="text" id="fvp" placeholder="FVP (Ej: 12345)" required class="w-full p-3 border-2 border-slate-100 rounded-xl outline-none focus:border-orange-500 font-bold text-navy">
-                <input type="password" id="pass" placeholder="Contraseña" required class="w-full p-3 border-2 border-slate-100 rounded-xl outline-none focus:border-orange-500 font-bold text-navy">
-                <button type="submit" id="btn" class="w-full bg-[#ff851b] text-white font-black py-4 rounded-xl hover:brightness-110 shadow-lg transition-all uppercase">ENTRAR</button>
-            </form>
+            <div class="bg-white text-gray-800 p-10 flex flex-col justify-center">
+                <h2 class="text-2xl font-bold text-navy mb-6 text-center italic">Acceso Especialistas</h2>
+                
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-black text-navy uppercase mb-1">Código FVP</label>
+                        <input type="text" id="fvpInput" placeholder="Ej: 12345" required 
+                            class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-navy uppercase mb-1">Contraseña de Acceso</label>
+                        <input type="password" id="passwordInput" placeholder="••••••••" required 
+                            class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none font-bold">
+                    </div>
+                    <button type="submit" id="btnIngresar" 
+                        class="w-full bg-orange hover:bg-orange/90 text-white font-black py-4 rounded-lg shadow-lg uppercase tracking-widest transition-all">
+                        Ingresar al Portal Clínico
+                    </button>
+                </form>
+
+                <div class="mt-12 pt-6 border-t border-gray-100 text-center">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">HDC 2026 | Propiedad Intelectual</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN CORREGIDA ---
-        // Nota: Se eliminó el "/rest/v1/" de la URL
-        const SB_URL = 'https://oqarmkugdzedptbqcygq.supabase.co'; 
-        const SB_KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
-        
-        const gte = supabase.createClient(SB_URL, SB_KEY);
+        // --- USANDO LA CONFIGURACIÓN QUE SÍ FUNCIONÓ ---
+        const URL = 'https://oqarmkugdzedptbqcygq.supabase.co'; 
+        const KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
+        const GTE_ENGINE = supabase.createClient(URL, KEY);
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const fvpVal = document.getElementById('fvp').value.trim();
-            const passVal = document.getElementById('pass').value.trim();
-            const btn = document.getElementById('btn');
+            const fvp = document.getElementById('fvpInput').value.trim();
+            const pass = document.getElementById('passwordInput').value.trim();
+            const btn = document.getElementById('btnIngresar');
 
-            btn.innerHTML = "CONECTANDO CON SUPABASE...";
+            btn.innerHTML = "CONECTANDO...";
             btn.disabled = true;
 
             try {
-                // Hacemos la consulta limpia
-                const { data, error } = await gte
+                // Usamos la lógica de búsqueda que nos dio el éxito
+                const { data, error } = await GTE_ENGINE
                     .from('psicologos')
                     .select('*')
-                    .eq('codigo_fvp', fvpVal)
-                    .maybeSingle(); // Usamos maybeSingle para evitar errores si no hay datos
+                    .eq('codigo_fvp', fvp)
+                    .maybeSingle();
 
                 if (error) {
-                    console.error("Error técnico:", error);
-                    alert("Error de conexión: " + error.message);
+                    alert("Error: " + error.message);
                 } else if (!data) {
-                    alert("El FVP '" + fvpVal + "' no existe en la base de datos.");
-                } else if (data.password !== passVal) {
+                    alert("El FVP '" + fvp + "' no existe.");
+                } else if (String(data.password).trim() !== pass) {
                     alert("Contraseña incorrecta.");
                 } else {
-                    alert("¡Acceso Exitoso! Bienvenido/a Dr/Dra. " + data.nombres);
+                    // Si todo coincide, cargamos el Dashboard profesional
                     renderDashboard(data);
                 }
             } catch (err) {
                 alert("Fallo crítico de red.");
             } finally {
-                btn.innerHTML = "ENTRAR";
+                btn.innerHTML = "Ingresar al Portal Clínico";
                 btn.disabled = false;
             }
         });
 
         function renderDashboard(user) {
             const body = document.getElementById('main-body');
-            body.className = "bg-slate-100 min-h-screen p-8 text-slate-800";
-            body.innerHTML = `
-                <div class="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-xl border-t-8 border-orange-500">
-                    <h1 class="text-3xl font-black text-[#001f3f] uppercase tracking-tighter">Portal GTE</h1>
-                    <p class="text-xl text-slate-500">Especialista: <span class="font-bold text-navy">${user.nombres} ${user.apellidos}</span></p>
-                    <hr class="my-6">
-                    <div class="p-10 border-2 border-dashed border-slate-200 rounded-2xl text-center text-slate-400 font-bold">
-                        DASHBOARD CONECTADO EXITOSAMENTE
+            body.classList.remove('bg-wireframe');
+            body.classList.add('bg-slate-50');
+            
+            const container = document.getElementById('app-container');
+            container.classList.remove('items-center', 'justify-center');
+            
+            container.innerHTML = `
+                <div class="w-full max-w-6xl mx-auto py-8 text-slate-800">
+                    <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border-l-8 border-orange">
+                        <div>
+                            <h1 class="text-2xl font-black text-navy uppercase">Portal Clínico GTE</h1>
+                            <p class="text-sm text-slate-500">Especialista: <span class="font-bold text-orange uppercase">${user.nombres} ${user.apellidos}</span></p>
+                        </div>
+                        <button onclick="location.reload()" class="bg-navy text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-red-600 transition-all">SALIR</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <div class="bg-navy p-6 rounded-2xl text-white shadow-xl">
+                                <p class="text-[10px] font-bold text-orange uppercase mb-4 tracking-widest">Módulo de Atención</p>
+                                <button class="w-full bg-orange py-3 rounded-xl font-black text-sm mb-4 shadow-lg hover:scale-105 transition-transform">+ NUEVA CONSULTA</button>
+                                <button class="w-full bg-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/20 transition-all">HISTORIAL CLÍNICO</button>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                <div class="p-4 bg-slate-50 border-b font-bold text-navy text-xs uppercase tracking-widest">Pacientes Asignados (Fase 3)</div>
+                                <div class="p-20 text-center">
+                                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    </div>
+                                    <p class="text-slate-400 font-bold italic">Bandeja de expedientes vacía.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>`;
         }
