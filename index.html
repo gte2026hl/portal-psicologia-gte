@@ -21,7 +21,6 @@
     </script>
     
     <style>
-        /* Patrón de red geométrica de fondo (Estilo Iceberg/Cronómetro) */
         .bg-wireframe {
             background-color: #001f3f;
             background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -39,7 +38,7 @@
             <h1 class="text-3xl font-bold mb-2">Guacara Te Escucha</h1>
             <p class="text-gray-300 text-sm tracking-widest uppercase">Transformando Silencios en Esperanza</p>
             <div class="mt-8 text-xs text-gray-500">
-                Fase de Triaje Nivel 3 - Atención Individual
+                Atención Individual
             </div>
         </div>
 
@@ -76,29 +75,26 @@
     </div>
 
     <script>
-        // 1. REEMPLAZA ESTOS DOS VALORES CON TUS LLAVES DE SUPABASE
-        // (Asegúrate de dejarlas entre las comillas simples)
-        const _SUPABASE_URL = 'https://oqarmkugdzedptbqcygq.supabase.co/rest/v1/';
+        // --- CONFIGURACIÓN DE CONEXIÓN HDC 2026 ---
+        const _SUPABASE_URL = 'https://oqarmkugdzedptbqcygq.supabase.co'; // Sin el /rest/v1/
         const _SUPABASE_KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
         
-        // 2. Inicializar la conexión
-        const supabase = supabase.createClient(_SUPABASE_URL, _SUPABASE_KEY);
+        // Inicializar cliente con nombre único
+        const GTE_CLIENT = supabase.createClient(_SUPABASE_URL, _SUPABASE_KEY);
 
-        // 3. Lógica de validación al hacer clic en "Ingresar"
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const fvp = document.getElementById('fvpInput').value;
             const btn = e.target.querySelector('button');
             
-            // Efecto visual de carga
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = 'Validando credenciales en servidor...';
+            btn.innerHTML = 'Validando credenciales...';
             btn.classList.add('opacity-75', 'cursor-not-allowed');
             btn.disabled = true;
 
             try {
-                // Consulta a tu base de datos GTE
-                const { data, error } = await supabase
+                // Consulta a la tabla 'psicologos'
+                const { data, error } = await GTE_CLIENT
                     .from('psicologos')
                     .select('nombres, apellidos, activo')
                     .eq('codigo_fvp', fvp)
@@ -109,15 +105,12 @@
                 } else if (!data.activo) {
                     alert('Acceso Denegado: El especialista se encuentra inactivo en el programa.');
                 } else {
-                    alert(`¡Acceso Concedido!\nBienvenido/a Dr/Dra. ${data.nombres} ${data.apellidos}.\nIngresando al panel HDC 2026...`);
-                    // Redirección futura al Dashboard
-                    // window.location.href = '/dashboard.html';
+                    alert(`¡Acceso Concedido!\nBienvenido/a Dr/Dra. ${data.nombres} ${data.apellidos}.`);
                 }
             } catch (err) {
-                alert('Error de conexión con el servidor. Intente nuevamente.');
-                console.error(err);
+                alert('Error de conexión con el servidor.');
+                console.error('Error detallado:', err);
             } finally {
-                // Restaurar el botón a su estado normal
                 btn.innerHTML = textoOriginal;
                 btn.classList.remove('opacity-75', 'cursor-not-allowed');
                 btn.disabled = false;
@@ -126,4 +119,3 @@
     </script>
 </body>
 </html>
-
