@@ -76,22 +76,56 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // 1. REEMPLAZA ESTOS DOS VALORES CON TUS LLAVES DE SUPABASE
+        // (Asegúrate de dejarlas entre las comillas simples)
+        const _SUPABASE_URL = 'https://oqarmkugdzedptbqcygq.supabase.co/rest/v1/';
+        const _SUPABASE_KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
+        
+        // 2. Inicializar la conexión
+        const supabase = supabase.createClient(_SUPABASE_URL, _SUPABASE_KEY);
+
+        // 3. Lógica de validación al hacer clic en "Ingresar"
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const fvp = document.getElementById('fvpInput').value;
             const btn = e.target.querySelector('button');
             
             // Efecto visual de carga
-            btn.innerHTML = 'Validando credenciales...';
-            btn.classList.add('opacity-75');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = 'Validando credenciales en servidor...';
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.disabled = true;
 
-            // Aquí conectaremos con Supabase en la próxima iteración
-            setTimeout(() => {
-                alert(`Conexión exitosa simulada para el FVP: ${fvp}. Preparando integración con base de datos.`);
-                btn.innerHTML = 'Ingresar al Portal Clínico';
-                btn.classList.remove('opacity-75');
-            }, 1500);
+            try {
+                // Consulta a tu base de datos GTE
+                const { data, error } = await supabase
+                    .from('psicologos')
+                    .select('nombres, apellidos, activo')
+                    .eq('codigo_fvp', fvp)
+                    .single();
+
+                if (error || !data) {
+                    alert('Acceso Denegado: Credencial FVP no encontrada en el sistema Guacara Te Escucha.');
+                } else if (!data.activo) {
+                    alert('Acceso Denegado: El especialista se encuentra inactivo en el programa.');
+                } else {
+                    alert(`¡Acceso Concedido!\nBienvenido/a Dr/Dra. ${data.nombres} ${data.apellidos}.\nIngresando al panel HDC 2026...`);
+                    // Redirección futura al Dashboard
+                    // window.location.href = '/dashboard.html';
+                }
+            } catch (err) {
+                alert('Error de conexión con el servidor. Intente nuevamente.');
+                console.error(err);
+            } finally {
+                // Restaurar el botón a su estado normal
+                btn.innerHTML = textoOriginal;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btn.disabled = false;
+            }
         });
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
