@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTE - Sistema de Expedientes Psicológicos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#001f3f',
+                        orange: '#ff851b'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Patrón de red geométrica de fondo (Estilo Iceberg/Cronómetro) */
+        .bg-wireframe {
+            background-color: #001f3f;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+    </style>
+</head>
+<body class="bg-wireframe min-h-screen flex items-center justify-center font-sans text-white">
+
+    <div class="w-full max-w-4xl grid md:grid-cols-2 bg-navy border border-gray-700 shadow-2xl rounded-xl overflow-hidden">
+        
+        <div class="p-10 flex flex-col justify-center items-center text-center relative border-r border-gray-700">
+            <svg class="w-32 h-32 text-orange mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+            <h1 class="text-3xl font-bold mb-2">Guacara Te Escucha</h1>
+            <p class="text-gray-300 text-sm tracking-widest uppercase">Transformando Silencios en Esperanza</p>
+            <div class="mt-8 text-xs text-gray-500">
+                Fase de Triaje Nivel 3 - Atención Individual
+            </div>
+        </div>
+
+        <div class="bg-white text-gray-800 p-10 flex flex-col justify-center">
+            <h2 class="text-2xl font-bold text-navy mb-6 text-center">Acceso Especialistas</h2>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Código FVP (Federación Venezolana de Psicólogos)</label>
+                    <input type="text" id="fvpInput" placeholder="Ej: 15420" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange focus:border-orange outline-none transition-colors">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña de Acceso</label>
+                    <input type="password" id="passwordInput" placeholder="••••••••" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange focus:border-orange outline-none transition-colors">
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-orange hover:bg-orange/90 text-white font-bold py-3 px-4 rounded-md transition-colors duration-300 shadow-lg">
+                    Ingresar al Portal Clínico
+                </button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <a href="#" class="text-sm text-gray-500 hover:text-navy transition-colors">¿Olvidaste tu credencial o contraseña?</a>
+            </div>
+
+            <div class="mt-12 pt-6 border-t border-gray-100 text-center">
+                <p class="text-xs text-gray-400 font-semibold tracking-wider">Desarrollado y patentado bajo la firma HDC 2026</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fvp = document.getElementById('fvpInput').value;
+            const btn = e.target.querySelector('button');
+            
+            // Efecto visual de carga
+            btn.innerHTML = 'Validando credenciales...';
+            btn.classList.add('opacity-75');
+
+            // Aquí conectaremos con Supabase en la próxima iteración
+            setTimeout(() => {
+                alert(`Conexión exitosa simulada para el FVP: ${fvp}. Preparando integración con base de datos.`);
+                btn.innerHTML = 'Ingresar al Portal Clínico';
+                btn.classList.remove('opacity-75');
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
