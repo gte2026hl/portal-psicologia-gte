@@ -19,7 +19,6 @@
         }
     </script>
     <style>
-        /* Restauramos el patrón de red original */
         .bg-wireframe {
             background-color: #001f3f;
             background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -64,14 +63,14 @@
                 </form>
 
                 <div class="mt-12 pt-6 border-t border-gray-100 text-center">
-                    <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase">Desarrollado y patentado bajo la firma HDC 2026</p>
+                    <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase">HDC 2026 | Ingeniería de Software</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE (LA QUE FUNCIONA)
+        // CONFIGURACIÓN TÉCNICA
         const URL = 'https://oqarmkugdzedptbqcygq.supabase.co'; 
         const KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
         const GTE_ENGINE = supabase.createClient(URL, KEY);
@@ -82,26 +81,30 @@
             const pass = document.getElementById('passwordInput').value.trim();
             const btn = document.getElementById('btnIngresar');
 
-            btn.innerHTML = "VERIFICANDO CREDENCIALES...";
+            btn.innerHTML = "VERIFICANDO...";
             btn.disabled = true;
 
             try {
+                // Buscamos al especialista
                 const { data, error } = await GTE_ENGINE
                     .from('psicologos')
                     .select('*')
                     .eq('codigo_fvp', fvp)
-                    .single();
+                    .maybeSingle(); // Cambiado a maybeSingle para mayor estabilidad
 
-                if (error || !data) {
-                    alert("ERROR: El código FVP no está registrado en el sistema.");
-                } else if (data.password !== pass) {
-                    alert("ERROR: La contraseña es incorrecta.");
+                if (error) {
+                    console.error("Error de Supabase:", error);
+                    alert("Error de conexión: " + error.message);
+                } else if (!data) {
+                    alert("El Código FVP no existe en la base de datos.");
+                } else if (String(data.password).trim() !== String(pass).trim()) {
+                    alert("Contraseña incorrecta.");
                 } else {
-                    // Si todo es correcto, lanzamos el Dashboard
                     renderDashboard(data);
                 }
             } catch (err) {
-                alert("Error de conexión con el servidor HDC.");
+                console.error("Fallo crítico:", err);
+                alert("Error crítico del sistema.");
             } finally {
                 btn.innerHTML = "Ingresar al Portal Clínico";
                 btn.disabled = false;
@@ -109,7 +112,6 @@
         });
 
         function renderDashboard(user) {
-            // Cambiamos el fondo y limpiamos la pantalla
             const body = document.getElementById('main-body');
             body.classList.remove('bg-wireframe');
             body.classList.add('bg-slate-50');
@@ -125,30 +127,27 @@
                             <p class="text-sm text-slate-500">Bienvenido/a, <span class="font-bold text-orange uppercase">${user.nombres} ${user.apellidos}</span></p>
                         </div>
                         <button onclick="location.reload()" class="bg-navy text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-red-600 transition-all">
-                            CERRAR SESIÓN
+                            SALIR
                         </button>
                     </div>
 
                     <div class="grid md:grid-cols-3 gap-8">
                         <div class="md:col-span-1 space-y-6">
                             <div class="bg-navy p-6 rounded-2xl text-white shadow-xl">
-                                <h3 class="text-orange font-black text-[10px] uppercase mb-4 tracking-widest">Panel de Control</h3>
+                                <h3 class="text-orange font-black text-[10px] uppercase mb-4 tracking-widest">Control Maestro</h3>
                                 <button class="w-full bg-orange py-3 rounded-xl font-black text-sm mb-4 shadow-lg hover:scale-105 transition-transform">+ NUEVA CONSULTA</button>
-                                <button class="w-full bg-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/20 transition-all">VER AGENDA COMPLETA</button>
+                                <button class="w-full bg-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/20 transition-all">VER AGENDA</button>
                             </div>
                         </div>
 
                         <div class="md:col-span-2">
                             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                                 <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-                                    <h3 class="font-bold text-navy uppercase text-xs">Expedientes Fase 3</h3>
+                                    <h3 class="font-bold text-navy uppercase text-xs tracking-widest">Expedientes Fase 3</h3>
                                     <span class="text-[10px] font-bold bg-navy text-white px-2 py-1 rounded">FVP: ${user.codigo_fvp}</span>
                                 </div>
-                                <div class="p-20 text-center">
-                                    <div class="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                    </div>
-                                    <p class="text-slate-400 font-bold italic text-sm">Bandeja de pacientes vacía.</p>
+                                <div class="p-20 text-center text-slate-400">
+                                    <p class="font-bold italic">No hay pacientes asignados actualmente.</p>
                                 </div>
                             </div>
                         </div>
