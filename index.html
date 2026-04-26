@@ -1,107 +1,83 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTE - Portal Clínico HDC 2026</title>
+    <title>GTE - Conexión Blindada HDC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        tailwind.config = { theme: { extend: { colors: { navy: '#001f3f', orange: '#ff851b' } } } }
-    </script>
-    <style>
-        .bg-wireframe {
-            background-color: #001f3f;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
-    </style>
 </head>
-<body id="main-body" class="bg-wireframe min-h-screen font-sans text-white">
+<body id="main-body" class="bg-[#001f3f] min-h-screen font-sans text-white">
 
-    <div id="app-container" class="min-h-screen flex items-center justify-center p-4">
-        
-        <div id="login-card" class="w-full max-w-4xl grid md:grid-cols-2 bg-navy border border-gray-700 shadow-2xl rounded-xl overflow-hidden">
-            
-            <div class="p-10 flex flex-col justify-center items-center text-center border-r border-gray-700 bg-navy/50">
-                <svg class="w-24 h-24 text-orange mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
-                <h1 class="text-3xl font-bold mb-2">Guacara Te Escucha</h1>
-                <p class="text-gray-300 text-sm tracking-widest uppercase">Especialistas</p>
+    <div id="app" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl text-slate-800">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-black text-navy">Guacara Te Escucha</h1>
+                <p class="text-[10px] text-orange-600 font-bold uppercase tracking-widest">Verificación de Especialista</p>
             </div>
 
-            <div class="bg-white text-gray-800 p-10 flex flex-col justify-center">
-                <h2 class="text-2xl font-bold text-navy mb-6 text-center italic">Acceso HDC 2026</h2>
-                
-                <form id="loginForm" class="space-y-6">
-                    <input type="text" id="fvpInput" placeholder="Código FVP" required class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none font-bold">
-                    <input type="password" id="passwordInput" placeholder="Contraseña" required class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none font-bold">
-                    <button type="submit" id="btnIngresar" class="w-full bg-orange text-white font-black py-4 rounded-lg shadow-lg uppercase">Ingresar</button>
-                </form>
-            </div>
+            <form id="loginForm" class="space-y-5">
+                <input type="text" id="fvp" placeholder="FVP (Ej: 12345)" required class="w-full p-3 border-2 border-slate-100 rounded-xl outline-none focus:border-orange-500 font-bold text-navy">
+                <input type="password" id="pass" placeholder="Contraseña" required class="w-full p-3 border-2 border-slate-100 rounded-xl outline-none focus:border-orange-500 font-bold text-navy">
+                <button type="submit" id="btn" class="w-full bg-[#ff851b] text-white font-black py-4 rounded-xl hover:brightness-110 shadow-lg transition-all uppercase">ENTRAR</button>
+            </form>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN (URL Limpia)
-        const URL = 'https://oqarmkugdzedptbqcygq.supabase.co'; 
-        const KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
-        const GTE_ENGINE = supabase.createClient(URL, KEY);
+        // --- CONFIGURACIÓN CORREGIDA ---
+        // Nota: Se eliminó el "/rest/v1/" de la URL
+        const SB_URL = 'https://oqarmkugdzedptbqcygq.supabase.co'; 
+        const SB_KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
+        
+        const gte = supabase.createClient(SB_URL, SB_KEY);
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const fvp = document.getElementById('fvpInput').value.trim();
-            const pass = document.getElementById('passwordInput').value.trim();
-            const btn = document.getElementById('btnIngresar');
+            const fvpVal = document.getElementById('fvp').value.trim();
+            const passVal = document.getElementById('pass').value.trim();
+            const btn = document.getElementById('btn');
 
-            btn.innerHTML = "CONECTANDO...";
+            btn.innerHTML = "CONECTANDO CON SUPABASE...";
             btn.disabled = true;
 
             try {
-                // PASO 1: Intentar buscar en la base de datos
-                const { data, error } = await GTE_ENGINE
+                // Hacemos la consulta limpia
+                const { data, error } = await gte
                     .from('psicologos')
                     .select('*')
-                    .eq('codigo_fvp', fvp)
-                    .maybeSingle();
+                    .eq('codigo_fvp', fvpVal)
+                    .maybeSingle(); // Usamos maybeSingle para evitar errores si no hay datos
 
                 if (error) {
-                    alert("Error de Supabase: " + error.message);
-                    console.error(error);
+                    console.error("Error técnico:", error);
+                    alert("Error de conexión: " + error.message);
                 } else if (!data) {
-                    alert("El FVP '" + fvp + "' no existe en Supabase.");
+                    alert("El FVP '" + fvpVal + "' no existe en la base de datos.");
+                } else if (data.password !== passVal) {
+                    alert("Contraseña incorrecta.");
                 } else {
-                    // PASO 2: Comparar contraseñas
-                    if (String(data.password).trim() === pass) {
-                        alert("¡Credenciales Correctas! Cargando Dashboard...");
-                        renderDashboard(data);
-                    } else {
-                        alert("Contraseña Incorrecta.");
-                    }
+                    alert("¡Acceso Exitoso! Bienvenido/a Dr/Dra. " + data.nombres);
+                    renderDashboard(data);
                 }
             } catch (err) {
                 alert("Fallo crítico de red.");
-                console.error(err);
             } finally {
-                btn.innerHTML = "Ingresar";
+                btn.innerHTML = "ENTRAR";
                 btn.disabled = false;
             }
         });
 
         function renderDashboard(user) {
-            console.log("Ejecutando renderDashboard...");
             const body = document.getElementById('main-body');
-            body.className = "bg-slate-100 min-h-screen text-slate-800 p-4";
-            
-            document.getElementById('app-container').innerHTML = `
-                <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl border-t-8 border-orange">
-                    <div class="flex justify-between items-center border-b pb-4 mb-6">
-                        <h1 class="text-2xl font-black text-navy uppercase">Portal Clínico GTE</h1>
-                        <button onclick="location.reload()" class="bg-navy text-white px-4 py-1 rounded-full text-xs font-bold">SALIR</button>
-                    </div>
-                    <p class="text-lg">Bienvenido/a: <b>${user.nombres} ${user.apellidos}</b></p>
-                    <div class="mt-10 p-20 border-2 border-dashed border-slate-200 rounded-xl text-center text-slate-400 font-bold uppercase tracking-widest">
-                        Sesión Iniciada con Éxito
+            body.className = "bg-slate-100 min-h-screen p-8 text-slate-800";
+            body.innerHTML = `
+                <div class="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-xl border-t-8 border-orange-500">
+                    <h1 class="text-3xl font-black text-[#001f3f] uppercase tracking-tighter">Portal GTE</h1>
+                    <p class="text-xl text-slate-500">Especialista: <span class="font-bold text-navy">${user.nombres} ${user.apellidos}</span></p>
+                    <hr class="my-6">
+                    <div class="p-10 border-2 border-dashed border-slate-200 rounded-2xl text-center text-slate-400 font-bold">
+                        DASHBOARD CONECTADO EXITOSAMENTE
                     </div>
                 </div>`;
         }
