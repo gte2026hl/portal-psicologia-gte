@@ -3,20 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTE - Sistema Clínico HDC2026</title>
+    <title>GTE - Portal Clínico HDC 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        navy: '#001f3f',
-                        orange: '#ff851b'
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { colors: { navy: '#001f3f', orange: '#ff851b' } } } }
     </script>
     <style>
         .bg-wireframe {
@@ -27,50 +18,32 @@
         }
     </style>
 </head>
-<body id="main-body" class="bg-wireframe min-h-screen font-sans text-white transition-all duration-700">
+<body id="main-body" class="bg-wireframe min-h-screen font-sans text-white">
 
     <div id="app-container" class="min-h-screen flex items-center justify-center p-4">
         
-        <div id="login-card" class="w-full max-w-4xl grid md:grid-cols-2 bg-navy border border-gray-700 shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in duration-500">
+        <div id="login-card" class="w-full max-w-4xl grid md:grid-cols-2 bg-navy border border-gray-700 shadow-2xl rounded-xl overflow-hidden">
             
-            <div class="p-10 flex flex-col justify-center items-center text-center relative border-r border-gray-700 bg-navy/50">
-                <svg class="w-32 h-32 text-orange mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
-                </svg>
+            <div class="p-10 flex flex-col justify-center items-center text-center border-r border-gray-700 bg-navy/50">
+                <svg class="w-24 h-24 text-orange mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                 <h1 class="text-3xl font-bold mb-2">Guacara Te Escucha</h1>
-                <p class="text-gray-300 text-sm tracking-widest uppercase">Transformando Silencios en Esperanza</p>
-                <div class="mt-8 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Atención Especializada</div>
+                <p class="text-gray-300 text-sm tracking-widest uppercase">Especialistas</p>
             </div>
 
             <div class="bg-white text-gray-800 p-10 flex flex-col justify-center">
-                <h2 class="text-2xl font-bold text-navy mb-6 text-center italic">Acceso Especialistas</h2>
+                <h2 class="text-2xl font-bold text-navy mb-6 text-center italic">Acceso HDC 2026</h2>
                 
                 <form id="loginForm" class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-black text-navy uppercase mb-1">Código FVP</label>
-                        <input type="text" id="fvpInput" placeholder="Ej: 12345" required 
-                            class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none transition-all font-bold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-navy uppercase mb-1">Contraseña de Acceso</label>
-                        <input type="password" id="passwordInput" placeholder="••••••••" required 
-                            class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none transition-all font-bold">
-                    </div>
-                    <button type="submit" id="btnIngresar" 
-                        class="w-full bg-orange hover:bg-orange/90 text-white font-black py-4 rounded-lg transition-all shadow-lg transform active:scale-95 uppercase tracking-widest">
-                        Ingresar al Portal Clínico
-                    </button>
+                    <input type="text" id="fvpInput" placeholder="Código FVP" required class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none font-bold">
+                    <input type="password" id="passwordInput" placeholder="Contraseña" required class="w-full px-4 py-3 border-2 border-slate-100 rounded-lg focus:border-orange outline-none font-bold">
+                    <button type="submit" id="btnIngresar" class="w-full bg-orange text-white font-black py-4 rounded-lg shadow-lg uppercase">Ingresar</button>
                 </form>
-
-                <div class="mt-12 pt-6 border-t border-gray-100 text-center">
-                    <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase">HDC 2026 | Ingeniería de Software</p>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN TÉCNICA
+        // CONFIGURACIÓN (URL Limpia)
         const URL = 'https://oqarmkugdzedptbqcygq.supabase.co'; 
         const KEY = 'sb_publishable_rQkY-aQgOyW_eh-fyO_JkA_tLXKdqK0';
         const GTE_ENGINE = supabase.createClient(URL, KEY);
@@ -81,79 +54,56 @@
             const pass = document.getElementById('passwordInput').value.trim();
             const btn = document.getElementById('btnIngresar');
 
-            btn.innerHTML = "VERIFICANDO...";
+            btn.innerHTML = "CONECTANDO...";
             btn.disabled = true;
 
             try {
-                // Buscamos al especialista
+                // PASO 1: Intentar buscar en la base de datos
                 const { data, error } = await GTE_ENGINE
                     .from('psicologos')
                     .select('*')
                     .eq('codigo_fvp', fvp)
-                    .maybeSingle(); // Cambiado a maybeSingle para mayor estabilidad
+                    .maybeSingle();
 
                 if (error) {
-                    console.error("Error de Supabase:", error);
-                    alert("Error de conexión: " + error.message);
+                    alert("Error de Supabase: " + error.message);
+                    console.error(error);
                 } else if (!data) {
-                    alert("El Código FVP no existe en la base de datos.");
-                } else if (String(data.password).trim() !== String(pass).trim()) {
-                    alert("Contraseña incorrecta.");
+                    alert("El FVP '" + fvp + "' no existe en Supabase.");
                 } else {
-                    renderDashboard(data);
+                    // PASO 2: Comparar contraseñas
+                    if (String(data.password).trim() === pass) {
+                        alert("¡Credenciales Correctas! Cargando Dashboard...");
+                        renderDashboard(data);
+                    } else {
+                        alert("Contraseña Incorrecta.");
+                    }
                 }
             } catch (err) {
-                console.error("Fallo crítico:", err);
-                alert("Error crítico del sistema.");
+                alert("Fallo crítico de red.");
+                console.error(err);
             } finally {
-                btn.innerHTML = "Ingresar al Portal Clínico";
+                btn.innerHTML = "Ingresar";
                 btn.disabled = false;
             }
         });
 
         function renderDashboard(user) {
+            console.log("Ejecutando renderDashboard...");
             const body = document.getElementById('main-body');
-            body.classList.remove('bg-wireframe');
-            body.classList.add('bg-slate-50');
+            body.className = "bg-slate-100 min-h-screen text-slate-800 p-4";
             
-            const container = document.getElementById('app-container');
-            container.classList.remove('items-center', 'justify-center');
-            
-            container.innerHTML = `
-                <div class="w-full max-w-6xl mx-auto py-8 text-slate-800 animate-in slide-in-from-bottom duration-700">
-                    <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border-l-8 border-orange">
-                        <div>
-                            <h1 class="text-2xl font-black text-navy uppercase tracking-tighter">Portal Clínico GTE</h1>
-                            <p class="text-sm text-slate-500">Bienvenido/a, <span class="font-bold text-orange uppercase">${user.nombres} ${user.apellidos}</span></p>
-                        </div>
-                        <button onclick="location.reload()" class="bg-navy text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-red-600 transition-all">
-                            SALIR
-                        </button>
+            document.getElementById('app-container').innerHTML = `
+                <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl border-t-8 border-orange">
+                    <div class="flex justify-between items-center border-b pb-4 mb-6">
+                        <h1 class="text-2xl font-black text-navy uppercase">Portal Clínico GTE</h1>
+                        <button onclick="location.reload()" class="bg-navy text-white px-4 py-1 rounded-full text-xs font-bold">SALIR</button>
                     </div>
-
-                    <div class="grid md:grid-cols-3 gap-8">
-                        <div class="md:col-span-1 space-y-6">
-                            <div class="bg-navy p-6 rounded-2xl text-white shadow-xl">
-                                <h3 class="text-orange font-black text-[10px] uppercase mb-4 tracking-widest">Control Maestro</h3>
-                                <button class="w-full bg-orange py-3 rounded-xl font-black text-sm mb-4 shadow-lg hover:scale-105 transition-transform">+ NUEVA CONSULTA</button>
-                                <button class="w-full bg-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/20 transition-all">VER AGENDA</button>
-                            </div>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                                <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-                                    <h3 class="font-bold text-navy uppercase text-xs tracking-widest">Expedientes Fase 3</h3>
-                                    <span class="text-[10px] font-bold bg-navy text-white px-2 py-1 rounded">FVP: ${user.codigo_fvp}</span>
-                                </div>
-                                <div class="p-20 text-center text-slate-400">
-                                    <p class="font-bold italic">No hay pacientes asignados actualmente.</p>
-                                </div>
-                            </div>
-                        </div>
+                    <p class="text-lg">Bienvenido/a: <b>${user.nombres} ${user.apellidos}</b></p>
+                    <div class="mt-10 p-20 border-2 border-dashed border-slate-200 rounded-xl text-center text-slate-400 font-bold uppercase tracking-widest">
+                        Sesión Iniciada con Éxito
                     </div>
-                </div>
-            `;
+                </div>`;
         }
     </script>
 </body>
