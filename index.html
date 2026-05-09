@@ -185,7 +185,6 @@
                     <button onclick="document.getElementById('bulk-input').click()" class="bg-gte-blue px-8 py-4 rounded-xl text-[10px] uppercase shadow-lg hover:shadow-xl transition border-none cursor-pointer">
                         <span class="btn-bulk-text">📊 Carga Masiva (Excel)</span>
                     </button>
-                    <button onclick="generarDatosEnsayo()" class="bg-gte-orange/10 px-4 py-4 rounded-xl text-[10px] font-black uppercase text-gte-orange border border-gte-orange/20 cursor-pointer">🧪 Generar Datos Ensayo</button>
                     <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcel(event)">
                     <button onclick="limpiarRepositorio()" class="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase">Limpiar Todo</button>
                 </div>
@@ -202,10 +201,10 @@
             </div>
 
             <div class="content-card overflow-x-auto">
-                <table class="w-full text-left min-w-[900px]">
+                <table class="w-full text-left min-w-[1000px]">
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <th class="p-6">Expediente</th><th class="p-6">Estudiante</th><th class="p-6">Institución Educativa</th><th class="p-6 text-center">Seguimiento / Estatus</th><th class="p-6 text-right">Responsable / Acción</th>
+                            <th class="p-6">Expediente</th><th class="p-6">Estudiante / Identidad</th><th class="p-6">Institución Educativa</th><th class="p-6">Fase</th><th class="p-6 text-center">Seguimiento / Estatus</th><th class="p-6 text-right">Responsable / Acción</th>
                         </tr>
                     </thead>
                     <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
@@ -281,7 +280,6 @@
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             
-            // Asegurar que el nombre en UI sea el de la sesión actual (posiblemente actualizado)
             document.getElementById('user-display-name').innerText = session.nombre;
             document.getElementById('user-role-label').innerText = session.rol;
             document.getElementById('perfil-nombre').value = session.nombre;
@@ -308,58 +306,31 @@
             renderExps();
         }
 
-        /* --- LÓGICA DE PERFIL (SOLUCIÓN QUIRÚRGICA) --- */
         function actualizarDatosPersonales() {
             const nuevoNombre = document.getElementById('perfil-nombre').value.trim();
             if (!nuevoNombre) { alert("El nombre no puede estar vacío."); return; }
-            
             const stored = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || {};
             stored.nombre = nuevoNombre;
             localStorage.setItem(`perfil_${session.user}`, JSON.stringify(stored));
-            
-            // Actualizar estado en tiempo real
             session.nombre = nuevoNombre;
             document.getElementById('user-display-name').innerText = nuevoNombre;
-            
-            // Reflejar en expedientes si el especialista ya tiene casos
-            REPOSITORIO.forEach(exp => {
-                if(exp.psico && (exp.psico === stored.nombre_antiguo || exp.psico.includes(session.user))) {
-                    // Nota: En un sistema real usaríamos IDs, aquí actualizamos la referencia de texto si aplica
-                }
-            });
-            
             showToast("Perfil Actualizado Correctamente");
         }
 
         function actualizarPassword() {
             const p1 = document.getElementById('perfil-pass1').value;
             const p2 = document.getElementById('perfil-pass2').value;
-
             if (!p1 || p1.length < 4) { alert("La contraseña debe tener al menos 4 caracteres."); return; }
             if (p1 !== p2) { alert("Las contraseñas no coinciden."); return; }
-
             const stored = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || {};
             stored.pass = p1;
             localStorage.setItem(`perfil_${session.user}`, JSON.stringify(stored));
-            
             document.getElementById('perfil-pass1').value = "";
             document.getElementById('perfil-pass2').value = "";
             showToast("Seguridad Actualizada");
         }
 
-        function generarDatosEnsayo() {
-            const demo = [
-                { id: "GTE-26-001", student: "ANDRES PÉREZ", inst: "U.E. VICENTE WALLIS", ci: "V-32.441.552", edad: "11", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-002", student: "MARIA GOMEZ", inst: "U.E. DIEGO IBARRA", ci: "V-33.111.999", edad: "10", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-003", student: "JESUS HERNANDEZ", inst: "ESC. MUN. GARCIA DE SENA", ci: "V-30.888.777", edad: "12", seguimiento: "Sin Iniciar", psico: null, evolucion: "" }
-            ];
-            REPOSITORIO = [...demo, ...REPOSITORIO.filter(x => !demo.find(d => d.id === x.id))];
-            localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-            renderExps();
-            if (session.rol === "MASTER") actualizarVistaMaster();
-            showToast("🧪 Datos de Ensayo generados.");
-        }
-
+        /* --- MOTOR DE INGESTA EXCEL REFINADO (PRECISIÓN ABSOLUTA) --- */
         function handleExcel(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
@@ -367,22 +338,51 @@
                 const data = new Uint8Array(evt.target.result);
                 const wb = XLSX.read(data, { type: 'array' });
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let start = 0;
-                for(let k=0; k<10; k++) if(rows[k] && String(rows[k][1]).toLowerCase().includes("exp")) { start = k + 1; break; }
+                
+                // AUDITORÍA DE CABECERA (Buscamos etiquetas Fase o Expediente)
+                let startRow = -1;
+                for (let k = 0; k < rows.length; k++) {
+                    const rowText = JSON.stringify(rows[k]).toLowerCase();
+                    if (rowText.includes("fase") || rowText.includes("expediente")) {
+                        startRow = k + 1; 
+                        break;
+                    }
+                }
+
+                if (startRow === -1) {
+                    alert("❌ Formato de Excel no reconocido. Asegúrese de que la primera columna sea 'Fase'.");
+                    return;
+                }
+
                 const nuevos = [];
-                for (let i = start; i < rows.length; i++) {
-                    const r = rows[i]; if (!r || !r[1]) continue;
+                for (let i = startRow; i < rows.length; i++) {
+                    const r = rows[i];
+                    if (!r || !r[1]) continue; // Validamos que exista al menos el Expediente
+
                     nuevos.push({
-                        id: String(r[1]).trim(), student: String(r[2] || "N/I").trim(),
-                        inst: String(r[3] || "N/I").trim().toUpperCase(), ci: String(r[4] || "N/I").trim(),
-                        edad: String(r[5] || "N/I").trim(), seguimiento: "Sin Iniciar", psico: null, evolucion: ""
+                        fase: String(r[0] || "N/A").trim().toUpperCase(), // COLUMNA 1 (Índice 0): FASE
+                        id: String(r[1]).trim(),                         // COLUMNA 2 (Índice 1): EXPEDIENTE
+                        student: String(r[2] || "N/I").trim(),           // COLUMNA 3 (Índice 2): ESTUDIANTE (Nombre)
+                        inst: String(r[3] || "N/I").trim().toUpperCase(),// COLUMNA 4 (Índice 3): INSTITUCIÓN
+                        ci: String(r[4] || "S/D").trim(),                // COLUMNA 5 (Índice 4): CÉDULA
+                        edad: String(r[5] || "--").trim(),               // COLUMNA 6 (Índice 5): EDAD
+                        seguimiento: "Sin Iniciar", 
+                        psico: null, 
+                        evolucion: ""
                     });
                 }
+
                 const idsExistentes = new Set(REPOSITORIO.map(e => e.id));
-                REPOSITORIO = [...REPOSITORIO, ...nuevos.filter(n => !idsExistentes.has(n.id))];
+                const casosAgregados = nuevos.filter(n => !idsExistentes.has(n.id));
+                
+                REPOSITORIO = [...REPOSITORIO, ...casosAgregados];
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-                renderExps(); if (session.rol === "MASTER") actualizarVistaMaster();
-                showToast(`✅ ${nuevos.length} casos cargados.`);
+                
+                renderExps(); 
+                if (session.rol === "MASTER") actualizarVistaMaster();
+                
+                showToast(`✅ Ingesta Exitosa: ${casosAgregados.length} expedientes vinculados.`);
+                e.target.value = '';
             };
             reader.readAsArrayBuffer(file);
         }
@@ -404,9 +404,14 @@
                     <td class="p-6 font-black text-gte-orange">${exp.id}</td>
                     <td class="p-6">
                         <p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p>
-                        <p class="text-[9px] text-slate-400 mt-1 uppercase">C.I: ${exp.ci} | EDAD: ${exp.edad}</p>
+                        <p class="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">C.I: ${exp.ci} | EDAD: ${exp.edad} AÑOS</p>
                     </td>
                     <td class="p-6 font-bold text-slate-500 uppercase leading-snug">${exp.inst}</td>
+                    <td class="p-6">
+                        <span class="px-3 py-1.5 bg-orange-50 text-gte-orange rounded-xl font-black uppercase text-[10px] border border-orange-100 shadow-sm">
+                            ${exp.fase || 'N/A'}
+                        </span>
+                    </td>
                     <td class="p-6 text-center">
                         ${myCase ? `
                             <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[10px] p-2 border border-slate-200 rounded-lg font-black text-gte-blue outline-none bg-white">
@@ -482,7 +487,7 @@
             if(grid) grid.innerHTML = stats.map(s => `<div class="kpi-card shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${s.l}</p><h3 class="text-3xl font-black text-${s.c} mt-1">${s.v}</h3></div>`).join('');
         }
 
-        function limpiarRepositorio() { if(confirm("¿Borrar todos los datos?")) { REPOSITORIO = []; localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); renderExps(); if(session.rol==="MASTER") actualizarVistaMaster(); } }
+        function limpiarRepositorio() { if(confirm("¿Borrar todos los datos? Esta acción es irreversible.")) { REPOSITORIO = []; localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); renderExps(); if(session.rol==="MASTER") actualizarVistaMaster(); } }
         function handleBusqueda(val) { filtroBusqueda = val.toLowerCase().trim(); renderExps(); }
         function cerrarSesion() { location.reload(); }
         function showToast(m) { const t = document.getElementById('gte-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(()=>t.style.display='none',3000); }
@@ -491,12 +496,10 @@
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); 
             const target = document.getElementById(id);
             if(target) target.classList.remove('hidden');
-            
             document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
             let bid = id === 'tab-master-stats' ? 'btn-stats' : id === 'tab-expedientes' ? 'btn-exp' : id === 'tab-equipo' ? 'btn-equipo' : 'btn-perfil';
             const btn = document.getElementById(bid);
             if(btn) btn.classList.add('active');
-            
             if(id === 'tab-equipo') renderEquipo();
             if(id === 'tab-master-stats') actualizarVistaMaster();
         }
