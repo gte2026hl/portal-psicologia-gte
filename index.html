@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { 
   getFirestore, collection, doc, setDoc, updateDoc, 
@@ -7,7 +7,11 @@ import {
 import { 
   getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged 
 } from 'firebase/auth';
-import { Layout, Users, Calendar, Database, LogOut, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { 
+  Layout, Users, Calendar, Database, LogOut, 
+  Loader2, CheckCircle2, AlertCircle, ShieldCheck,
+  TrendingUp, Clock, FileSpreadsheet, Trash2
+} from 'lucide-react';
 
 // --- CONFIGURACIÓN E INICIALIZACIÓN ---
 const firebaseConfig = JSON.parse(__firebase_config);
@@ -16,9 +20,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'gte-2026-prod';
 
-// Usuarios del sistema
+// Usuarios autorizados (Login Centralizado)
 const DB_AUTH = {
-  master: { user: "admin_master", pass: "gte2026master", nombre: "ADMIN MASTER" },
+  master: { user: "admin_master", pass: "gte2026master", nombre: "ADMIN MASTER GTE" },
   psicos: Array.from({ length: 20 }, (_, i) => ({
     user: `psic_${String(i + 1).padStart(3, '0')}`,
     pass: "1234",
@@ -37,7 +41,7 @@ export default function App() {
   const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
   const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
 
-  // 1. Carga dinámica de la librería XLSX
+  // 1. Carga dinámica de la librería XLSX (Evita errores de compilación)
   useEffect(() => {
     if (!window.XLSX) {
       const script = document.createElement('script');
@@ -50,7 +54,7 @@ export default function App() {
     }
   }, []);
 
-  // 2. Autenticación y Carga Inicial
+  // 2. Autenticación Inicial y Persistencia de Sesión
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -60,7 +64,7 @@ export default function App() {
           await signInAnonymously(auth);
         }
       } catch (err) {
-        console.error("Auth Error", err);
+        console.error("Firebase Auth Error:", err);
       }
     };
     initAuth();
@@ -72,18 +76,18 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // 3. Suscripción a Datos (Cloud Firestore)
+  // 3. Suscripción a Firestore (Tiempo Real)
   useEffect(() => {
     if (!user) return;
     
-    // Repositorio de Expedientes (Público para el App)
+    // Repositorio de Expedientes (Datos Públicos del Artefacto)
     const qRepo = collection(db, 'artifacts', appId, 'public', 'data', 'expedientes');
     const unsubRepo = onSnapshot(qRepo, (snap) => {
-      const data = snap.docs.map(d => d.data());
+      const data = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
       setRepositorio(data);
-    });
+    }, (err) => console.error("Repo Stream Error:", err));
 
-    // Agenda (Privada por Usuario)
+    // Agenda Personalizada (Datos Privados del Usuario)
     let unsubAgenda = () => {};
     if (session?.rol === 'PSICOLOGO') {
       const docAgenda = doc(db, 'artifacts', appId, 'users', user.uid, 'agenda', 'semana_actual');
@@ -96,18 +100,20 @@ export default function App() {
     return () => { unsubRepo(); unsubAgenda(); };
   }, [user, session]);
 
-  // --- FUNCIONES DE LOGICA ---
+  // --- LÓGICA DE NEGOCIO ---
 
   const handleLogin = () => {
     const { user: u, pass: p } = loginForm;
     if (u === DB_AUTH.master.user && p === DB_AUTH.master.pass) {
       setSession({ user: u, nombre: DB_AUTH.master.nombre, rol: "MASTER" });
       setActiveTab('stats');
+      showToast("Bienvenido, Administrador Master");
     } else {
       const ps = DB_AUTH.psicos.find(x => x.user === u && x.pass === p);
       if (ps) {
         setSession({ user: u, nombre: ps.nombre, rol: "PSICOLOGO" });
         setActiveTab('agenda');
+        showToast(`Bienvenido, ${ps.nombre}`);
       } else {
         showToast("❌ Credenciales Incorrectas", "error");
       }
@@ -125,15 +131,18 @@ export default function App() {
         const wb = window.XLSX.read(data, { type: 'array' });
         const rows = window.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
         
+        // Detección de cabecera dinámica
         let startRow = -1;
         for (let k = 0; k < rows.length; k++) {
           const txt = JSON.stringify(rows[k]).toLowerCase();
           if (txt.includes("fase") || txt.includes("expediente")) { startRow = k + 1; break; }
         }
 
-        if (startRow === -1) { showToast("❌ Cabecera no detectada", "error"); return; }
+        if (startRow === -1) { showToast("❌ Estructura de Excel no válida", "error"); return; }
 
         const batch = writeBatch(db);
+        let count = 0;
+        
         for (let i = startRow; i < rows.length; i++) {
           const r = rows[i];
           if (!r || !r[1]) continue;
@@ -141,7 +150,7 @@ export default function App() {
           const idExp = String(r[1]).trim();
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'expedientes', idExp);
           
-          // MAPEO SOLICITADO: Fase:0, Exp:1, Est:2, Inst:3, CI:4, Edad:5
+          // Mapeo Maestro GTE: Fase(0), Exp(1), Est(2), Inst(3), CI(4), Edad(5)
           batch.set(docRef, {
             fase: String(r[0] || "N/A").trim().toUpperCase(),
             id: idExp,
@@ -150,13 +159,15 @@ export default function App() {
             ci: String(r[4] || "S/D").trim(),
             edad: String(r[5] || "--").trim(),
             psico: null,
-            status: 'DISPONIBLE'
+            status: 'DISPONIBLE',
+            timestamp: Date.now()
           });
+          count++;
         }
         await batch.commit();
-        showToast("✅ Repositorio Sincronizado");
+        showToast(`✅ ${count} expedientes sincronizados en la nube`);
       } catch (err) {
-        showToast("❌ Error al procesar Excel", "error");
+        showToast("❌ Error al procesar el archivo", "error");
       }
     };
     reader.readAsArrayBuffer(file);
@@ -166,16 +177,35 @@ export default function App() {
     if (!pendingAdoptionId || !user) return;
     
     try {
+      // 1. Vincular en Repositorio Público
       const expRef = doc(db, 'artifacts', appId, 'public', 'data', 'expedientes', pendingAdoptionId);
-      await updateDoc(expRef, { psico: session.nombre, status: 'ADOPTADO' });
+      await updateDoc(expRef, { 
+        psico: session.nombre, 
+        status: 'EN ATENCIÓN',
+        psicoUid: user.uid 
+      });
 
+      // 2. Registrar en Agenda Privada
       const agendaRef = doc(db, 'artifacts', appId, 'users', user.uid, 'agenda', 'semana_actual');
       await setDoc(agendaRef, { ...agenda, [slotId]: pendingAdoptionId });
 
       setPendingAdoptionId(null);
-      showToast("✅ Caso vinculado a tu agenda");
+      showToast("✅ Caso vinculado exitosamente");
     } catch (err) {
-      showToast("❌ Error al adoptar", "error");
+      showToast("❌ Error en la sincronización cloud", "error");
+    }
+  };
+
+  const limpiarRepoMaster = async () => {
+    if (!confirm("¿Desea purgar el repositorio global? Esta acción es irreversible.")) return;
+    try {
+      const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'expedientes'));
+      const batch = writeBatch(db);
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      showToast("🔥 Repositorio Maestro Limpio");
+    } catch (e) {
+      showToast("Error al limpiar", "error");
     }
   };
 
@@ -188,22 +218,13 @@ export default function App() {
     setTimeout(() => { t.style.display = 'none'; }, 3000);
   };
 
-  const limpiarRepo = async () => {
-    if (!confirm("¿Borrar definitivamente el repositorio en la nube?")) return;
-    const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'expedientes'));
-    const batch = writeBatch(db);
-    snap.docs.forEach(d => batch.delete(d.ref));
-    await batch.commit();
-    showToast("Base de datos limpia");
-  };
-
-  // --- RENDERIZADO ---
+  // --- COMPONENTES DE INTERFAZ ---
 
   if (loading || !isLibraryLoaded) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#003366] text-white">
-        <Loader2 className="w-10 h-10 animate-spin text-[#FF6600] mb-4" />
-        <p className="font-black uppercase tracking-widest text-[10px]">Sincronizando GTE Cloud...</p>
+        <Loader2 className="w-12 h-12 animate-spin text-[#FF6600] mb-6" />
+        <p className="font-black uppercase tracking-[0.2em] text-[10px]">Iniciando Protocolo GTE Cloud...</p>
       </div>
     );
   }
@@ -211,99 +232,114 @@ export default function App() {
   if (!session) {
     return (
       <div className="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
-        <div className="bg-white w-full max-w-md rounded-[45px] shadow-2xl p-12 border-t-[12px] border-[#FF6600] text-center animate-fade">
-          <h1 className="text-4xl font-black text-[#003366] mb-10 uppercase tracking-tighter">GTE 2026</h1>
-          <div className="space-y-6 text-left">
-            <input 
-              type="text" 
-              className="w-full border-2 border-slate-100 rounded-2xl p-4 font-bold outline-none focus:border-[#FF6600] text-sm" 
-              placeholder="Usuario" 
-              value={loginForm.user}
-              onChange={e => setLoginForm({...loginForm, user: e.target.value})}
-            />
-            <input 
-              type="password" 
-              className="w-full border-2 border-slate-100 rounded-2xl p-4 font-bold outline-none focus:border-[#FF6600] text-sm" 
-              placeholder="Contraseña" 
-              value={loginForm.pass}
-              onChange={e => setLoginForm({...loginForm, pass: e.target.value})}
-            />
-            <button onClick={handleLogin} className="w-full bg-[#003366] text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-[#FF6600] transition shadow-lg">Entrar al Sistema</button>
+        <div className="bg-white w-full max-w-md rounded-[50px] shadow-2xl p-12 border-t-[14px] border-[#FF6600] text-center animate-fade">
+          <div className="mb-10">
+            <h1 className="text-4xl font-black text-[#003366] uppercase tracking-tighter leading-none">GUACARA<br/><span className="text-[#FF6600]">TE ESCUCHA</span></h1>
+            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-4">Sistema de Gestión Clínica 2026</p>
           </div>
-          <p className="mt-8 text-[9px] text-slate-300 font-bold uppercase tracking-widest italic">HDC 1991 - Persistencia Cloud Habilitada</p>
+          <div className="space-y-6 text-left">
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase ml-4 mb-2 block">Usuario del Sistema</label>
+              <input 
+                type="text" 
+                className="w-full border-2 border-slate-50 bg-slate-50 rounded-2xl p-4 font-bold outline-none focus:border-[#FF6600] focus:bg-white transition-all text-sm" 
+                placeholder="Ej: psic_001" 
+                value={loginForm.user}
+                onChange={e => setLoginForm({...loginForm, user: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase ml-4 mb-2 block">Contraseña Única</label>
+              <input 
+                type="password" 
+                className="w-full border-2 border-slate-50 bg-slate-50 rounded-2xl p-4 font-bold outline-none focus:border-[#FF6600] focus:bg-white transition-all text-sm" 
+                placeholder="••••••••" 
+                value={loginForm.pass}
+                onChange={e => setLoginForm({...loginForm, pass: e.target.value})}
+              />
+            </div>
+            <button onClick={handleLogin} className="w-full bg-[#003366] text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-[#FF6600] transition-all transform hover:scale-[1.02] shadow-xl">Acceder al Portal</button>
+          </div>
+          <p className="mt-10 text-[9px] text-slate-400 font-bold uppercase tracking-widest italic opacity-50">HDC 1991 - Persistencia Cloud Multi-IP</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#f1f5f9]">
-      <div id="gte-toast" className="fixed bottom-8 left-1/2 -translate-x-1/2 px-10 py-3 rounded-full text-white font-black text-[10px] uppercase shadow-2xl z-[9999] hidden"></div>
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#f8fafc]">
+      {/* Toast Notifier */}
+      <div id="gte-toast" className="fixed bottom-10 left-1/2 -translate-x-1/2 px-12 py-4 rounded-full text-white font-black text-[10px] uppercase shadow-2xl z-[9999] hidden border-2 border-white/20"></div>
 
-      {/* Sidebar Navigation */}
+      {/* Sidebar de Navegación */}
       <nav className="w-full md:w-80 bg-[#003366] text-white flex flex-col sticky top-0 md:h-screen z-50 shadow-2xl">
-        <div className="p-10">
+        <div className="p-12">
           <h2 className="text-2xl font-black uppercase leading-tight tracking-tighter">GUACARA<br/><span className="text-[#FF6600]">TE ESCUCHA</span></h2>
-          <div className="mt-6 flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/5">
-            <div className="w-10 h-10 bg-[#FF6600] rounded-xl flex items-center justify-center font-black">👤</div>
+          <div className="mt-10 flex items-center gap-4 bg-white/5 p-5 rounded-[25px] border border-white/10">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#FF6600] to-orange-400 rounded-2xl flex items-center justify-center font-black shadow-lg">👤</div>
             <div>
               <p className="text-xs font-black leading-none">{session.nombre}</p>
-              <p className="text-[9px] text-white/40 uppercase font-bold mt-1 tracking-widest">{session.rol}</p>
+              <p className="text-[9px] text-white/40 uppercase font-bold mt-2 tracking-widest">{session.rol}</p>
             </div>
           </div>
         </div>
         
-        <div className="flex-grow space-y-1 px-4 py-2">
+        <div className="flex-grow space-y-2 px-6 py-2">
           {session.rol === 'MASTER' ? (
             <>
-              <button onClick={() => setActiveTab('stats')} className={`nav-btn ${activeTab === 'stats' ? 'active' : ''}`}><Layout size={18}/> Estadísticas</button>
-              <button onClick={() => setActiveTab('repo')} className={`nav-btn ${activeTab === 'repo' ? 'active' : ''}`}><Database size={18}/> Repositorio Master</button>
+              <button onClick={() => setActiveTab('stats')} className={`nav-btn ${activeTab === 'stats' ? 'active' : ''}`}><TrendingUp size={18}/> Estadísticas</button>
+              <button onClick={() => setActiveTab('repo')} className={`nav-btn ${activeTab === 'repo' ? 'active' : ''}`}><Database size={18}/> Repositorio Maestro</button>
             </>
           ) : (
             <>
-              <button onClick={() => setActiveTab('agenda')} className={`nav-btn ${activeTab === 'agenda' ? 'active' : ''}`}><Calendar size={18}/> Mi Agenda Semanal</button>
-              <button onClick={() => setActiveTab('psicorepo')} className={`nav-btn ${activeTab === 'psicorepo' ? 'active' : ''}`}><Database size={18}/> Repositorio Municipal</button>
+              <button onClick={() => setActiveTab('agenda')} className={`nav-btn ${activeTab === 'agenda' ? 'active' : ''}`}><Calendar size={18}/> Agenda Semanal</button>
+              <button onClick={() => setActiveTab('psicorepo')} className={`nav-btn ${activeTab === 'psicorepo' ? 'active' : ''}`}><FileSpreadsheet size={18}/> Bolsa de Casos</button>
               <button onClick={() => setActiveTab('pacientes')} className={`nav-btn ${activeTab === 'pacientes' ? 'active' : ''}`}><Users size={18}/> Mis Pacientes</button>
             </>
           )}
         </div>
 
-        <div className="p-8">
-          <button onClick={() => location.reload()} className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 rounded-2xl text-[10px] font-black text-red-400 uppercase transition border border-red-500/20 flex items-center justify-center gap-2"><LogOut size={14}/> Cerrar Sesión</button>
+        <div className="p-10">
+          <button onClick={() => location.reload()} className="w-full py-5 bg-red-500/10 hover:bg-red-500/20 rounded-2xl text-[10px] font-black text-red-400 uppercase transition-all border border-red-500/20 flex items-center justify-center gap-3 tracking-widest"><LogOut size={16}/> Cerrar Sistema</button>
         </div>
       </nav>
 
-      {/* Content Area */}
-      <main className="flex-grow p-8 md:p-12 lg:p-16 overflow-y-auto">
+      {/* Área de Trabajo */}
+      <main className="flex-grow p-10 md:p-16 lg:p-20 overflow-y-auto">
         
-        {/* Banner de Adopción */}
+        {/* Banner de Acción Pendiente */}
         {pendingAdoptionId && (
-          <div className="bg-[#FF6600] text-white p-6 rounded-2xl mb-10 flex justify-between items-center shadow-xl animate-fade">
-            <div className="flex items-center gap-4">
-              <AlertCircle size={24} />
+          <div className="bg-[#FF6600] text-white p-8 rounded-[30px] mb-12 flex justify-between items-center shadow-2xl animate-pulse">
+            <div className="flex items-center gap-6">
+              <AlertCircle size={32} />
               <div>
-                <p className="font-black text-xs uppercase tracking-widest">Adopción activa: {pendingAdoptionId}</p>
-                <p className="text-[10px] font-bold opacity-80 uppercase">Seleccione un espacio disponible en su agenda.</p>
+                <p className="font-black text-sm uppercase tracking-widest">Protocolo de Adopción: {pendingAdoptionId}</p>
+                <p className="text-[10px] font-bold opacity-80 uppercase mt-1">Marque un espacio "LIBRE" en su agenda para sincronizar el caso.</p>
               </div>
             </div>
-            <button onClick={() => setPendingAdoptionId(null)} className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-[9px] font-black">CANCELAR</button>
+            <button onClick={() => setPendingAdoptionId(null)} className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Abortar</button>
           </div>
         )}
 
         {/* --- VISTAS MASTER --- */}
         {session.rol === 'MASTER' && activeTab === 'stats' && (
           <div className="animate-fade">
-            <header className="mb-12"><h2 className="text-4xl font-black text-[#003366] uppercase tracking-tight">Consola de Gestión</h2></header>
+            <header className="mb-14"><h2 className="text-5xl font-black text-[#003366] uppercase tracking-tighter">Panel de Métricas</h2></header>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
-                { label: "Total Casos", val: repositorio.length, color: "#003366" },
-                { label: "Adoptados", val: repositorio.filter(e => e.psico).length, color: "#FF6600" },
-                { label: "Prioridad Fase 3", val: repositorio.filter(e => e.fase.includes('3')).length, color: "#ef4444" },
-                { label: "Pendientes", val: repositorio.filter(e => !e.psico).length, color: "#22c55e" }
+                { label: "Casos Registrados", val: repositorio.length, color: "#003366", icon: <Database/> },
+                { label: "Casos en Atención", val: repositorio.filter(e => e.psico).length, color: "#FF6600", icon: <Clock/> },
+                { label: "Prioridad Fase 3", val: repositorio.filter(e => e.fase.includes('3')).length, color: "#ef4444", icon: <AlertCircle/> },
+                { label: "Disponibilidad", val: repositorio.filter(e => !e.psico).length, color: "#22c55e", icon: <ShieldCheck/> }
               ].map((s, idx) => (
-                <div key={idx} className="bg-white p-10 rounded-[35px] shadow-sm border border-slate-100 border-l-[12px]" style={{ borderLeftColor: s.color }}>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{s.label}</p>
-                  <h3 className="text-4xl font-black text-[#003366]">{s.val}</h3>
+                <div key={idx} className="bg-white p-12 rounded-[45px] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all">
+                  <div className="relative z-10">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{s.label}</p>
+                    <h3 className="text-5xl font-black text-[#003366]">{s.val}</h3>
+                  </div>
+                  <div className="absolute right-[-10px] bottom-[-10px] text-slate-50 opacity-10 group-hover:opacity-20 transition-all scale-[3]">
+                    {s.icon}
+                  </div>
                 </div>
               ))}
             </div>
@@ -312,33 +348,37 @@ export default function App() {
 
         {session.rol === 'MASTER' && activeTab === 'repo' && (
           <div className="animate-fade">
-            <header className="mb-12 flex flex-wrap gap-8 justify-between items-end">
+            <header className="mb-14 flex flex-wrap gap-10 justify-between items-end">
               <div>
-                <h2 className="text-4xl font-black text-[#003366] uppercase">Repositorio Maestro</h2>
-                <p className="text-slate-500 font-bold text-xs mt-1 uppercase">Sincronización Multicanal Habilitada</p>
+                <h2 className="text-5xl font-black text-[#003366] uppercase tracking-tighter leading-none">Repositorio<br/><span className="text-[#FF6600]">Maestro</span></h2>
+                <p className="text-slate-400 font-bold text-xs mt-4 uppercase tracking-[0.3em]">Gestión Central de Expedientes</p>
               </div>
-              <div className="flex gap-4">
-                <button onClick={() => document.getElementById('ex-up').click()} className="bg-[#003366] text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#FF6600] transition shadow-lg">📊 Carga Masiva (Excel)</button>
+              <div className="flex gap-6">
+                <button onClick={() => document.getElementById('ex-up').click()} className="bg-[#003366] text-white px-10 py-5 rounded-[22px] text-xs font-black uppercase tracking-widest hover:bg-[#FF6600] transition-all shadow-xl flex items-center gap-3"><FileSpreadsheet size={18}/> Importar Excel</button>
                 <input type="file" id="ex-up" className="hidden" accept=".xlsx, .xls" onChange={handleExcelUpload} />
-                <button onClick={limpiarRepo} className="text-[10px] font-black text-red-400 uppercase px-4 py-2 hover:bg-red-50 rounded-xl transition">Limpiar Base</button>
+                <button onClick={limpiarRepoMaster} className="text-[10px] font-black text-red-400 uppercase px-6 py-3 hover:bg-red-50 rounded-2xl transition-all flex items-center gap-2 border border-red-100"><Trash2 size={14}/> Limpiar</button>
               </div>
             </header>
-            <div className="bg-white rounded-[35px] border border-slate-100 shadow-sm overflow-x-auto">
+            <div className="bg-white rounded-[50px] border border-slate-100 shadow-sm overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b text-[10px] uppercase font-black text-slate-400 tracking-widest">
-                  <tr><th className="p-8">Expediente</th><th className="p-8">Estudiante / ID</th><th className="p-8">Institución</th><th className="p-8 text-center">Fase</th><th className="p-8 text-right">Especialista</th></tr>
+                <thead className="bg-slate-50/50 border-b text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">
+                  <tr><th className="p-10">ID Expediente</th><th className="p-10">Estudiante / Identidad</th><th className="p-10">Institución</th><th className="p-10 text-center">Nivel</th><th className="p-10 text-right">Estatus Cloud</th></tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {repositorio.map(e => (
-                    <tr key={e.id} className="text-xs hover:bg-slate-50 transition">
-                      <td className="p-8 font-black text-[#FF6600]">{e.id}</td>
-                      <td className="p-8">
-                        <p className="font-black text-[#003366] uppercase leading-tight">{e.student}</p>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">C.I: {e.ci} | {e.edad} AÑOS</p>
+                <tbody className="divide-y divide-slate-50">
+                  {repositorio.length === 0 ? (
+                    <tr><td colSpan="5" className="p-20 text-center text-slate-300 font-black uppercase tracking-widest italic">Esperando carga de datos...</td></tr>
+                  ) : repositorio.sort((a,b) => b.timestamp - a.timestamp).map(e => (
+                    <tr key={e.id} className="text-xs hover:bg-slate-50/80 transition-all group">
+                      <td className="p-10 font-black text-[#FF6600] text-sm">{e.id}</td>
+                      <td className="p-10">
+                        <p className="font-black text-[#003366] uppercase text-sm leading-tight">{e.student}</p>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase mt-2 tracking-widest">C.I: {e.ci} | {e.edad} AÑOS</p>
                       </td>
-                      <td className="p-8 font-bold text-slate-500 uppercase">{e.inst}</td>
-                      <td className="p-8 text-center"><span className="bg-orange-50 text-[#FF6600] px-3 py-1.5 rounded-xl font-black text-[10px]">{e.fase}</span></td>
-                      <td className="p-8 text-right font-black text-slate-300 italic uppercase text-[9px]">{e.psico || '❌ Sin Asignar'}</td>
+                      <td className="p-10 font-bold text-slate-500 uppercase text-[10px]">{e.inst}</td>
+                      <td className="p-10 text-center"><span className="bg-orange-50 text-[#FF6600] px-5 py-2 rounded-2xl font-black text-[10px] border border-orange-100">{e.fase}</span></td>
+                      <td className="p-10 text-right">
+                        <p className={`text-[10px] font-black uppercase italic ${e.psico ? 'text-green-500' : 'text-slate-300'}`}>{e.psico || '❌ Sin Asignar'}</p>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -350,35 +390,35 @@ export default function App() {
         {/* --- VISTAS PSICÓLOGO --- */}
         {session.rol === 'PSICOLOGO' && activeTab === 'agenda' && (
           <div className="animate-fade">
-             <header className="mb-10 flex justify-between items-center">
-               <h2 className="text-4xl font-black text-[#003366] uppercase tracking-tight">Mi Agenda Semanal</h2>
-               <div className="flex gap-4 text-[9px] font-black uppercase text-slate-400">
-                 <span className="flex items-center gap-2"><div className="w-3 h-3 bg-green-50 border border-green-200"></div> Disponible</span>
-                 <span className="flex items-center gap-2"><div className="w-3 h-3 bg-red-50 border border-red-200"></div> Ocupado</span>
+             <header className="mb-14 flex justify-between items-center">
+               <h2 className="text-5xl font-black text-[#003366] uppercase tracking-tighter">Mi Agenda GTE</h2>
+               <div className="flex gap-8 text-[9px] font-black uppercase text-slate-400 tracking-widest">
+                 <span className="flex items-center gap-3"><div className="w-4 h-4 bg-green-50 border-2 border-green-100 rounded-lg"></div> Libre</span>
+                 <span className="flex items-center gap-3"><div className="w-4 h-4 bg-red-50 border-2 border-red-100 rounded-lg"></div> Ocupado</span>
                </div>
              </header>
-             <div className="bg-white rounded-[35px] border border-slate-100 shadow-sm overflow-hidden">
+             <div className="bg-white rounded-[50px] border border-slate-100 shadow-sm overflow-hidden">
                 <table className="w-full text-[10px] font-black uppercase text-center">
-                  <thead className="bg-slate-50 border-b text-slate-400 uppercase tracking-widest">
-                    <tr><th className="p-6 border-r w-32">Bloque</th>{["Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(d => <th key={d} className="p-6">{d}</th>)}</tr>
+                  <thead className="bg-slate-50/50 border-b text-slate-400 tracking-[0.2em]">
+                    <tr><th className="p-8 border-r w-36">Horario</th>{["Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(d => <th key={d} className="p-8">{d}</th>)}</tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map(h => (
                       <tr key={h}>
-                        <td className="p-6 bg-slate-50 border-r border-slate-100 font-black text-slate-500">{h}</td>
+                        <td className="p-8 bg-slate-50 border-r border-slate-100 font-black text-slate-500">{h}</td>
                         {["Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(d => {
                           const slotId = `${d}-${h}`;
                           const val = agenda[slotId];
                           const isOccupied = typeof val === 'string' && val.includes('GTE');
-                          if (h === "12:00") return <td key={slotId} className="p-1 bg-slate-50 italic text-slate-300">Receso GTE</td>;
+                          if (h === "12:00") return <td key={slotId} className="p-2 bg-slate-50 italic text-slate-300 tracking-widest">Receso Operativo</td>;
                           return (
-                            <td key={slotId} className="p-1">
+                            <td key={slotId} className="p-2">
                               <div 
                                 onClick={() => isOccupied ? null : adoptarCaso(slotId)}
-                                className={`h-16 flex flex-col items-center justify-center rounded-2xl cursor-pointer transition ${isOccupied ? 'bg-red-50 text-red-600 border-2 border-red-100 shadow-inner' : 'bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 hover:scale-[0.98]'}`}
+                                className={`h-20 flex flex-col items-center justify-center rounded-[25px] cursor-pointer transition-all duration-300 ${isOccupied ? 'bg-red-50 text-red-600 border-2 border-red-100 shadow-inner scale-[0.98]' : 'bg-green-50 text-green-700 border-2 border-green-100 hover:bg-green-100 hover:scale-[1.05] hover:shadow-xl'}`}
                               >
-                                <span className="font-black">{isOccupied ? 'CITA' : 'DISPONIBLE'}</span>
-                                {isOccupied && <span className="text-[8px] mt-1 opacity-60">{val}</span>}
+                                <span className="font-black tracking-tighter text-[11px]">{isOccupied ? 'CITA' : 'LIBRE'}</span>
+                                {isOccupied && <span className="text-[9px] mt-2 opacity-60 font-bold bg-white px-3 py-1 rounded-full">{val}</span>}
                               </div>
                             </td>
                           );
@@ -393,54 +433,60 @@ export default function App() {
 
         {session.rol === 'PSICOLOGO' && activeTab === 'psicorepo' && (
           <div className="animate-fade">
-             <header className="mb-10"><h2 className="text-4xl font-black text-[#003366] uppercase">Repositorio Municipal</h2></header>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+             <header className="mb-14"><h2 className="text-5xl font-black text-[#003366] uppercase tracking-tighter leading-none">Bolsa de Casos<br/><span className="text-[#FF6600]">Municipales</span></h2></header>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                {repositorio.filter(e => !e.psico).map(exp => (
-                 <div key={exp.id} className="bg-white p-10 rounded-[45px] border border-slate-100 shadow-sm hover:shadow-2xl transition-all border-t-[12px] border-[#FF6600]">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="bg-orange-50 text-[#FF6600] px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tighter">{exp.fase}</span>
-                      <span className="text-[10px] font-black text-slate-300">SMPNA PRIORIDAD</span>
+                 <div key={exp.id} className="bg-white p-12 rounded-[55px] border border-slate-100 shadow-sm hover:shadow-2xl transition-all border-t-[14px] border-[#FF6600] group">
+                    <div className="flex justify-between items-center mb-8">
+                      <span className="bg-orange-50 text-[#FF6600] px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-orange-100">{exp.fase}</span>
+                      <span className="text-[10px] font-black text-slate-300 uppercase italic">GTE MASTER</span>
                     </div>
-                    <h4 className="text-2xl font-black text-[#003366] leading-tight uppercase mb-1">{exp.student}</h4>
-                    <p className="text-xs font-bold text-slate-400 uppercase mb-10">{exp.inst}</p>
+                    <h4 className="text-3xl font-black text-[#003366] leading-[1.1] uppercase mb-2 group-hover:text-[#FF6600] transition-colors">{exp.student}</h4>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-12">{exp.inst}</p>
                     <button 
-                      onClick={() => { setPendingAdoptionId(exp.id); setActiveTab('agenda'); showToast("Vincule el caso a un horario."); }} 
-                      className="w-full bg-[#003366] text-white py-5 rounded-[20px] font-black text-[11px] uppercase tracking-widest hover:bg-[#FF6600] transition shadow-xl"
-                    >Adoptar Expediente</button>
+                      onClick={() => { setPendingAdoptionId(exp.id); setActiveTab('agenda'); showToast("Paso 2: Marque el horario en su agenda."); }} 
+                      className="w-full bg-[#003366] text-white py-6 rounded-[25px] font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#FF6600] transition-all shadow-xl transform active:scale-95"
+                    >Adoptar Caso</button>
                  </div>
                ))}
+               {repositorio.filter(e => !e.psico).length === 0 && (
+                 <div className="col-span-full py-32 text-center border-4 border-dashed border-slate-200 rounded-[55px] text-slate-300 font-black uppercase tracking-widest text-sm">
+                   Bolsa de casos vacía o todos los expedientes han sido adoptados.
+                 </div>
+               )}
              </div>
           </div>
         )}
 
         {session.rol === 'PSICOLOGO' && activeTab === 'pacientes' && (
           <div className="animate-fade">
-            <header className="mb-10"><h2 className="text-4xl font-black text-[#003366] uppercase tracking-tight">Mis Pacientes Activos</h2></header>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <header className="mb-14"><h2 className="text-5xl font-black text-[#003366] uppercase tracking-tighter">Mis Pacientes Activos</h2></header>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {repositorio.filter(e => e.psico === session.nombre).map(p => (
-                <div key={p.id} className="bg-white p-10 rounded-[45px] border border-slate-100 shadow-sm border-t-[12px] border-[#003366] hover:shadow-xl transition">
-                  <div className="flex justify-between mb-4">
-                    <p className="text-[10px] font-black text-[#FF6600] uppercase tracking-widest">{p.id}</p>
-                    <CheckCircle2 className="text-green-500" size={18} />
+                <div key={p.id} className="bg-white p-12 rounded-[55px] border border-slate-100 shadow-sm border-t-[14px] border-[#003366] hover:shadow-2xl transition-all relative">
+                  <div className="flex justify-between mb-6">
+                    <p className="text-[10px] font-black text-[#FF6600] uppercase tracking-[0.2em]">{p.id}</p>
+                    <div className="w-8 h-8 bg-green-50 text-green-500 rounded-full flex items-center justify-center"><CheckCircle2 size={16} /></div>
                   </div>
-                  <h4 className="text-2xl font-black text-[#003366] leading-tight uppercase">{p.student}</h4>
-                  <p className="text-xs font-bold text-slate-400 uppercase mt-1 mb-8">{p.inst}</p>
-                  <div className="pt-8 border-t border-slate-100">
-                    <p className="text-[9px] font-black text-slate-300 uppercase mb-4 tracking-widest">Sincronización de Estatus</p>
-                    <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black text-[#003366] outline-none mb-6">
+                  <h4 className="text-3xl font-black text-[#003366] leading-[1.1] uppercase">{p.student}</h4>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 mb-10">{p.inst}</p>
+                  <div className="pt-10 border-t border-slate-100">
+                    <label className="text-[9px] font-black text-slate-300 uppercase mb-4 tracking-widest block">Sincronización de Avance</label>
+                    <select className="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[22px] text-xs font-black text-[#003366] outline-none mb-6 focus:border-[#FF6600] transition-all">
                       <option>En Proceso de Atención</option>
-                      <option>Segunda Cita Agendada</option>
+                      <option>Evaluación en Curso</option>
+                      <option>Intervención Psicopedagógica</option>
                       <option>Derivación SMPNA / Legal</option>
-                      <option>Alta por Evolución</option>
+                      <option>Alta por Evolución Positiva</option>
                     </select>
-                    <button onClick={() => showToast("Estatus Sincronizado en la Nube")} className="w-full bg-slate-100 hover:bg-slate-200 text-[#003366] py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition">Actualizar Registro</button>
+                    <button onClick={() => showToast("Registro Sincronizado en Cloud GTE")} className="w-full bg-slate-100 hover:bg-[#003366] hover:text-white text-[#003366] py-5 rounded-[22px] text-[10px] font-black uppercase tracking-[0.2em] transition-all">Actualizar Caso</button>
                   </div>
                 </div>
               ))}
             </div>
             {repositorio.filter(e => e.psico === session.nombre).length === 0 && (
-              <div className="h-64 flex flex-col items-center justify-center border-4 border-dashed border-slate-200 rounded-[45px] text-slate-300 font-black uppercase tracking-widest text-[11px]">
-                No has adoptado casos del repositorio aún.
+              <div className="py-40 flex flex-col items-center justify-center border-4 border-dashed border-slate-200 rounded-[55px] text-slate-300 font-black uppercase tracking-widest text-[11px] text-center px-10 leading-relaxed">
+                Aún no has adoptado casos.<br/>Dirígete a la "Bolsa de Casos" para iniciar tu gestión.
               </div>
             )}
           </div>
@@ -450,12 +496,14 @@ export default function App() {
 
       <style>{`
         .nav-btn {
-          width: 100%; text-align: left; padding: 18px 24px; display: flex; align-items: center; gap: 16px;
-          color: rgba(255, 255, 255, 0.5); font-size: 13px; font-weight: 800; transition: all 0.3s ease;
-          border-left: 5px solid transparent; border-radius: 0 15px 15px 0; margin-right: 15px;
+          width: 100%; text-align: left; padding: 22px 30px; display: flex; align-items: center; gap: 20px;
+          color: rgba(255, 255, 255, 0.4); font-size: 14px; font-weight: 800; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          border-left: 6px solid transparent; border-radius: 0 25px 25px 0; margin-right: 25px;
         }
         .nav-btn:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
-        .nav-btn.active { background-color: rgba(255, 255, 255, 0.1); border-left: 5px solid #FF6600; color: white; }
+        .nav-btn.active { background-color: rgba(255, 255, 255, 0.1); border-left: 6px solid #FF6600; color: white; transform: translateX(5px); }
+        .animate-fade { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   );
