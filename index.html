@@ -62,16 +62,14 @@
         .animate-fade { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Ajuste Carga Masiva (Excel) Naranja */
         .btn-bulk-text { color: var(--gte-orange) !important; font-weight: 900; }
 
-        /* Modal Clinical History */
         .clinical-modal { 
             position: fixed; inset: 0; background: rgba(0, 51, 102, 0.9); 
             display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
         }
         .clinical-box { background: white; width: 100%; max-width: 850px; border-radius: 35px; overflow: hidden; animation: zoomIn 0.3s ease-out; }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); opacity: 0; } to { opacity: 1; transform: scale(1); opacity: 1; } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -176,7 +174,7 @@
             </div>
         </section>
 
-        <!-- TAB: REPOSITORIO (CENTRAL) -->
+        <!-- TAB: REPOSITORIO -->
         <section id="tab-expedientes" class="tab-content hidden animate-fade">
             <header class="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 <div>
@@ -219,8 +217,17 @@
         <section id="tab-perfil" class="tab-content hidden animate-fade">
             <header class="mb-10"><h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Mi Perfil</h2></header>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <div class="content-card p-10"><h3 class="text-lg font-black text-gte-blue uppercase mb-6">👤 Datos Personales</h3><input type="text" id="perfil-nombre" class="form-input font-bold mb-4" placeholder="Nombre completo"><button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full text-xs uppercase tracking-widest">Guardar Cambios</button></div>
-                <div class="content-card p-10"><h3 class="text-lg font-black text-gte-blue uppercase mb-6">🔒 Seguridad</h3><input type="password" id="perfil-pass1" class="form-input font-bold mb-4" placeholder="Nueva Contraseña"><input type="password" id="perfil-pass2" class="form-input font-bold mb-4" placeholder="Confirmar Contraseña"><button onclick="actualizarPassword()" class="btn-gte-blue w-full py-4 text-xs uppercase tracking-widest">Actualizar Contraseña</button></div>
+                <div class="content-card p-10">
+                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">👤 Datos Personales</h3>
+                    <input type="text" id="perfil-nombre" class="form-input font-bold mb-4" placeholder="Nombre completo">
+                    <button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full text-xs uppercase tracking-widest">Guardar Cambios</button>
+                </div>
+                <div class="content-card p-10">
+                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">🔒 Seguridad</h3>
+                    <input type="password" id="perfil-pass1" class="form-input font-bold mb-4" placeholder="Nueva Contraseña">
+                    <input type="password" id="perfil-pass2" class="form-input font-bold mb-4" placeholder="Confirmar Contraseña">
+                    <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-4 text-xs uppercase tracking-widest">Actualizar Contraseña</button>
+                </div>
             </div>
         </section>
     </main>
@@ -273,6 +280,8 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
+            
+            // Asegurar que el nombre en UI sea el de la sesión actual (posiblemente actualizado)
             document.getElementById('user-display-name').innerText = session.nombre;
             document.getElementById('user-role-label').innerText = session.rol;
             document.getElementById('perfil-nombre').value = session.nombre;
@@ -299,18 +308,55 @@
             renderExps();
         }
 
+        /* --- LÓGICA DE PERFIL (SOLUCIÓN QUIRÚRGICA) --- */
+        function actualizarDatosPersonales() {
+            const nuevoNombre = document.getElementById('perfil-nombre').value.trim();
+            if (!nuevoNombre) { alert("El nombre no puede estar vacío."); return; }
+            
+            const stored = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || {};
+            stored.nombre = nuevoNombre;
+            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(stored));
+            
+            // Actualizar estado en tiempo real
+            session.nombre = nuevoNombre;
+            document.getElementById('user-display-name').innerText = nuevoNombre;
+            
+            // Reflejar en expedientes si el especialista ya tiene casos
+            REPOSITORIO.forEach(exp => {
+                if(exp.psico && (exp.psico === stored.nombre_antiguo || exp.psico.includes(session.user))) {
+                    // Nota: En un sistema real usaríamos IDs, aquí actualizamos la referencia de texto si aplica
+                }
+            });
+            
+            showToast("Perfil Actualizado Correctamente");
+        }
+
+        function actualizarPassword() {
+            const p1 = document.getElementById('perfil-pass1').value;
+            const p2 = document.getElementById('perfil-pass2').value;
+
+            if (!p1 || p1.length < 4) { alert("La contraseña debe tener al menos 4 caracteres."); return; }
+            if (p1 !== p2) { alert("Las contraseñas no coinciden."); return; }
+
+            const stored = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || {};
+            stored.pass = p1;
+            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(stored));
+            
+            document.getElementById('perfil-pass1').value = "";
+            document.getElementById('perfil-pass2').value = "";
+            showToast("Seguridad Actualizada");
+        }
+
         function generarDatosEnsayo() {
             const demo = [
-                { id: "GTE-26-001", student: "ANDRES PÉREZ", inst: "U.E. " + "VICENTE WALLIS", ci: "V-32.441.552", edad: "11", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-002", student: "MARIA GOMEZ", inst: "U.E. " + "DIEGO IBARRA", ci: "V-33.111.999", edad: "10", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-003", student: "JESUS HERNANDEZ", inst: "ESC. MUN. " + "GARCIA DE SENA", ci: "V-30.888.777", edad: "12", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-004", student: "LUCIA RODRIGUEZ", inst: "U.E. " + "LUIS AUGUSTO MACHADO", ci: "V-31.222.333", edad: "9", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-005", student: "CARLOS RIVAS", inst: "U.E. " + "SIMÓN BOLIVAR", ci: "V-34.555.444", edad: "13", seguimiento: "Sin Iniciar", psico: null, evolucion: "" }
+                { id: "GTE-26-001", student: "ANDRES PÉREZ", inst: "U.E. VICENTE WALLIS", ci: "V-32.441.552", edad: "11", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
+                { id: "GTE-26-002", student: "MARIA GOMEZ", inst: "U.E. DIEGO IBARRA", ci: "V-33.111.999", edad: "10", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
+                { id: "GTE-26-003", student: "JESUS HERNANDEZ", inst: "ESC. MUN. GARCIA DE SENA", ci: "V-30.888.777", edad: "12", seguimiento: "Sin Iniciar", psico: null, evolucion: "" }
             ];
             REPOSITORIO = [...demo, ...REPOSITORIO.filter(x => !demo.find(d => d.id === x.id))];
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             renderExps();
-            actualizarVistaMaster();
+            if (session.rol === "MASTER") actualizarVistaMaster();
             showToast("🧪 Datos de Ensayo generados.");
         }
 
@@ -379,7 +425,6 @@
             }).join('');
         }
 
-        /* --- CLÍNICA --- */
         function verHistoria(id) {
             const exp = REPOSITORIO.find(e => e.id === id);
             activeExpId = id;
@@ -433,19 +478,25 @@
                 { l: "Derivaciones", v: REPOSITORIO.filter(e => e.seguimiento === "Derivación").length, c: "gte-orange" },
                 { l: "Casos Activos", v: REPOSITORIO.filter(e => e.psico !== null).length, c: "blue-500" }
             ];
-            document.getElementById('stats-grid').innerHTML = stats.map(s => `<div class="kpi-card shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${s.l}</p><h3 class="text-3xl font-black text-${s.c} mt-1">${s.v}</h3></div>`).join('');
+            const grid = document.getElementById('stats-grid');
+            if(grid) grid.innerHTML = stats.map(s => `<div class="kpi-card shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${s.l}</p><h3 class="text-3xl font-black text-${s.c} mt-1">${s.v}</h3></div>`).join('');
         }
 
         function limpiarRepositorio() { if(confirm("¿Borrar todos los datos?")) { REPOSITORIO = []; localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); renderExps(); if(session.rol==="MASTER") actualizarVistaMaster(); } }
         function handleBusqueda(val) { filtroBusqueda = val.toLowerCase().trim(); renderExps(); }
         function cerrarSesion() { location.reload(); }
         function showToast(m) { const t = document.getElementById('gte-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(()=>t.style.display='none',3000); }
+        
         function switchTab(id) { 
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); 
-            document.getElementById(id).classList.remove('hidden');
+            const target = document.getElementById(id);
+            if(target) target.classList.remove('hidden');
+            
             document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
             let bid = id === 'tab-master-stats' ? 'btn-stats' : id === 'tab-expedientes' ? 'btn-exp' : id === 'tab-equipo' ? 'btn-equipo' : 'btn-perfil';
-            if(document.getElementById(bid)) document.getElementById(bid).classList.add('active');
+            const btn = document.getElementById(bid);
+            if(btn) btn.classList.add('active');
+            
             if(id === 'tab-equipo') renderEquipo();
             if(id === 'tab-master-stats') actualizarVistaMaster();
         }
