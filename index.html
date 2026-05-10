@@ -13,7 +13,7 @@
             --gte-blue: #003366; 
             --gte-orange: #FF6600; 
             --gte-gold: #D4AF37;
-            --gte-bg: #f4f7fa;
+            --gte-bg: #f8fafc;
         }
 
         body { 
@@ -28,108 +28,98 @@
         .text-gte-blue { color: var(--gte-blue); }
         .bg-gte-blue { background-color: var(--gte-blue); }
         .text-gte-orange { color: var(--gte-orange); }
-        .border-gte-orange { border-color: var(--gte-orange); }
 
         .btn-gte-orange {
             background-color: var(--gte-orange); color: white; transition: all 0.3s ease;
             display: inline-flex; align-items: center; justify-content: center;
-            font-weight: 800; padding: 12px 24px; border-radius: 14px; border: none; cursor: pointer;
+            font-weight: 800; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;
         }
-        .btn-gte-orange:hover { background-color: var(--gte-blue); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 51, 102, 0.3); }
+        .btn-gte-orange:hover { background-color: var(--gte-blue); transform: translateY(-1px); }
 
         .btn-gte-blue {
             background-color: var(--gte-blue); color: white; transition: all 0.3s ease;
-            font-weight: 800; border-radius: 14px; border: none; padding: 12px 24px; cursor: pointer;
+            font-weight: 800; border-radius: 12px; border: none; padding: 12px 24px; cursor: pointer;
         }
-        .btn-gte-blue:hover { background-color: var(--gte-orange); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(255, 102, 0, 0.3); }
+        .btn-gte-blue:hover { background-color: var(--gte-orange); transform: translateY(-1px); }
 
         .nav-button {
-            width: 100%; text-align: left; padding: 18px 28px; display: flex; align-items: center; gap: 14px;
-            color: rgba(255, 255, 255, 0.5); font-size: 14px; font-weight: 700; transition: all 0.3s ease;
-            border-left: 5px solid transparent; cursor: pointer; background: transparent;
+            width: 100%; text-align: left; padding: 16px 24px; display: flex; align-items: center; gap: 14px;
+            color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 700; transition: all 0.3s ease;
+            border-left: 4px solid transparent; cursor: pointer; background: transparent;
         }
         .nav-button:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
-        .nav-button.active { background-color: rgba(255, 255, 255, 0.1); border-left: 5px solid var(--gte-orange); color: white; }
+        .nav-button.active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid var(--gte-orange); color: white; }
 
-        .content-card { background: white; border-radius: 30px; box-shadow: 0 10px 40px rgba(0, 51, 102, 0.04); border: 1px solid #eef2f6; }
+        .content-card { background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #eef2f6; }
 
         .form-input { 
-            width: 100%; border: 2px solid #edf2f7; border-radius: 16px; padding: 14px 20px; font-size: 14px; outline: none;
-            transition: 0.2s; color: #1e293b; background: #fcfdfe;
+            width: 100%; border: 2px solid #f1f5f9; border-radius: 14px; padding: 12px 16px; font-size: 14px; outline: none;
+            transition: 0.2s; color: #1e293b; background: #f8fafc;
         }
-        .form-input:focus { border-color: var(--gte-orange); background: white; box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.1); }
+        .form-input:focus { border-color: var(--gte-orange); background: white; }
 
-        .kpi-card { background: white; padding: 30px; border-radius: 24px; border: 1px solid #eef2f6; transition: 0.3s; position: relative; overflow: hidden; }
+        .kpi-card { background: white; padding: 25px; border-radius: 20px; border: 1px solid #eef2f6; transition: 0.3s; position: relative; overflow: hidden; }
         .kpi-card::after { content: ""; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--gte-orange); opacity: 0; transition: 0.3s; }
-        .kpi-card:hover { transform: translateY(-5px); border-color: var(--gte-orange); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
         .kpi-card:hover::after { opacity: 1; }
+        .kpi-card:hover { transform: translateY(-5px); border-color: var(--gte-orange); }
 
         #gte-toast {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            background-color: var(--gte-blue); color: white; padding: 16px 45px; border-radius: 50px;
-            font-weight: 800; font-size: 12px; text-transform: uppercase; border: 2px solid var(--gte-orange);
-            z-index: 10000; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background-color: var(--gte-blue); color: white; padding: 14px 40px; border-radius: 50px;
+            font-weight: 800; font-size: 11px; text-transform: uppercase; border: 2px solid var(--gte-orange);
+            z-index: 10000; display: none; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
 
-        .animate-fade { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         .clinical-modal { 
-            position: fixed; inset: 0; background: rgba(0, 51, 102, 0.85); backdrop-filter: blur(8px);
-            display: none; align-items: center; justify-content: center; z-index: 2000; padding: 25px;
+            position: fixed; inset: 0; background: rgba(0, 51, 102, 0.9); 
+            display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
         }
-        .clinical-box { background: white; width: 100%; max-width: 950px; border-radius: 40px; overflow: hidden; animation: zoomIn 0.3s ease-out; }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+        .clinical-box { background: white; width: 100%; max-width: 850px; border-radius: 35px; overflow: hidden; }
         
-        .gte-table th { padding: 24px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; font-weight: 800; }
-        .gte-table td { padding: 22px 24px; vertical-align: middle; transition: all 0.2s; }
-        .gte-table tr:hover td { background-color: #f8fafc; }
-
-        /* Estilo para los selectores tipo badge */
-        .badge-select {
-            appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23003366'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 10px center; background-size: 14px;
-            padding-right: 32px !important;
-        }
+        /* Ajustes Quirúrgicos para Columnas */
+        .gte-table th { padding: 16px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+        .gte-table td { padding: 14px 12px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+        
+        .col-exp { width: 120px; }
+        .col-student { min-width: 280px; }
+        .col-inst { width: 250px; }
+        .col-fase { width: 160px; }
+        .col-status { width: 160px; }
+        .col-action { width: 180px; text-align: right; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <!-- PANTALLA DE ACCESO (REDISEÑADA) -->
+    <!-- PANTALLA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-lg rounded-[55px] shadow-2xl overflow-hidden animate-fade">
-            <div class="h-5 w-full bg-gradient-to-r from-orange-500 via-yellow-400 to-orange-600"></div>
-            
-            <div class="p-16 text-center">
-                <div class="mb-10">
-                    <h1 class="text-4xl font-black text-[#003366] mb-2 uppercase tracking-tighter">Guacara Te Escucha 2026</h1>
-                    <div class="flex items-center justify-center gap-2">
-                        <span class="h-px w-8 bg-slate-200"></span>
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em]">Gestión de Salud Mental</p>
-                        <span class="h-px w-8 bg-slate-200"></span>
-                    </div>
-                </div>
-                
-                <div class="space-y-8 text-left">
+        <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden animate-fade">
+            <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
+            <div class="p-12 text-center">
+                <h1 class="text-3xl font-black text-[#003366] mb-2 uppercase tracking-tighter">Guacara Te Escucha 2026</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal de Gestión Municipal</p>
+                <div class="space-y-6 text-left">
                     <div>
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-3 block">Identificación Municipal</label>
-                        <input type="text" id="user_id" class="form-input font-bold text-lg" placeholder="Administrador o Psicólogo">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Identificación</label>
+                        <input type="text" id="user_id" class="form-input font-bold" placeholder="Ej: Administrador o Psicólogo">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-3 block">Clave de Acceso</label>
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Clave de Acceso</label>
                         <div class="relative">
-                            <input type="password" id="user_pass" class="form-input font-bold pr-14 text-lg" placeholder="••••••••">
-                            <button type="button" onclick="togglePasswordVisibility('user_pass', this)" class="absolute inset-y-0 right-0 px-5 flex items-center text-slate-300 hover:text-gte-orange transition">
-                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <input type="password" id="user_pass" class="form-input font-bold pr-12" placeholder="••••••••">
+                            <button type="button" onclick="togglePasswordVisibility('user_pass', this)" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-gte-orange transition">
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </button>
                         </div>
                     </div>
-                    <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-6 uppercase text-sm tracking-[0.2em] shadow-xl font-black">Iniciar Sesión en Consola</button>
+                    <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-5 uppercase text-xs tracking-widest shadow-lg">Entrar al Sistema</button>
                 </div>
-                <p class="mt-12 text-[10px] text-slate-300 font-bold uppercase tracking-widest italic">HDC 2026 - SISTEMA INTEGRAL GUACARA</p>
+                <p class="mt-8 text-[9px] text-slate-300 font-bold uppercase tracking-widest italic">HDC 2026 - Guacara Te Escucha</p>
             </div>
         </div>
     </div>
@@ -138,141 +128,129 @@
 
     <!-- MODAL EVOLUCIÓN CLÍNICA -->
     <div id="modal-historia" class="clinical-modal">
-        <div class="clinical-box flex flex-col max-h-[92vh] shadow-2xl">
-            <div class="bg-gte-blue p-10 text-white flex justify-between items-center">
+        <div class="clinical-box flex flex-col max-h-[90vh] shadow-2xl">
+            <div class="bg-gte-blue p-8 text-white flex justify-between items-center">
                 <div>
-                    <h2 class="text-3xl font-black uppercase tracking-tight">Evolución Psicológica</h2>
-                    <p id="modal-paciente-id" class="text-gte-orange font-bold text-xs uppercase mt-2 tracking-widest">---</p>
+                    <h2 class="text-2xl font-black uppercase tracking-tight">Evolución Psicológica</h2>
+                    <p id="modal-paciente-id" class="text-gte-orange font-bold text-[10px] uppercase mt-1 tracking-widest">---</p>
                 </div>
-                <button onclick="cerrarHistoria()" class="bg-white/10 hover:bg-white/20 p-4 rounded-2xl text-white font-bold transition flex items-center gap-2">
-                    <span class="text-lg">✕</span> CERRAR
-                </button>
+                <button onclick="cerrarHistoria()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl text-white font-bold transition">CERRAR</button>
             </div>
-            <div class="p-12 overflow-y-auto flex-grow space-y-10 bg-white">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Paciente</p>
-                        <p id="modal-nombre" class="font-black text-gte-blue uppercase text-lg">---</p>
+            <div class="p-10 overflow-y-auto flex-grow space-y-8 bg-white">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Paciente</p>
+                        <p id="modal-nombre" class="font-bold text-gte-blue uppercase text-sm">---</p>
                     </div>
-                    <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Institución Educativa</p>
-                        <p id="modal-inst" class="font-black text-gte-blue uppercase text-lg">---</p>
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución</p>
+                        <p id="modal-inst" class="font-bold text-gte-blue uppercase text-sm">---</p>
                     </div>
                 </div>
                 <div class="space-y-4">
-                    <label class="text-xs font-black text-gte-blue uppercase tracking-widest ml-2 block">Notas Clínicas y Hallazgos de la Sesión</label>
-                    <textarea id="modal-evolucion" class="form-input h-72 resize-none font-semibold text-slate-700 leading-relaxed p-8 text-base shadow-inner border-slate-100" placeholder="Documente la evolución detallada del paciente..."></textarea>
+                    <label class="text-[10px] font-black text-gte-blue uppercase tracking-widest block">Notas de la Sesión</label>
+                    <textarea id="modal-evolucion" class="form-input h-64 resize-none font-semibold text-slate-700 leading-relaxed p-6" placeholder="Documente detalladamente..."></textarea>
                 </div>
             </div>
-            <div class="p-10 bg-slate-50 border-t border-slate-100 flex gap-6">
-                <button onclick="guardarEvolucion()" class="flex-grow btn-gte-orange py-6 text-sm uppercase tracking-widest shadow-2xl font-black">Actualizar Historia Clínica</button>
+            <div class="p-8 bg-slate-50 border-t flex gap-4">
+                <button onclick="guardarEvolucion()" class="flex-grow btn-gte-orange py-5 text-xs uppercase tracking-widest shadow-xl font-black">Guardar Historia</button>
             </div>
         </div>
     </div>
 
-    <!-- SIDEBAR (MEJORADO) -->
+    <!-- SIDEBAR -->
     <nav id="sidebar" class="hidden w-full md:w-80 bg-[#003366] text-white flex flex-col sticky top-0 md:h-screen z-50 shadow-2xl">
-        <div class="p-12">
-            <div class="flex flex-col gap-1 mb-10">
-                <h2 class="text-3xl font-black uppercase leading-none tracking-tighter">GUACARA</h2>
-                <h2 class="text-3xl font-black uppercase leading-none tracking-tighter text-gte-orange">TE ESCUCHA</h2>
-                <p class="text-[10px] font-bold text-white/30 tracking-[0.4em] mt-2">EDICIÓN 2026</p>
-            </div>
-            
-            <div class="mt-12 flex items-center gap-4 bg-white/5 p-5 rounded-3xl border border-white/5 shadow-inner">
-                <div class="w-12 h-12 bg-gradient-to-tr from-gte-orange to-yellow-500 rounded-2xl flex items-center justify-center font-black text-white text-2xl shadow-lg">👤</div>
+        <div class="p-10">
+            <h2 class="text-2xl font-black uppercase leading-tight tracking-tighter">GUACARA<br><span class="text-gte-orange">TE ESCUCHA</span></h2>
+            <div class="mt-6 flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/5">
+                <div class="w-10 h-10 bg-gte-orange rounded-xl flex items-center justify-center font-black text-white text-xl">👤</div>
                 <div class="overflow-hidden">
-                    <p id="user-display-name" class="text-sm font-black leading-none truncate">---</p>
-                    <p id="user-role-label" class="text-[10px] text-white/40 uppercase font-bold mt-2 tracking-widest">---</p>
+                    <p id="user-display-name" class="text-xs font-black leading-none truncate">---</p>
+                    <p id="user-role-label" class="text-[9px] text-white/40 uppercase font-bold mt-1 tracking-widest">---</p>
                 </div>
             </div>
         </div>
-        
-        <div id="nav-menu" class="flex-grow space-y-2 px-6 py-4"></div>
-        
-        <div class="p-10">
-            <button onclick="cerrarSesion()" class="w-full py-5 bg-red-500/5 hover:bg-red-500/20 rounded-2xl text-[10px] font-black text-red-400 uppercase transition border border-red-500/10 tracking-[0.2em]">Cerrar Sesión</button>
+        <div id="nav-menu" class="flex-grow space-y-1 px-4 py-2"></div>
+        <div class="p-8">
+            <button onclick="cerrarSesion()" class="w-full py-4 bg-red-500/10 hover:bg-red-500/20 rounded-2xl text-[10px] font-black text-red-400 uppercase transition border border-red-500/20">Cerrar Sesión</button>
         </div>
     </nav>
 
-    <!-- CONTENIDO PRINCIPAL (MAXIMIZADO) -->
-    <main id="main-content" class="hidden flex-grow p-8 md:p-12 lg:p-16 overflow-y-auto w-full">
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="hidden flex-grow p-4 md:p-8 lg:p-10 overflow-y-auto w-full">
 
         <!-- TAB: ESTADÍSTICAS MASTER -->
-        <section id="tab-master-stats" class="tab-content hidden animate-fade w-full max-w-full">
-            <header class="mb-14">
-                <h2 class="text-5xl font-black text-gte-blue uppercase tracking-tighter leading-none">Consola Master</h2>
-                <p class="text-slate-400 font-bold mt-4 uppercase text-xs tracking-widest">Panel de Control Situacional - Municipio Guacara</p>
+        <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
+            <header class="mb-10">
+                <h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight leading-none">Consola Master</h2>
+                <p class="text-slate-500 mt-2">Reporte Situacional de Salud Mental 2026.</p>
             </header>
-            <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 mb-16"></div>
+            <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"></div>
         </section>
 
-        <!-- TAB: GESTIÓN DE EQUIPO -->
-        <section id="tab-equipo" class="tab-content hidden animate-fade w-full max-w-[1600px] mx-auto">
-            <header class="mb-14">
-                <h2 class="text-5xl font-black text-[#003366] uppercase tracking-tighter">Especialistas</h2>
-                <p class="text-slate-400 font-bold mt-4 uppercase text-xs tracking-widest">Nómina activa y gestión de credenciales</p>
+        <!-- TAB: GESTIÓN DE EQUIPO (MASTER) -->
+        <section id="tab-equipo" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
+            <header class="mb-10">
+                <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Especialistas</h2>
+                <p class="text-slate-500 mt-2">Nómina y administración de perfiles.</p>
             </header>
             <div class="content-card overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left gte-table">
-                        <thead class="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                                <th>Usuario ID</th>
-                                <th>Especialista</th>
-                                <th class="text-center">Casos Asignados</th>
+                        <thead class="bg-slate-50">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th class="text-center">Casos</th>
                                 <th class="text-center">Estatus</th>
                                 <th class="text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="equipo-list-body" class="divide-y divide-slate-100"></tbody>
+                        <tbody id="equipo-list-body"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- TAB: REPOSITORIO (PANTALLA COMPLETA) -->
-        <section id="tab-expedientes" class="tab-content hidden animate-fade w-full max-w-full">
-            <header class="mb-14 flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+        <!-- TAB: REPOSITORIO (MODIFICADO PARA COMPACTACIÓN) -->
+        <section id="tab-expedientes" class="tab-content hidden animate-fade max-w-[1600px] mx-auto">
+            <header class="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 <div>
-                    <h2 class="text-5xl font-black text-[#003366] uppercase tracking-tighter">Repositorio GTE 2026</h2>
-                    <p class="text-slate-400 font-bold mt-4 uppercase text-xs tracking-widest">Base Maestra de Expedientes Municipales</p>
+                    <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Repositorio Maestro</h2>
+                    <p class="text-slate-500 mt-1">Gestión Centralizada GTE 2026.</p>
                 </div>
-                <div id="master-actions" class="hidden flex flex-wrap items-center gap-6">
-                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-10 py-5 rounded-2xl text-[11px] uppercase shadow-xl hover:shadow-2xl transition border-2 border-blue-600 flex items-center gap-3">
-                        <span class="text-blue-600 font-black text-lg">📊</span> 
-                        <span class="text-blue-600 font-black tracking-widest">Carga Maestra (Excel)</span>
+                <div id="master-actions" class="hidden flex flex-wrap items-center gap-4">
+                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-6 py-3 rounded-xl text-[10px] uppercase shadow-md transition border-2 border-blue-600 flex items-center gap-2">
+                        <span class="text-blue-600 font-black">📊 CARGA MAESTRA</span>
                     </button>
                     <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcel(event)">
-                    <button onclick="limpiarRepositorio()" class="text-[10px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest border-b-2 border-transparent hover:border-red-600 pb-1 transition">Vaciar Base de Datos</button>
+                    <button onclick="limpiarRepositorio()" class="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase">Vaciar</button>
                 </div>
             </header>
 
-            <!-- Filtros Ampliados -->
-            <div class="mb-12 flex flex-col lg:flex-row gap-6 items-center bg-white p-6 rounded-[35px] shadow-sm border border-slate-100">
-                <div class="relative flex-grow w-full">
-                    <span class="absolute inset-y-0 left-0 pl-6 flex items-center text-slate-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-                    </span>
-                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50/50 border-2 border-transparent pl-16 pr-8 py-5 rounded-2xl text-lg font-semibold placeholder-slate-300 outline-none focus:ring-4 focus:ring-gte-orange/10 focus:border-gte-orange/20 transition" placeholder="Búsqueda por Expediente, Estudiante o Colegio...">
+            <!-- Buscador y Filtro -->
+            <div class="mb-6 flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <div class="relative flex-grow">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">🔍</span>
+                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-11 pr-4 py-3 rounded-xl text-sm font-semibold placeholder-slate-400 outline-none focus:ring-2 ring-gte-orange transition" placeholder="Búsqueda rápida...">
                 </div>
-                <div class="flex items-center gap-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap px-8">
-                    <span id="contador-resultados" class="text-gte-orange font-black text-2xl">0</span> Registros Encontrados
+                <div class="px-4 text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">
+                    <span id="contador-resultados" class="text-gte-orange font-black text-xs">0</span> Registros
                 </div>
             </div>
 
-            <!-- Tabla de Datos (Maximizada) -->
-            <div class="content-card overflow-hidden shadow-2xl">
+            <!-- Tabla de Datos Compactada -->
+            <div class="content-card overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left gte-table min-w-[1400px]">
-                        <thead class="bg-slate-50/80 border-b border-slate-100">
+                    <table class="w-full text-left gte-table table-auto">
+                        <thead class="bg-slate-50 border-b">
                             <tr>
-                                <th class="w-[180px]">Expediente</th>
-                                <th>Estudiante / C.I. / Edad</th>
-                                <th>Institución Educativa</th>
-                                <th class="text-center w-[220px]">Fase GTE</th>
-                                <th class="text-center w-[220px]">Seguimiento</th>
-                                <th class="text-right w-[240px]">Responsable</th>
+                                <th class="col-exp">EXP</th>
+                                <th class="col-student">ESTUDIANTE / C.I / EDAD</th>
+                                <th class="col-inst">INSTITUCIÓN</th>
+                                <th class="col-fase text-center">FASE</th>
+                                <th class="col-status text-center">SEGUIMIENTO</th>
+                                <th class="col-action">RESPONSABLE</th>
                             </tr>
                         </thead>
                         <tbody id="exp-list" class="divide-y divide-slate-50"></tbody>
@@ -283,28 +261,21 @@
 
         <!-- TAB: PERFIL -->
         <section id="tab-perfil" class="tab-content hidden animate-fade max-w-[1200px] mx-auto">
-            <header class="mb-14"><h2 class="text-5xl font-black text-[#003366] uppercase tracking-tighter">Mi Perfil</h2></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div class="content-card p-14">
-                    <h3 class="text-xl font-black text-gte-blue uppercase mb-10 flex items-center gap-4">
-                        <span class="bg-gte-orange/10 p-3 rounded-xl">👤</span> Identidad Profesional
-                    </h3>
-                    <div class="space-y-8">
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase mb-3 block ml-2">Nombre Completo</label>
-                            <input type="text" id="perfil-nombre" class="form-input font-black text-lg" placeholder="Nombre completo">
-                        </div>
-                        <button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full py-5 text-sm uppercase tracking-widest font-black shadow-xl">Sincronizar Datos</button>
+            <header class="mb-10"><h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Mi Perfil</h2></header>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div class="content-card p-10">
+                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">👤 Identidad</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="perfil-nombre" class="form-input font-bold" placeholder="Nombre completo">
+                        <button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full text-xs uppercase tracking-widest">Sincronizar</button>
                     </div>
                 </div>
-                <div class="content-card p-14">
-                    <h3 class="text-xl font-black text-gte-blue uppercase mb-10 flex items-center gap-4">
-                        <span class="bg-gte-blue/10 p-3 rounded-xl">🔒</span> Seguridad
-                    </h3>
-                    <div class="space-y-8">
+                <div class="content-card p-10">
+                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">🔒 Seguridad</h3>
+                    <div class="space-y-4">
                         <input type="password" id="perfil-pass1" class="form-input font-bold" placeholder="Nueva Contraseña">
-                        <input type="password" id="perfil-pass2" class="form-input font-bold" placeholder="Confirmar Nueva Contraseña">
-                        <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-5 text-sm uppercase tracking-widest font-black shadow-xl">Actualizar Credenciales</button>
+                        <input type="password" id="perfil-pass2" class="form-input font-bold" placeholder="Confirmar">
+                        <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-4 text-xs uppercase tracking-widest">Actualizar</button>
                     </div>
                 </div>
             </div>
@@ -359,7 +330,7 @@
                 if (p === finalPass) {
                     session = { user: u, nombre: stored?.nombre || especialista.nombre, rol: "ESPECIALISTA" };
                     initInterface();
-                    showToast(`Bienvenido(a), ${session.nombre}`);
+                    showToast(`Bienvenido, ${session.nombre}`);
                 } else alert("❌ Clave Incorrecta");
             } else alert("❌ Usuario No Registrado");
         }
@@ -376,18 +347,18 @@
             if (session.rol === "MASTER") {
                 document.getElementById('master-actions').classList.remove('hidden');
                 menu.innerHTML = `
-                    <button onclick="switchTab('tab-master-stats')" id="btn-stats" class="nav-button active">📊 Panel Situacional</button>
-                    <button onclick="switchTab('tab-equipo')" id="btn-equipo" class="nav-button">👥 Equipo Especialista</button>
-                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button">📁 Repositorio Maestro</button>
-                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Configuración</button>
+                    <button onclick="switchTab('tab-master-stats')" id="btn-stats" class="nav-button active">📊 Estadísticas</button>
+                    <button onclick="switchTab('tab-equipo')" id="btn-equipo" class="nav-button">👥 Especialistas</button>
+                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button">📁 Repositorio</button>
+                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Perfil</button>
                 `;
                 actualizarVistaMaster();
                 switchTab('tab-master-stats');
             } else {
                 document.getElementById('master-actions').classList.add('hidden');
                 menu.innerHTML = `
-                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button active">📁 Mis Casos GTE</button>
-                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Mi Perfil</button>
+                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button active">📁 Mis Casos</button>
+                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Perfil</button>
                 `;
                 switchTab('tab-expedientes');
             }
@@ -402,36 +373,24 @@
                 const data = new Uint8Array(evt.target.result);
                 const wb = XLSX.read(data, { type: 'array' });
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let headerRowIndex = -1;
-
-                for(let k=0; k < Math.min(rows.length, 30); k++) {
-                    if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp"))) {
-                        headerRowIndex = k;
-                        break;
-                    }
+                let hIdx = -1;
+                for(let k=0; k < 30; k++) {
+                    if(rows[k] && rows[k].some(c => String(c).toLowerCase().includes("exp"))) { hIdx = k; break; }
                 }
-
-                if(headerRowIndex === -1) { alert("❌ Estructura de Excel Inválida."); return; }
-
+                if(hIdx === -1) { alert("❌ Error: No se encontró la columna EXP."); return; }
                 const nuevos = [];
-                for (let i = headerRowIndex + 1; i < rows.length; i++) {
-                    const r = rows[i]; 
-                    if (!r || !r[1]) continue;
-
+                for (let i = hIdx + 1; i < rows.length; i++) {
+                    const r = rows[i]; if (!r || !r[1]) continue;
                     nuevos.push({
-                        fase: String(r[0] || "Fase 1: Captación").trim(),
+                        fase: String(r[0] || "Fase 1").trim(),
                         id: String(r[1] || "").trim(),
                         student: String(r[2] || "N/I").trim().toUpperCase(),
                         inst: String(r[3] || "N/I").trim().toUpperCase(),
                         ci: String(r[4] || "N/I").trim(),
                         edad: String(r[5] || "N/I").trim(),
-                        seguimiento: "Sin Iniciar", 
-                        psico: null, 
-                        psicoId: null,
-                        evolucion: ""
+                        seguimiento: "Sin Iniciar", psico: null, psicoId: null, evolucion: ""
                     });
                 }
-
                 const idsExistentes = new Set(REPOSITORIO.map(e => e.id));
                 const filtrados = nuevos.filter(n => !idsExistentes.has(n.id));
                 REPOSITORIO = [...REPOSITORIO, ...filtrados];
@@ -456,39 +415,32 @@
             body.innerHTML = filtrados.map(exp => {
                 const myCase = exp.psicoId === session.user;
                 return `
-                <tr class="animate-fade">
-                    <td class="font-black text-gte-orange text-sm tracking-tight">${exp.id}</td>
-                    <td>
-                        <div class="flex flex-col gap-1">
-                            <span class="font-black text-gte-blue uppercase text-[15px]">${exp.student}</span>
-                            <div class="flex items-center gap-2">
-                                <span class="bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded text-[10px]">CI: ${exp.ci}</span>
-                                <span class="bg-gte-orange/10 text-gte-orange font-bold px-2 py-0.5 rounded text-[10px]">${exp.edad} AÑOS</span>
-                            </div>
-                        </div>
+                <tr class="hover:bg-slate-50 transition border-b animate-fade">
+                    <td class="font-black text-gte-orange col-exp">${exp.id}</td>
+                    <td class="col-student">
+                        <p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5 uppercase font-bold">C.I: ${exp.ci} | ${exp.edad} AÑOS</p>
                     </td>
-                    <td>
-                        <span class="font-bold text-slate-500 uppercase text-xs leading-relaxed max-w-[300px] block">${exp.inst}</span>
-                    </td>
-                    <td class="text-center">
-                         ${myCase ? `
-                            <select onchange="updateFase('${exp.id}', this.value)" class="badge-select text-[10px] p-3 border-2 border-orange-100 rounded-2xl font-black text-gte-orange outline-none bg-orange-50/50 cursor-pointer w-full max-w-[180px]">
+                    <td class="font-bold text-slate-500 uppercase text-[11px] col-inst">${exp.inst}</td>
+                    <td class="text-center col-fase">
+                        ${myCase ? `
+                            <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-1.5 border border-slate-200 rounded-lg font-black text-gte-orange outline-none bg-white cursor-pointer w-full">
                                 ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase.includes(opt.split(':')[0]) ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
-                        ` : `<div class="px-4 py-2 rounded-xl text-[9px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-100 inline-block truncate max-w-[180px]">${exp.fase || "Captación"}</div>`}
+                        ` : `<span class="px-2 py-1 rounded bg-orange-50 text-orange-600 text-[8px] font-black uppercase truncate block">${exp.fase || "Captación"}</span>`}
                     </td>
-                    <td class="text-center">
+                    <td class="text-center col-status">
                         ${myCase ? `
-                            <select onchange="updateSeguimiento('${exp.id}', this.value)" class="badge-select text-[10px] p-3 border-2 border-blue-50 rounded-2xl font-black text-gte-blue outline-none bg-blue-50/30 cursor-pointer w-full max-w-[180px]">
+                            <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[9px] p-1.5 border border-slate-200 rounded-lg font-black text-gte-blue outline-none bg-white cursor-pointer w-full">
                                 ${SEGUIMIENTO_OPCIONES.map(opt => `<option value="${opt}" ${exp.seguimiento === opt ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
-                        ` : `<div class="px-4 py-2 rounded-full text-[9px] font-black uppercase bg-slate-100 text-slate-600 inline-block truncate max-w-[180px]">${exp.seguimiento}</div>`}
+                        ` : `<span class="px-2 py-1 rounded bg-slate-100 text-slate-600 text-[8px] font-black uppercase truncate block">${exp.seguimiento}</span>`}
                     </td>
-                    <td class="text-right">
+                    <td class="text-right col-action">
                         ${(!exp.psicoId && session.rol === 'ESPECIALISTA') 
-                            ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[10px] py-3 px-6 shadow-lg uppercase tracking-widest">Adoptar Caso</button>` 
-                            : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-3 px-8 rounded-2xl text-[10px] font-black uppercase shadow-lg hover:bg-gte-orange transition tracking-widest">Evolución</button>`
-                            : `<div class="flex flex-col items-end"><span class="text-[10px] font-black text-slate-300 uppercase">Especialista:</span><span class="text-[11px] font-black text-slate-500 uppercase">${exp.psico || 'En Espera'}</span></div>`)
+                            ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] px-3 py-1.5 shadow-sm uppercase">Adoptar</button>` 
+                            : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-1.5 px-4 rounded-lg text-[9px] font-black uppercase hover:bg-gte-orange transition">Evolución</button>`
+                            : `<span class="text-[10px] font-black text-slate-400 uppercase italic truncate block">${exp.psico || 'Libre'}</span>`)
                         }
                     </td>
                 </tr>`;
@@ -498,7 +450,7 @@
         function verHistoria(id) {
             const exp = REPOSITORIO.find(e => e.id === id);
             activeExpId = id;
-            document.getElementById('modal-paciente-id').innerText = `ID EXPEDIENTE: ${id}`;
+            document.getElementById('modal-paciente-id').innerText = `ID: ${id}`;
             document.getElementById('modal-nombre').innerText = exp.student;
             document.getElementById('modal-inst').innerText = exp.inst;
             document.getElementById('modal-evolucion').value = exp.evolucion || "";
@@ -510,7 +462,7 @@
             exp.evolucion = document.getElementById('modal-evolucion').value;
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             cerrarHistoria(); 
-            showToast("Sincronización Exitosa");
+            showToast("Guardado");
         }
 
         function cerrarHistoria() { document.getElementById('modal-historia').style.display = 'none'; activeExpId = null; }
@@ -544,94 +496,76 @@
             const body = document.getElementById('equipo-list-body');
             body.innerHTML = DB_BASE.especialistas.map(esp => {
                 const stored = JSON.parse(localStorage.getItem(`perfil_${esp.user}`));
-                const nombre = stored?.nombre || esp.nombre;
-                const casos = REPOSITORIO.filter(e => e.psicoId === esp.user).length;
-                const isCustom = stored ? true : false;
-                
+                const n = stored?.nombre || esp.nombre;
+                const c = REPOSITORIO.filter(e => e.psicoId === esp.user).length;
                 return `
-                <tr class="animate-fade">
-                    <td class="font-black text-gte-blue text-sm">${esp.user}</td>
-                    <td class="font-bold text-slate-700 text-base">${nombre}</td>
-                    <td class="text-center font-black text-gte-orange text-xl">${casos}</td>
-                    <td class="text-center">
-                        <span class="px-5 py-2 ${isCustom ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'} rounded-full text-[10px] font-black uppercase tracking-widest">
-                            ${isCustom ? 'En Línea' : 'Pendiente'}
-                        </span>
-                    </td>
-                    <td class="text-right">
-                        <button onclick="resetearEspecialista('${esp.user}')" class="text-[10px] font-black text-blue-600 hover:text-orange-600 uppercase transition tracking-widest">Resetear Perfil</button>
-                    </td>
+                <tr class="border-b text-xs">
+                    <td class="p-4 font-black text-gte-blue">${esp.user}</td>
+                    <td class="p-4 font-bold text-slate-600">${n}</td>
+                    <td class="p-4 text-center font-black text-gte-orange text-sm">${c}</td>
+                    <td class="p-4 text-center"><span class="${stored ? 'text-green-500' : 'text-slate-400'} font-black uppercase text-[9px]">${stored ? 'Activo' : 'Pendiente'}</span></td>
+                    <td class="p-4 text-right"><button onclick="resetearEspecialista('${esp.user}')" class="text-[9px] font-black text-blue-600 hover:text-red-500 uppercase">Reset</button></td>
                 </tr>`;
             }).join('');
         }
 
         function resetearEspecialista(uid) {
-            if(confirm(`¿Desea reiniciar el acceso de ${uid}?`)) {
-                localStorage.removeItem(`perfil_${uid}`);
-                renderEquipo();
-                showToast(`Perfil Reiniciado`);
-            }
+            if(confirm("¿Resetear?")) { localStorage.removeItem(`perfil_${uid}`); renderEquipo(); showToast("Listo"); }
         }
 
         function actualizarVistaMaster() {
-            const stats = [
-                { l: "Atenciones 2026", v: REPOSITORIO.length, c: "gte-blue" },
-                { l: "Altas Médicas", v: REPOSITORIO.filter(e => e.seguimiento === "Alta" || e.seguimiento === "Cierre").length, c: "green-600" },
+            const s = [
+                { l: "Atendidos", v: REPOSITORIO.length, c: "gte-blue" },
+                { l: "Altas", v: REPOSITORIO.filter(e => e.seguimiento === "Alta" || e.seguimiento === "Cierre").length, c: "green-600" },
                 { l: "Derivaciones", v: REPOSITORIO.filter(e => e.seguimiento === "Derivación").length, c: "gte-orange" },
-                { l: "Casos en Curso", v: REPOSITORIO.filter(e => e.psicoId !== null).length, c: "blue-500" }
+                { l: "En Curso", v: REPOSITORIO.filter(e => e.psicoId !== null).length, c: "blue-500" }
             ];
-            document.getElementById('stats-grid').innerHTML = stats.map(s => `
-                <div class="kpi-card">
-                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">${s.l}</p>
-                    <h3 class="text-4xl font-black text-${s.c}">${s.v}</h3>
+            document.getElementById('stats-grid').innerHTML = s.map(x => `
+                <div class="kpi-card shadow-sm">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${x.l}</p>
+                    <h3 class="text-2xl font-black text-${x.c} mt-1">${x.v}</h3>
                 </div>`).join('');
         }
 
         function actualizarDatosPersonales() {
-            const nuevoNom = document.getElementById('perfil-nombre').value;
-            if(!nuevoNom) return;
-            const perfil = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { pass: "1234" };
-            perfil.nombre = nuevoNom;
-            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(perfil));
-            session.nombre = nuevoNom;
-            document.getElementById('user-display-name').innerText = nuevoNom;
-            showToast("Perfil Actualizado");
+            const n = document.getElementById('perfil-nombre').value;
+            if(!n) return;
+            const p = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { pass: "1234" };
+            p.nombre = n;
+            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(p));
+            session.nombre = n;
+            document.getElementById('user-display-name').innerText = n;
+            showToast("Perfil Sincronizado");
         }
 
         function actualizarPassword() {
             const p1 = document.getElementById('perfil-pass1').value;
             const p2 = document.getElementById('perfil-pass2').value;
-            if(!p1 || p1 !== p2) { alert("Las contraseñas no coinciden."); return; }
-            const perfil = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { nombre: session.nombre };
-            perfil.pass = p1;
-            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(perfil));
-            showToast("Seguridad Actualizada");
+            if(!p1 || p1 !== p2) { alert("Error"); return; }
+            const p = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { nombre: session.nombre };
+            p.pass = p1;
+            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(p));
+            showToast("Clave Actualizada");
         }
 
         function limpiarRepositorio() { 
-            if(confirm("¿Seguro que desea vaciar toda la base de datos municipal?")) { 
-                REPOSITORIO = []; 
-                localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); 
-                renderExps(); 
-                if(session.rol==="MASTER") actualizarVistaMaster(); 
-            } 
+            if(confirm("¿Seguro?")) { REPOSITORIO = []; localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); renderExps(); actualizarVistaMaster(); }
         }
 
-        function handleBusqueda(val) { filtroBusqueda = val.toLowerCase().trim(); renderExps(); }
+        function handleBusqueda(v) { filtroBusqueda = v.toLowerCase().trim(); renderExps(); }
         function cerrarSesion() { location.reload(); }
         function showToast(m) { 
             const t = document.getElementById('gte-toast'); 
-            t.innerText = m; 
-            t.style.display = 'block'; 
-            setTimeout(()=>t.style.display='none',3000); 
+            t.innerText = m; t.style.display = 'block'; 
+            setTimeout(()=>t.style.display='none',2000); 
         }
 
         function switchTab(id) { 
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); 
             document.getElementById(id).classList.remove('hidden');
             document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            let btnId = (id === 'tab-master-stats' ? 'btn-stats' : id === 'tab-equipo' ? 'btn-equipo' : id === 'tab-expedientes' ? 'btn-exp' : 'btn-perfil');
-            if(document.getElementById(btnId)) document.getElementById(btnId).classList.add('active');
+            let bId = (id === 'tab-master-stats' ? 'btn-stats' : id === 'tab-equipo' ? 'btn-equipo' : id === 'tab-expedientes' ? 'btn-exp' : 'btn-perfil');
+            if(document.getElementById(bId)) document.getElementById(bId).classList.add('active');
             if(id === 'tab-equipo') renderEquipo();
             if(id === 'tab-master-stats') actualizarVistaMaster();
         }
