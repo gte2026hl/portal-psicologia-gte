@@ -355,6 +355,7 @@
             renderExps();
         }
 
+        /* MOTOR DE CARGA MAESTRA DINÁMICO GTE 2026 */
         function handleExcel(e) {
             const file = e.target.files[0];
             if(!file) return;
@@ -363,35 +364,59 @@
                 const data = new Uint8Array(evt.target.result);
                 const wb = XLSX.read(data, { type: 'array' });
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let start = 0;
-                for(let k=0; k<15; k++) {
-                    if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp") || String(cell).toLowerCase().includes("id"))) {
-                        start = k + 1; break;
+                
+                let headerRowIndex = -1;
+                let colMap = { id: -1, nombre: -1, inst: -1, ci: -1, edad: -1, fase: -1 };
+
+                // Localización meticulosa de encabezados
+                for(let k=0; k < Math.min(rows.length, 25); k++) {
+                    if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp"))) {
+                        headerRowIndex = k;
+                        rows[k].forEach((cell, idx) => {
+                            const val = String(cell).toLowerCase().trim();
+                            if(val.includes("exp")) colMap.id = idx;
+                            else if(val.includes("nombre") || val.includes("estudiante")) colMap.nombre = idx;
+                            else if(val.includes("institución") || val.includes("colegio") || val.includes("inst")) colMap.inst = idx;
+                            else if(val.includes("cédula") || val.includes("ci") || val.includes("documento")) colMap.ci = idx;
+                            else if(val.includes("edad")) colMap.edad = idx;
+                            else if(val.includes("fase")) colMap.fase = idx;
+                        });
+                        break;
                     }
                 }
+
+                if(headerRowIndex === -1 || colMap.id === -1) {
+                    alert("❌ Error de Estructura: No se detectó la columna 'EXPEDIENTE'. Verifique el archivo.");
+                    return;
+                }
+
                 const nuevos = [];
-                for (let i = start; i < rows.length; i++) {
-                    const r = rows[i]; if (!r || !r[1]) continue;
-                    // Mapeo corregido: r[1]: EXP, r[2]: Nombre, r[3]: Institución, r[4]: C.I, r[5]: Edad
+                for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                    const r = rows[i]; 
+                    if (!r || !r[colMap.id]) continue;
+
                     nuevos.push({
-                        id: String(r[1]).trim(), 
-                        student: String(r[2] || "N/I").trim().toUpperCase(),
-                        inst: String(r[3] || "N/I").trim().toUpperCase(), 
-                        ci: String(r[4] || "N/I").trim(),
-                        edad: String(r[5] || "N/I").trim(), 
-                        fase: "Fase 1: Captación",
+                        id: String(r[colMap.id] || "").trim(), 
+                        student: String(colMap.nombre !== -1 ? r[colMap.nombre] : "N/I").trim().toUpperCase(),
+                        inst: String(colMap.inst !== -1 ? r[colMap.inst] : "N/I").trim().toUpperCase(), 
+                        ci: String(colMap.ci !== -1 ? r[colMap.ci] : "N/I").trim(),
+                        edad: String(colMap.edad !== -1 ? r[colMap.edad] : "N/I").trim(), 
+                        fase: String(colMap.fase !== -1 ? r[colMap.fase] : "Fase 1: Captación").trim(),
                         seguimiento: "Sin Iniciar", 
                         psico: null, 
                         psicoId: null,
                         evolucion: ""
                     });
                 }
+
                 const idsExistentes = new Set(REPOSITORIO.map(e => e.id));
-                REPOSITORIO = [...REPOSITORIO, ...nuevos.filter(n => !idsExistentes.has(n.id))];
+                const filtrados = nuevos.filter(n => !idsExistentes.has(n.id));
+                REPOSITORIO = [...REPOSITORIO, ...filtrados];
+                
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
                 renderExps(); 
                 if (session.rol === "MASTER") actualizarVistaMaster();
-                showToast(`✅ ${nuevos.length} registros cargados satisfactoriamente.`);
+                showToast(`✅ Carga Exitosa: ${filtrados.length} registros nuevos.`);
             };
             reader.readAsArrayBuffer(file);
         }
@@ -420,7 +445,7 @@
                     <td class="p-6 text-center">
                         ${myCase ? `
                             <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-2 border border-slate-200 rounded-lg font-black text-gte-orange outline-none bg-white cursor-pointer">
-                                ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                                ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase.includes(opt.split(':')[0]) ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
                         ` : `<span class="px-2 py-1 rounded-md text-[8px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-100">${exp.fase || "Captación"}</span>`}
                     </td>
