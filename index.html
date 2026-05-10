@@ -229,16 +229,15 @@
             </div>
 
             <div class="content-card overflow-x-auto">
-                <table class="w-full text-left min-w-[1000px]">
+                <table class="w-full text-left min-w-[1100px]">
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                             <th class="p-6">Expediente</th>
-                            <th class="p-6">Estudiante / C.I.</th>
+                            <th class="p-6">Estudiante / C.I. / Edad</th>
                             <th class="p-6">Institución Educativa</th>
-                            <th class="p-6 text-center">Edad</th>
-                            <th class="p-6 text-center">Fase Actual</th>
-                            <th class="p-6 text-center">Estatus / Seguimiento</th>
-                            <th class="p-6 text-right">Responsable</th>
+                            <th class="p-6 text-center">Fase</th>
+                            <th class="p-6 text-center">Seguimiento / Estatus</th>
+                            <th class="p-6 text-right">Responsable / Acción</th>
                         </tr>
                     </thead>
                     <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
@@ -355,7 +354,7 @@
             renderExps();
         }
 
-        /* MOTOR DE CARGA MAESTRA DINÁMICO GTE 2026 */
+        /* MOTOR DE CARGA MAESTRA DINÁMICO GTE 2026 - CORREGIDO */
         function handleExcel(e) {
             const file = e.target.files[0];
             if(!file) return;
@@ -368,7 +367,6 @@
                 let headerRowIndex = -1;
                 let colMap = { id: -1, nombre: -1, inst: -1, ci: -1, edad: -1, fase: -1 };
 
-                // Localización meticulosa de encabezados
                 for(let k=0; k < Math.min(rows.length, 25); k++) {
                     if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp"))) {
                         headerRowIndex = k;
@@ -386,7 +384,7 @@
                 }
 
                 if(headerRowIndex === -1 || colMap.id === -1) {
-                    alert("❌ Error de Estructura: No se detectó la columna 'EXPEDIENTE'. Verifique el archivo.");
+                    alert("❌ Error de Estructura: No se detectó la columna 'EXPEDIENTE'.");
                     return;
                 }
 
@@ -416,7 +414,7 @@
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
                 renderExps(); 
                 if (session.rol === "MASTER") actualizarVistaMaster();
-                showToast(`✅ Carga Exitosa: ${filtrados.length} registros nuevos.`);
+                showToast(`✅ Carga Exitosa: ${filtrados.length} registros.`);
             };
             reader.readAsArrayBuffer(file);
         }
@@ -438,12 +436,11 @@
                     <td class="p-6 font-black text-gte-orange">${exp.id}</td>
                     <td class="p-6">
                         <p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p>
-                        <p class="text-[9px] text-slate-400 mt-1 uppercase font-bold">C.I: ${exp.ci}</p>
+                        <p class="text-[9px] text-slate-400 mt-1 uppercase font-bold">C.I: ${exp.ci} | EDAD: ${exp.edad}</p>
                     </td>
                     <td class="p-6 font-bold text-slate-500 uppercase leading-snug">${exp.inst}</td>
-                    <td class="p-6 text-center font-black text-slate-600">${exp.edad}</td>
                     <td class="p-6 text-center">
-                        ${myCase ? `
+                         ${myCase ? `
                             <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-2 border border-slate-200 rounded-lg font-black text-gte-orange outline-none bg-white cursor-pointer">
                                 ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase.includes(opt.split(':')[0]) ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
