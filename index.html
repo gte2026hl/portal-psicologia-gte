@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guacara Te Escucha 2026 - Consola de Gestión</title>
+    <title>GTE 2026 - Portal Clínico de Gestión Municipal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -79,13 +79,12 @@
         }
         .gte-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
 
-        /* Control de anchos específicos para evitar dispersión */
         .col-exp { width: 100px; }
         .col-student { width: 280px; }
         .col-inst { width: 200px; }
-        .col-fase { width: 60px; text-align: letf; }
+        .col-fase { width: 60px; text-align: center; }
         .col-status { width: 160px; }
-        .col-action { width: 170px; text-align: letf; }
+        .col-action { width: 180px; text-align: right; }
 
         .exp-box { display: flex; flex-direction: column; line-height: 1.1; }
         .exp-prefix { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
@@ -102,6 +101,14 @@
             display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
         }
         .clinical-box { background: white; width: 100%; max-width: 800px; border-radius: 30px; overflow: hidden; }
+
+        /* Estilo degradado para el footer solicitado */
+        .gradient-text-footer {
+            background: linear-gradient(to right, #FF6600, #D4AF37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -112,17 +119,31 @@
             <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
             <div class="p-12 text-center">
                 <h1 class="text-3xl font-black text-[#003366] mb-2 uppercase tracking-tighter">Guacara Te Escucha 2026</h1>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Consola Integral de Gestión</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal Clínico de Gestión Municipal</p>
                 <div class="space-y-6 text-left">
                     <div>
                         <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Identificación</label>
                         <input type="text" id="user_id" class="form-input font-bold" placeholder="Especialista o Master">
                     </div>
                     <div>
-                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Clave</label>
-                        <input type="password" id="user_pass" class="form-input font-bold" placeholder="••••••••">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Clave de Acceso</label>
+                        <div class="relative">
+                            <input type="password" id="user_pass" class="form-input font-bold pr-12" placeholder="••••••••">
+                            <button type="button" onclick="togglePasswordVisibility('user_pass', this)" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-300 hover:text-gte-orange transition">
+                                <svg id="eye-icon-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-4 uppercase text-xs tracking-widest shadow-lg">Ingresar</button>
+                </div>
+                <div class="mt-10">
+                    <p class="text-[9px] font-bold uppercase tracking-widest leading-relaxed">
+                        <span class="text-slate-300">Sello Institucional </span><br>
+                        <span class="gradient-text-footer">HDC 2026 — Guacara Te Escucha</span>
+                    </p>
                 </div>
             </div>
         </div>
@@ -180,7 +201,7 @@
     <!-- MAIN CONTENT -->
     <main id="main-content" class="hidden flex-grow p-4 md:p-6 lg:p-8 overflow-y-auto w-full">
 
-        <!-- TAB: REPOSITORIO MAESTRO (EL FOCO DE LA MEJORA) -->
+        <!-- TAB: REPOSITORIO MAESTRO -->
         <section id="tab-expedientes" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
             <header class="mb-6 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
                 <div>
@@ -223,7 +244,7 @@
             </div>
         </section>
 
-        <!-- OTRAS SECCIONES (Estadísticas, Perfil, etc) -->
+        <!-- OTRAS SECCIONES -->
         <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
             <header class="mb-8"><h2 class="text-3xl font-black text-gte-blue uppercase tracking-tight">Consola Master</h2></header>
             <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
@@ -274,9 +295,17 @@
         let filtroBusqueda = "";
         let activeExpId = null;
 
+        /* Restauración quirúrgica de la visibilidad de contraseña */
         function togglePasswordVisibility(id, btn) {
             const input = document.getElementById(id);
-            input.type = input.type === "password" ? "text" : "password";
+            const icon = document.getElementById('eye-icon-svg');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
+            } else {
+                input.type = "password";
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+            }
         }
 
         function accesoUniversal() {
@@ -342,7 +371,7 @@
                 for(let k=0; k < 30; k++) {
                     if(rows[k] && rows[k].some(c => String(c).toLowerCase().includes("exp"))) { hIdx = k; break; }
                 }
-                if(hIdx === -1) { alert("❌ Columna EXP no hallada."); return; }
+                if(hIdx === -1) { alert("❌ Estructura no hallada."); return; }
                 const nuevos = [];
                 for (let i = hIdx + 1; i < rows.length; i++) {
                     const r = rows[i]; if (!r || !r[1]) continue;
@@ -378,7 +407,6 @@
             body.innerHTML = filtrados.map(exp => {
                 const myCase = exp.psicoId === session.user;
                 
-                // Procesamiento Quirúrgico de Expediente para dos líneas
                 let idText = exp.id;
                 let prefix = "EXP";
                 let num = idText;
