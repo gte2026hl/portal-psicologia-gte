@@ -28,7 +28,6 @@
         window.collectionPath = `artifacts/${appId}/public/data/expedientes`;
         window.userCollectionPath = `artifacts/${appId}/public/data/usuarios`;
 
-        // Protocolo de Autenticación de Élite con Promesa de Estado
         window.authReady = new Promise((resolve) => {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -73,6 +72,14 @@
         .animate-fade { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .stats-card { background: white; border-radius: 24px; padding: 30px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        /* Badge de Seguimiento según Estatus */
+        .badge-step { padding: 4px 12px; border-radius: 99px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+        .status-sin { background: #f1f5f9; color: #64748b; }
+        .status-cita { background: #dcfce7; color: #166534; }
+        .status-deriva { background: #fef9c3; color: #854d0e; }
+        .status-cierre { background: #fee2e2; color: #991b1b; }
+        .status-alta { background: #e0f2fe; color: #075985; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -105,7 +112,7 @@
         </div>
     </div>
 
-    <!-- MODAL HISTORIA CLÍNICA -->
+    <!-- MODAL HISTORIA CLÍNICA (ACTUALIZADO CON FASES) -->
     <div id="modal-historia" class="clinical-modal">
         <div class="clinical-box flex flex-col max-h-[90vh]">
             <div class="bg-gte-blue p-8 text-white flex justify-between items-center">
@@ -113,13 +120,26 @@
                 <button onclick="cerrarHistoria()" class="bg-white/10 px-4 py-2 rounded-xl text-white font-bold hover:bg-white/20 transition">CERRAR</button>
             </div>
             <div class="p-10 overflow-y-auto flex-grow space-y-6 bg-white">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nombre del Paciente</p><p id="modal-nombre" class="font-bold text-gte-blue uppercase text-sm">---</p></div>
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución Educativa</p><p id="modal-inst" class="font-bold text-gte-blue uppercase text-sm">---</p></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Paciente</p><p id="modal-nombre" class="font-bold text-gte-blue uppercase text-sm">---</p></div>
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución</p><p id="modal-inst" class="font-bold text-gte-blue uppercase text-sm">---</p></div>
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Fase de Seguimiento</p>
+                        <select id="modal-status-select" class="w-full bg-transparent font-bold text-gte-orange text-xs uppercase outline-none">
+                            <option value="Sin Iniciar">Sin Iniciar</option>
+                            <option value="Primera Cita">Primera Cita</option>
+                            <option value="Segunda Cita">Segunda Cita</option>
+                            <option value="Tercera Cita">Tercera Cita</option>
+                            <option value="Cuarta Cita">Cuarta Cita</option>
+                            <option value="Derivación">Derivación</option>
+                            <option value="Caso Cerrado">Caso Cerrado</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
                 </div>
-                <div><label class="text-[10px] font-black text-gte-blue uppercase tracking-widest mb-3 block">Notas de Evolución y Seguimiento</label><textarea id="modal-evolucion" class="form-input-gte h-64 resize-none leading-relaxed p-6" placeholder="Registre los hallazgos y avances de la sesión..."></textarea></div>
+                <div><label class="text-[10px] font-black text-gte-blue uppercase tracking-widest mb-3 block">Notas de Evolución Clínica</label><textarea id="modal-evolucion" class="form-input-gte h-64 resize-none leading-relaxed p-6" placeholder="Registre los avances meticulosos de la sesión..."></textarea></div>
             </div>
-            <div class="p-8 border-t bg-slate-50 flex gap-4"><button onclick="guardarEvolucionCloud()" class="flex-grow btn-gte-orange-action py-5 shadow-lg uppercase text-xs tracking-widest">Sincronizar en la Nube</button></div>
+            <div class="p-8 border-t bg-slate-50 flex gap-4"><button onclick="guardarEvolucionCloud()" class="flex-grow btn-gte-orange-action py-5 shadow-lg uppercase text-xs tracking-widest">Sincronizar Expediente</button></div>
         </div>
     </div>
 
@@ -152,7 +172,7 @@
             </div>
             <div class="bg-white rounded-[35px] shadow-sm border border-slate-100 overflow-hidden">
                 <div class="overflow-x-auto"><table class="w-full text-left min-w-[900px]">
-                    <thead class="bg-slate-50 border-b border-slate-100"><tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest"><th class="p-8">Expediente</th><th class="p-8">Estudiante / ID</th><th class="p-8">Institución</th><th class="p-8 text-center">Seguimiento</th><th class="p-8 text-right">Acción Clínica</th></tr></thead>
+                    <thead class="bg-slate-50 border-b border-slate-100"><tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest"><th class="p-8">Expediente</th><th class="p-8">Paciente / Identidad</th><th class="p-8">Institución</th><th class="p-8 text-center">Seguimiento</th><th class="p-8 text-right">Acción Clínica</th></tr></thead>
                     <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
                 </table></div>
             </div>
@@ -162,6 +182,7 @@
             </div>
         </section>
 
+        <!-- OTROS TABS (ESTADÍSTICAS Y PERFIL) -->
         <section id="tab-estadisticas" class="tab-content hidden animate-fade">
              <header class="mb-12 flex justify-between items-end">
                 <div><h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight">Estadísticas GTE</h2><p class="text-slate-500 mt-3 font-semibold">Análisis objetivo de impacto en Salud Mental.</p></div>
@@ -206,7 +227,6 @@
         };
 
         let REPOSITORIO_FULL = [];
-        let USUARIOS_NUBE = [];
         let pagina = 0;
         const tamPagina = 15;
         let filtroBusqueda = "";
@@ -214,56 +234,25 @@
         let activeExpId = null;
         let chartInstances = {};
 
-        // INICIO SESIÓN RESILIENTE (FIX DE BLOQUEO)
         window.iniciarSesionCloud = async () => {
             const uInput = document.getElementById('user_id').value.trim().toLowerCase();
             const pInput = document.getElementById('user_pass').value;
             const loading = document.getElementById('login-loading');
-            
             if(!uInput || !pInput) { alert("Complete los campos."); return; }
-            
             loading.classList.remove('hidden');
-
             try {
-                // Paso 1: Asegurar que Auth está listo
                 await window.authReady;
-
-                // Paso 2: Intentar fetch de usuarios nube (con timeout implícito por Firebase)
                 let cloudUsers = [];
-                try {
-                    const uSnap = await getDocs(collection(window.db, window.userCollectionPath));
-                    cloudUsers = uSnap.docs.map(d => d.data());
-                } catch (e) { console.warn("Modo Fallback local activado."); }
-
-                // Paso 3: Lógica de Identificación (Nube -> Estático)
+                try { const uSnap = await getDocs(collection(window.db, window.userCollectionPath)); cloudUsers = uSnap.docs.map(d => d.data()); } catch (e) { }
                 let targetUser = cloudUsers.find(usr => usr.user === uInput);
-                
                 if (!targetUser) {
                     if (uInput === DB_BASE.master.user) targetUser = { ...DB_BASE.master, rol: "MASTER" };
-                    else {
-                        const staticPsic = DB_BASE.especialistas.find(e => e.user === uInput);
-                        if (staticPsic) targetUser = { ...staticPsic, rol: "ESPECIALISTA" };
-                    }
+                    else { const staticPsic = DB_BASE.especialistas.find(e => e.user === uInput); if (staticPsic) targetUser = { ...staticPsic, rol: "ESPECIALISTA" }; }
                 }
-
-                // Paso 4: Validación Final de Credenciales
-                if (!targetUser) {
-                    alert("❌ El usuario no está bien escrito o no existe.");
-                } else if (targetUser.pass !== pInput) {
-                    alert("❌ Contraseña no válida.");
-                } else {
-                    // ÉXITO DE ACCESO
-                    session = targetUser;
-                    initInterface();
-                    cargarDatosDesdeNube();
-                    if(session.rol === "MASTER") initUserAdmin(cloudUsers);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Error crítico de acceso. Verifique su conexión.");
-            } finally {
-                loading.classList.add('hidden');
-            }
+                if (!targetUser) alert("❌ El usuario no está bien escrito o no existe.");
+                else if (targetUser.pass !== pInput) alert("❌ Contraseña no válida.");
+                else { session = targetUser; initInterface(); cargarDatosDesdeNube(); if(session.rol === "MASTER") initUserAdmin(cloudUsers); }
+            } catch (err) { alert("Error crítico de acceso."); } finally { loading.classList.add('hidden'); }
         };
 
         function initInterface() {
@@ -273,39 +262,27 @@
             document.getElementById('user-display-name').innerText = session.nombre;
             document.getElementById('user-role-label').innerText = session.rol;
             document.getElementById('perfil-nombre').value = session.nombre;
-
             const menu = document.getElementById('nav-menu');
             if (session.rol === "MASTER") {
                 document.getElementById('master-actions').classList.remove('hidden');
                 document.getElementById('master-user-admin').classList.remove('hidden');
-                menu.innerHTML = `
-                    <button onclick="switchTab('tab-expedientes')" id="nav-exp" class="nav-button active">📁 Repositorio Maestro</button>
-                    <button onclick="switchTab('tab-estadisticas')" id="nav-stat" class="nav-button">📈 Estadísticas Globales</button>
-                    <button onclick="switchTab('tab-perfil')" id="nav-perf" class="nav-button">⚙️ Ajustes del Sistema</button>
-                `;
+                menu.innerHTML = `<button onclick="switchTab('tab-expedientes')" id="nav-exp" class="nav-button active">📁 Repositorio Maestro</button><button onclick="switchTab('tab-estadisticas')" id="nav-stat" class="nav-button">📈 Estadísticas Globales</button><button onclick="switchTab('tab-perfil')" id="nav-perf" class="nav-button">⚙️ Ajustes del Sistema</button>`;
             } else {
-                menu.innerHTML = `
-                    <button onclick="switchTab('tab-expedientes')" id="nav-exp" class="nav-button active">📁 Mis Pacientes GTE</button>
-                    <button onclick="switchTab('tab-perfil')" id="nav-perf" class="nav-button">⚙️ Mi Perfil</button>
-                `;
+                menu.innerHTML = `<button onclick="switchTab('tab-expedientes')" id="nav-exp" class="nav-button active">📁 Mis Pacientes GTE</button><button onclick="switchTab('tab-perfil')" id="nav-perf" class="nav-button">⚙️ Mi Perfil</button>`;
             }
         }
 
         async function cargarDatosDesdeNube() {
-            try {
-                const querySnapshot = await getDocs(collection(window.db, window.collectionPath));
-                REPOSITORIO_FULL = querySnapshot.docs.map(doc => doc.data());
-                renderExps();
-            } catch (error) { console.error("Error al cargar expedientes:", error); }
+            try { const querySnapshot = await getDocs(collection(window.db, window.collectionPath)); REPOSITORIO_FULL = querySnapshot.docs.map(doc => doc.data()); renderExps(); } catch (error) { }
         }
 
-        // MOTOR EXCEL (ROBUSTO)
+        // --- MOTOR DE EXCEL ULTRA-ROBUSTO (FIX DEFINITIVO) ---
         window.handleExcelCloud = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const btn = document.getElementById('btn-excel-bulk');
             const originalText = btn.innerHTML;
-            btn.innerHTML = `<span class="animate-pulse">⏳ ASUMIENDO DATOS...</span>`;
+            btn.innerHTML = `<span class="animate-pulse">⏳ CARGANDO DATOS...</span>`;
             btn.disabled = true;
 
             const reader = new FileReader();
@@ -315,57 +292,58 @@
                     const wb = XLSX.read(data, { type: 'array' });
                     const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
                     
+                    if (rows.length < 2) throw new Error("Archivo vacío.");
+
+                    // Buscador de cabeceras dinámico
                     let colIdx = { id: -1, student: -1, inst: -1, ci: -1, edad: -1 };
-                    let startRow = -1;
+                    let startRow = 0;
 
                     for (let i = 0; i < Math.min(rows.length, 10); i++) {
-                        const row = rows[i];
-                        if (!row) continue;
+                        const row = rows[i]; if (!row) continue;
                         row.forEach((cell, idx) => {
                             const val = String(cell || "").toLowerCase();
                             if (val.includes("exp") || val.includes("id")) colIdx.id = idx;
-                            if (val.includes("estu") || val.includes("nombr")) colIdx.student = idx;
-                            if (val.includes("inst") || val.includes("plantel")) colIdx.inst = idx;
+                            if (val.includes("estu") || val.includes("nombr") || val.includes("paciente")) colIdx.student = idx;
+                            if (val.includes("inst") || val.includes("plantel") || val.includes("escuela")) colIdx.inst = idx;
                             if (val.includes("ced") || val.includes("ci")) colIdx.ci = idx;
                             if (val.includes("edad")) colIdx.edad = idx;
                         });
-                        if (colIdx.id !== -1) { startRow = i + 1; break; }
+                        if (colIdx.id !== -1 && colIdx.student !== -1) { startRow = i + 1; break; }
                     }
 
-                    if (startRow === -1) throw new Error("Formato Excel no reconocido.");
+                    // Fallback si no hay cabeceras claras: asumimos columnas 0, 1 y 2
+                    if (colIdx.id === -1) colIdx.id = 0;
+                    if (colIdx.student === -1) colIdx.student = 1;
+                    if (colIdx.inst === -1) colIdx.inst = 2;
 
                     let count = 0;
                     for (let i = startRow; i < rows.length; i++) {
                         const r = rows[i];
                         if (!r || !r[colIdx.id]) continue;
+                        
                         const expId = String(r[colIdx.id]).trim();
-                        await setDoc(doc(window.db, window.collectionPath, expId), {
+                        const docData = {
                             id: expId,
-                            student: colIdx.student !== -1 ? String(r[colIdx.student] || "N/I").trim() : "N/I",
-                            inst: colIdx.inst !== -1 ? String(r[colIdx.inst] || "N/I").trim().toUpperCase() : "N/I",
+                            student: String(r[colIdx.student] || "SIN NOMBRE").trim(),
+                            inst: String(r[colIdx.inst] || "N/I").trim().toUpperCase(),
                             ci: colIdx.ci !== -1 ? String(r[colIdx.ci] || "N/I").trim() : "N/I",
                             edad: colIdx.edad !== -1 ? String(r[colIdx.edad] || "N/I").trim() : "N/I",
-                            seguimiento: "Sin Iniciar", psico: null, evolucion: ""
-                        });
+                            seguimiento: "Sin Iniciar",
+                            psico: null,
+                            evolucion: ""
+                        };
+                        await setDoc(doc(window.db, window.collectionPath, expId), docData);
                         count++;
                     }
-                    alert(`✅ Procesados ${count} registros.`);
+                    alert(`✅ Procesados ${count} registros con éxito.`);
                     cargarDatosDesdeNube();
-                } catch (err) { alert("Error Excel: " + err.message); }
-                finally { btn.innerHTML = originalText; btn.disabled = false; }
+                } catch (err) { alert("Error de Carga: " + err.message); }
+                finally { btn.innerHTML = originalText; btn.disabled = false; e.target.value = ""; }
             };
             reader.readAsArrayBuffer(file);
         };
 
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            if(tabId === 'tab-estadisticas') renderStats();
-            const map = {'tab-expedientes':'nav-exp', 'tab-estadisticas':'nav-stat', 'tab-perfil':'nav-perf'};
-            if(map[tabId]) document.getElementById(map[tabId]).classList.add('active');
-        };
-
+        // --- RENDERIZADO CON BADGES DINÁMICOS ---
         window.renderExps = () => {
             const body = document.getElementById('exp-list');
             const filtrados = REPOSITORIO_FULL.filter(exp => exp.id.toLowerCase().includes(filtroBusqueda) || exp.student.toLowerCase().includes(filtroBusqueda) || exp.inst.toLowerCase().includes(filtroBusqueda));
@@ -374,52 +352,54 @@
             const slice = filtrados.slice(pagina * tamPagina, (pagina + 1) * tamPagina);
             body.innerHTML = slice.map(exp => {
                 const myCase = exp.psico === session.nombre;
+                let statusClass = "status-sin";
+                if (exp.seguimiento.includes("Cita")) statusClass = "status-cita";
+                if (exp.seguimiento === "Derivación") statusClass = "status-deriva";
+                if (exp.seguimiento === "Caso Cerrado") statusClass = "status-cierre";
+                if (exp.seguimiento === "Alta") statusClass = "status-alta";
+
                 return `<tr class="hover:bg-slate-50 transition border-b border-slate-100 text-xs animate-fade">
                     <td class="p-8"><span class="bg-gte-blue/5 text-gte-blue px-4 py-2 rounded-lg font-black">${exp.id}</span></td>
-                    <td class="p-8"><p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p><p class="text-[9px] text-slate-400 font-bold mt-1 uppercase">CI: ${exp.ci}</p></td>
+                    <td class="p-8"><p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p><p class="text-[9px] text-slate-400 font-bold mt-1 uppercase">CI: ${exp.ci} | Edad: ${exp.edad}</p></td>
                     <td class="p-8 font-bold text-slate-500 uppercase leading-snug">${exp.inst}</td>
-                    <td class="p-8 text-center"><span class="px-4 py-2 rounded-full text-[9px] font-black uppercase ${exp.seguimiento === 'Sin Iniciar' ? 'bg-slate-100 text-slate-500' : 'bg-green-100 text-green-700'}">${exp.seguimiento}</span></td>
-                    <td class="p-8 text-right">${(!exp.psico && session.rol === 'ESPECIALISTA') ? `<button onclick="window.adoptar('${exp.id}')" class="btn-gte-orange-action !py-3 !px-6 text-[9px]">Adoptar</button>` : myCase ? `<button onclick="window.verHistoria('${exp.id}')" class="btn-gte-main !py-3 !px-6 text-[9px]">Ver Evolución</button>` : `<p class="text-[10px] font-black text-slate-300 italic uppercase">${exp.psico || 'Esperando'}</p>`}</td>
+                    <td class="p-8 text-center"><span class="badge-step ${statusClass}">${exp.seguimiento}</span></td>
+                    <td class="p-8 text-right">${(!exp.psico && session.rol === 'ESPECIALISTA') ? `<button onclick="window.adoptar('${exp.id}')" class="btn-gte-orange-action !py-3 !px-6 text-[9px]">Adoptar</button>` : myCase ? `<button onclick="window.verHistoria('${exp.id}')" class="btn-gte-main !py-3 !px-6 text-[9px]">Evolución</button>` : `<p class="text-[10px] font-black text-slate-300 italic uppercase">${exp.psico || 'Esperando'}</p>`}</td>
                 </tr>`;
             }).join('');
         };
 
+        window.verHistoria = (id) => {
+            const exp = REPOSITORIO_FULL.find(e => e.id === id);
+            activeExpId = id;
+            document.getElementById('modal-paciente-id').innerText = `EXPEDIENTE N° ${id}`;
+            document.getElementById('modal-nombre').innerText = exp.student;
+            document.getElementById('modal-inst').innerText = exp.inst;
+            document.getElementById('modal-evolucion').value = exp.evolucion || "";
+            document.getElementById('modal-status-select').value = exp.seguimiento || "Sin Iniciar";
+            document.getElementById('modal-historia').style.display = 'flex';
+        };
+
+        window.guardarEvolucionCloud = async () => {
+            const ref = doc(window.db, window.collectionPath, activeExpId);
+            await updateDoc(ref, { 
+                evolucion: document.getElementById('modal-evolucion').value,
+                seguimiento: document.getElementById('modal-status-select').value
+            });
+            document.getElementById('modal-historia').style.display = 'none';
+            cargarDatosDesdeNube();
+        };
+
         window.adoptar = async (id) => { await updateDoc(doc(window.db, window.collectionPath, id), { psico: session.nombre, seguimiento: "En Atención" }); cargarDatosDesdeNube(); };
-        window.verHistoria = (id) => { const exp = REPOSITORIO_FULL.find(e => e.id === id); activeExpId = id; document.getElementById('modal-paciente-id').innerText = `EXPEDIENTE N° ${id}`; document.getElementById('modal-nombre').innerText = exp.student; document.getElementById('modal-inst').innerText = exp.inst; document.getElementById('modal-evolucion').value = exp.evolucion || ""; document.getElementById('modal-historia').style.display = 'flex'; };
-        window.guardarEvolucionCloud = async () => { await updateDoc(doc(window.db, window.collectionPath, activeExpId), { evolucion: document.getElementById('modal-evolucion').value }); document.getElementById('modal-historia').style.display = 'none'; cargarDatosDesdeNube(); };
+        window.switchTab = (tabId) => { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.getElementById(tabId).classList.remove('hidden'); document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active')); if(tabId === 'tab-estadisticas') renderStats(); const map = {'tab-expedientes':'nav-exp', 'tab-estadisticas':'nav-stat', 'tab-perfil':'nav-perf'}; if(map[tabId]) document.getElementById(map[tabId]).classList.add('active'); };
         window.handleBusqueda = (v) => { filtroBusqueda = v.toLowerCase(); pagina = 0; renderExps(); };
         window.cambiarPagina = (dir) => { pagina = Math.max(0, pagina + dir); renderExps(); };
         window.togglePasswordVisibility = () => { const passInput = document.getElementById('user_pass'); const openEye = document.getElementById('eye-open'); const closedEye = document.getElementById('eye-closed'); if (passInput.type === 'password') { passInput.type = 'text'; openEye.classList.add('hidden'); closedEye.classList.remove('hidden'); } else { passInput.type = 'password'; openEye.classList.remove('hidden'); closedEye.classList.add('hidden'); } };
         window.cerrarHistoria = () => { document.getElementById('modal-historia').style.display = 'none'; };
-        
-        function initUserAdmin(uNube) {
-            const container = document.getElementById('psico-list-admin');
-            container.innerHTML = DB_BASE.especialistas.map(p => {
-                const cloud = uNube.find(u => u.user === p.user);
-                return `<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-between items-center"><div><p class="text-[10px] font-black text-gte-blue uppercase">${p.nombre}</p><p class="text-[9px] text-slate-400">Pass: <span class="font-bold text-gte-orange">${cloud ? cloud.pass : p.pass}</span></p></div><button onclick="resetUserPass('${p.user}')" class="btn-gte-main !py-2 !px-4 text-[9px]">Reset</button></div>`;
-            }).join('');
-        }
-
-        window.resetUserPass = async (uid) => { await setDoc(doc(window.db, window.userCollectionPath, uid), { ...DB_BASE.especialistas.find(e => e.user === uid), pass: "1234", rol: "ESPECIALISTA" }); alert("Reseteado a 1234"); location.reload(); };
+        function initUserAdmin(uNube) { const container = document.getElementById('psico-list-admin'); container.innerHTML = DB_BASE.especialistas.map(p => { const cloud = uNube.find(u => u.user === p.user); return `<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-between items-center"><div><p class="text-[10px] font-black text-gte-blue uppercase">${p.nombre}</p><p class="text-[9px] text-slate-400">Pass: <span class="font-bold text-gte-orange">${cloud ? cloud.pass : p.pass}</span></p></div><button onclick="resetUserPass('${p.user}')" class="btn-gte-main !py-2 !px-4 text-[9px]">Reset</button></div>`; }).join(''); }
+        window.resetUserPass = async (uid) => { await setDoc(doc(window.db, window.userCollectionPath, uid), { ...DB_BASE.especialistas.find(e => e.user === uid), pass: "1234", rol: "ESPECIALISTA" }); alert("Reseteado"); location.reload(); };
         window.guardarPerfil = async () => { const n = document.getElementById('perfil-nombre').value; const p = document.getElementById('perfil-pass').value; const up = { nombre: n }; if(p) up.pass = p; await setDoc(doc(window.db, window.userCollectionPath, session.user), { ...session, ...up }, { merge: true }); alert("Actualizado"); location.reload(); };
-        
-        window.renderStats = () => {
-            const ctx1 = document.getElementById('chart-cobertura').getContext('2d');
-            const atendidos = REPOSITORIO_FULL.filter(e => e.seguimiento !== 'Sin Iniciar').length;
-            const pendientes = REPOSITORIO_FULL.length - atendidos;
-            Object.values(chartInstances).forEach(c => c.destroy());
-            chartInstances.cobertura = new Chart(ctx1, { type: 'doughnut', data: { labels: ['Atendidos', 'Pendientes'], datasets: [{ data: [atendidos, pendientes], backgroundColor: ['#FF6600', '#003366'] }] } });
-        };
-
-        window.generarReportePDF = async () => {
-            const { jsPDF } = window.jspdf;
-            const docPdf = new jsPDF('p', 'mm', 'a4');
-            const canvas = await html2canvas(document.getElementById('reporte-contenedor'), { scale: 2 });
-            docPdf.setFillColor(0, 51, 102); docPdf.rect(0, 0, 210, 40, 'F');
-            docPdf.setTextColor(255, 255, 255); docPdf.setFontSize(22); docPdf.text("INFORME GTE 2026", 15, 20);
-            docPdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 50, 190, 0);
-            docPdf.save(`Reporte_GTE.pdf`);
-        };
+        window.renderStats = () => { const ctx1 = document.getElementById('chart-cobertura').getContext('2d'); const atendidos = REPOSITORIO_FULL.filter(e => e.seguimiento !== 'Sin Iniciar').length; const pendientes = REPOSITORIO_FULL.length - atendidos; Object.values(chartInstances).forEach(c => c.destroy()); chartInstances.cobertura = new Chart(ctx1, { type: 'doughnut', data: { labels: ['Atendidos', 'Pendientes'], datasets: [{ data: [atendidos, pendientes], backgroundColor: ['#FF6600', '#003366'] }] } }); };
+        window.generarReportePDF = async () => { const { jsPDF } = window.jspdf; const docPdf = new jsPDF('p', 'mm', 'a4'); const canvas = await html2canvas(document.getElementById('reporte-contenedor'), { scale: 2 }); docPdf.setFillColor(0, 51, 102); docPdf.rect(0, 0, 210, 40, 'F'); docPdf.setTextColor(255, 255, 255); docPdf.setFontSize(22); docPdf.text("INFORME GTE 2026", 15, 20); docPdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 50, 190, 0); docPdf.save(`Reporte_GTE.pdf`); };
     </script>
 </body>
 </html>
