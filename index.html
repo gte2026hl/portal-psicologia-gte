@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTE 2026 - Consola de Gestión Integral</title>
+    <title>Guacara Te Escucha 2026 - Consola de Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -12,6 +12,7 @@
         :root { 
             --gte-blue: #003366; 
             --gte-orange: #FF6600; 
+            --gte-gold: #D4AF37;
             --gte-bg: #f8fafc;
         }
 
@@ -90,25 +91,35 @@
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl p-12 border-t-[12px] border-gte-orange text-center animate-fade">
-            <h1 class="text-4xl font-black text-[#003366] mb-10 uppercase tracking-tighter">GTE 2026</h1>
-            <div class="space-y-6 text-left">
-                <div>
-                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">Identificación Municipal</label>
-                    <input type="text" id="user_id" class="form-input font-bold" placeholder="Ej: psic_001">
-                </div>
-                <div>
-                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">Clave de Acceso</label>
-                    <div class="relative">
-                        <input type="password" id="user_pass" class="form-input font-bold pr-12" placeholder="••••••••">
-                        <button type="button" onclick="togglePasswordVisibility('user_pass', this)" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-gte-orange transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        </button>
+        <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden animate-fade">
+            <!-- Header Naranja/Dorado Decorativo -->
+            <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
+            
+            <div class="p-12 text-center">
+                <h1 class="text-3xl font-black text-[#003366] mb-2 uppercase tracking-tighter">Guacara Te Escucha 2026</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal de Gestión Municipal</p>
+                
+                <div class="space-y-6 text-left">
+                    <div>
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Identificación</label>
+                        <input type="text" id="user_id" class="form-input font-bold" placeholder="Ej: Administrador o Psicólogo">
                     </div>
+                    <div>
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Clave de Acceso</label>
+                        <div class="relative">
+                            <input type="password" id="user_pass" class="form-input font-bold pr-12" placeholder="••••••••">
+                            <button type="button" onclick="togglePasswordVisibility('user_pass', this)" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-gte-orange transition">
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-5 uppercase text-xs tracking-widest shadow-lg">Entrar al Sistema</button>
                 </div>
-                <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-5 uppercase text-xs tracking-widest shadow-lg">Iniciar Sesión</button>
+                <p class="mt-8 text-[9px] text-slate-300 font-bold uppercase tracking-widest italic">HDC 2026 - Guacara Te Escucha</p>
             </div>
-            <p class="mt-8 text-[9px] text-slate-300 font-bold uppercase tracking-widest">HDC 1991 - Guacara Te Escucha</p>
         </div>
     </div>
 
@@ -292,7 +303,14 @@
 
         function togglePasswordVisibility(id, btn) {
             const input = document.getElementById(id);
-            input.type = input.type === "password" ? "text" : "password";
+            const icon = btn.querySelector('svg');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
+            } else {
+                input.type = "password";
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+            }
         }
 
         function accesoUniversal() {
@@ -316,7 +334,7 @@
                     initInterface();
                     showToast("Acceso Especialista Autorizado");
                 } else alert("❌ Contraseña Incorrecta");
-            } else alert("❌ Usuario no registrado en la base municipal");
+            } else alert("❌ Identificación no registrada");
         }
 
         function initInterface() {
@@ -374,7 +392,6 @@
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
                 
                 let start = 0;
-                // Escanear para encontrar la cabecera (ID o EXP)
                 for(let k=0; k<Math.min(rows.length, 15); k++) {
                     if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp") || String(cell).toLowerCase().includes("id"))) {
                         start = k + 1; break;
@@ -443,7 +460,6 @@
             }).join('');
         }
 
-        /* --- CLÍNICA --- */
         function verHistoria(id) {
             const exp = REPOSITORIO.find(e => e.id === id);
             activeExpId = id;
@@ -511,7 +527,6 @@
                 </div>`).join('');
         }
 
-        /* --- PERFIL --- */
         function actualizarDatosPersonales() {
             const nuevoNom = document.getElementById('perfil-nombre').value;
             if(!nuevoNom) return;
