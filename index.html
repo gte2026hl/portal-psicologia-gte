@@ -25,10 +25,8 @@
 
         h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
 
-        /* Estilos de Marca */
-        .bg-sidebar { background-color: var(--gte-blue); }
         .text-gte-blue { color: var(--gte-blue); }
-        .bg-gte-orange { background-color: var(--gte-orange); }
+        .bg-gte-blue { background-color: var(--gte-blue); }
         .text-gte-orange { color: var(--gte-orange); }
 
         .btn-gte-orange {
@@ -44,7 +42,6 @@
         }
         .btn-gte-blue:hover { background-color: var(--gte-orange); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(255, 102, 0, 0.3); }
 
-        /* Navegación */
         .nav-button {
             width: 100%; text-align: left; padding: 16px 24px; display: flex; align-items: center; gap: 14px;
             color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 700; transition: all 0.3s ease;
@@ -53,7 +50,6 @@
         .nav-button:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
         .nav-button.active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid var(--gte-orange); color: white; }
 
-        /* Tarjetas y Formularios */
         .content-card { background: white; border-radius: 24px; box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; }
 
         .form-input { 
@@ -67,7 +63,6 @@
         .kpi-card:hover::after { opacity: 1; }
         .kpi-card:hover { transform: translateY(-5px); border-color: var(--gte-orange); }
 
-        /* Toast & Animations */
         #gte-toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background-color: var(--gte-blue); color: white; padding: 14px 40px; border-radius: 50px;
@@ -78,7 +73,6 @@
         .animate-fade { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Modal Clinical History */
         .clinical-modal { 
             position: fixed; inset: 0; background: rgba(0, 51, 102, 0.9); 
             display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
@@ -92,7 +86,6 @@
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden animate-fade">
-            <!-- Header Naranja/Dorado Decorativo -->
             <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
             
             <div class="p-12 text-center">
@@ -169,9 +162,7 @@
                 </div>
             </div>
         </div>
-        <div id="nav-menu" class="flex-grow space-y-1 px-4 py-2">
-            <!-- Dinámico por rol -->
-        </div>
+        <div id="nav-menu" class="flex-grow space-y-1 px-4 py-2"></div>
         <div class="p-8">
             <button onclick="cerrarSesion()" class="w-full py-4 bg-red-500/10 hover:bg-red-500/20 rounded-2xl text-[10px] font-black text-red-400 uppercase transition border border-red-500/20">Cerrar Sesión</button>
         </div>
@@ -184,27 +175,26 @@
         <section id="tab-master-stats" class="tab-content hidden animate-fade">
             <header class="mb-10">
                 <h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight leading-none">Consola Master</h2>
-                <p class="text-slate-500 mt-2">Reporte Situacional de Salud Mental - Municipio Guacara.</p>
+                <p class="text-slate-500 mt-2">Reporte Situacional de Salud Mental 2026.</p>
             </header>
-            <div id="stats-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                <!-- Dinámico -->
-            </div>
+            <div id="stats-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"></div>
         </section>
 
-        <!-- TAB: EQUIPO ESPECIALISTA -->
+        <!-- TAB: GESTIÓN DE EQUIPO (MASTER) -->
         <section id="tab-equipo" class="tab-content hidden animate-fade">
             <header class="mb-10">
-                <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Equipo Especialista</h2>
-                <p class="text-slate-500 mt-2">Nómina de los especialistas registrados en el sistema.</p>
+                <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Gestión de Especialistas</h2>
+                <p class="text-slate-500 mt-2">Nómina y administración de perfiles psicológicos.</p>
             </header>
             <div class="content-card overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <th class="p-6">ID Usuario</th>
-                            <th class="p-6">Nombre Completo</th>
-                            <th class="p-6 text-center">Casos Atendidos</th>
-                            <th class="p-6 text-right">Estatus</th>
+                            <th class="p-6">Usuario ID</th>
+                            <th class="p-6">Nombre de Especialista</th>
+                            <th class="p-6 text-center">Casos</th>
+                            <th class="p-6 text-center">Estatus</th>
+                            <th class="p-6 text-right">Acciones de Reseteo</th>
                         </tr>
                     </thead>
                     <tbody id="equipo-list-body" class="divide-y divide-slate-100"></tbody>
@@ -212,36 +202,32 @@
             </div>
         </section>
 
-        <!-- TAB: REPOSITORIO (CENTRAL) -->
+        <!-- TAB: REPOSITORIO -->
         <section id="tab-expedientes" class="tab-content hidden animate-fade">
             <header class="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 <div>
-                    <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Repositorio GTE</h2>
-                    <p class="text-slate-500 mt-2">Gestión y distribución de expedientes municipales.</p>
+                    <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Repositorio GTE 2026</h2>
+                    <p class="text-slate-500 mt-2">Distribución maestra de expedientes municipales.</p>
                 </div>
                 <div id="master-actions" class="hidden flex flex-wrap items-center gap-4">
-                    <button onclick="document.getElementById('bulk-input').click()" class="bg-gte-blue px-8 py-4 rounded-xl text-[10px] uppercase shadow-lg hover:shadow-xl transition flex items-center gap-2">
-                        <span class="text-gte-orange font-black">📊</span> 
-                        <span class="text-white font-bold">Carga Masiva (Excel)</span>
+                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-8 py-4 rounded-xl text-[10px] uppercase shadow-lg hover:shadow-xl transition border-2 border-blue-600 flex items-center gap-2">
+                        <span class="text-blue-600 font-black">📊 CARGA MAESTRA</span>
                     </button>
-                    <button onclick="generarDatosEnsayo()" class="bg-gte-orange/10 px-4 py-4 rounded-xl text-[10px] font-black uppercase text-gte-orange border border-gte-orange/20">🧪 Datos Ensayo</button>
                     <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcel(event)">
-                    <button onclick="limpiarRepositorio()" class="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase">Borrar Todo</button>
+                    <button onclick="limpiarRepositorio()" class="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase">Vaciar Repositorio</button>
                 </div>
             </header>
 
-            <!-- Filtros -->
             <div class="mb-8 flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                 <div class="relative flex-grow w-full">
                     <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">🔍</span>
-                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-11 pr-4 py-3 rounded-xl text-sm font-semibold placeholder-slate-400 outline-none focus:ring-2 ring-gte-orange transition" placeholder="Búsqueda rápida por Expediente, Nombre o Institución...">
+                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-11 pr-4 py-3 rounded-xl text-sm font-semibold placeholder-slate-400 outline-none focus:ring-2 ring-gte-orange transition" placeholder="Filtrar por Expediente, Estudiante o Institución...">
                 </div>
                 <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-4">
-                    <span id="contador-resultados" class="text-gte-orange font-black text-xs">0</span> Resultados
+                    <span id="contador-resultados" class="text-gte-orange font-black text-xs">0</span> Registros
                 </div>
             </div>
 
-            <!-- Tabla -->
             <div class="content-card overflow-x-auto">
                 <table class="w-full text-left min-w-[900px]">
                     <thead class="bg-slate-50 border-b border-slate-100">
@@ -249,8 +235,8 @@
                             <th class="p-6">Expediente</th>
                             <th class="p-6">Estudiante</th>
                             <th class="p-6">Institución Educativa</th>
-                            <th class="p-6 text-center">Seguimiento / Estatus</th>
-                            <th class="p-6 text-right">Responsable / Acción</th>
+                            <th class="p-6 text-center">Estatus</th>
+                            <th class="p-6 text-right">Responsable</th>
                         </tr>
                     </thead>
                     <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
@@ -260,24 +246,24 @@
 
         <!-- TAB: PERFIL -->
         <section id="tab-perfil" class="tab-content hidden animate-fade">
-            <header class="mb-10"><h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Mi Perfil</h2></header>
+            <header class="mb-10"><h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Gestión de Perfil</h2></header>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div class="content-card p-10">
-                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">👤 Datos Personales</h3>
+                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">👤 Identidad del Especialista</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Nombre Completo</label>
-                            <input type="text" id="perfil-nombre" class="form-input font-bold" placeholder="Nombre completo">
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Nombre y Apellido</label>
+                            <input type="text" id="perfil-nombre" class="form-input font-bold" placeholder="Tu nombre profesional">
                         </div>
                         <button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full text-xs uppercase tracking-widest">Guardar Cambios</button>
                     </div>
                 </div>
                 <div class="content-card p-10">
-                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">🔒 Seguridad</h3>
+                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">🔒 Credenciales Privadas</h3>
                     <div class="space-y-4">
                         <input type="password" id="perfil-pass1" class="form-input font-bold" placeholder="Nueva Contraseña">
-                        <input type="password" id="perfil-pass2" class="form-input font-bold" placeholder="Confirmar Contraseña">
-                        <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-4 text-xs uppercase tracking-widest">Actualizar Contraseña</button>
+                        <input type="password" id="perfil-pass2" class="form-input font-bold" placeholder="Confirmar Nueva Contraseña">
+                        <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-4 text-xs uppercase tracking-widest">Actualizar Seguridad</button>
                     </div>
                 </div>
             </div>
@@ -318,23 +304,22 @@
             const p = document.getElementById('user_pass').value;
 
             if (u === DB_BASE.master.user && p === DB_BASE.master.pass) {
-                const stored = JSON.parse(localStorage.getItem(`perfil_${u}`));
-                session = { user: u, nombre: stored?.nombre || DB_BASE.master.nombre, rol: "MASTER" };
+                session = { user: u, nombre: DB_BASE.master.nombre, rol: "MASTER" };
                 initInterface();
                 showToast("Acceso Master Autorizado");
                 return;
             }
 
-            const pb = DB_BASE.especialistas.find(e => e.user === u);
-            if (pb) {
+            const especialista = DB_BASE.especialistas.find(e => e.user === u);
+            if (especialista) {
                 const stored = JSON.parse(localStorage.getItem(`perfil_${u}`));
-                const finalPass = stored?.pass || pb.pass;
+                const finalPass = stored?.pass || especialista.pass;
                 if (p === finalPass) {
-                    session = { user: u, nombre: stored?.nombre || pb.nombre, rol: "ESPECIALISTA" };
+                    session = { user: u, nombre: stored?.nombre || especialista.nombre, rol: "ESPECIALISTA" };
                     initInterface();
-                    showToast("Acceso Especialista Autorizado");
-                } else alert("❌ Contraseña Incorrecta");
-            } else alert("❌ Identificación no registrada");
+                    showToast(`Bienvenido(a), ${session.nombre}`);
+                } else alert("❌ Clave de Acceso Incorrecta");
+            } else alert("❌ Usuario no registrado en GTE 2026");
         }
 
         function initInterface() {
@@ -350,36 +335,21 @@
                 document.getElementById('master-actions').classList.remove('hidden');
                 menu.innerHTML = `
                     <button onclick="switchTab('tab-master-stats')" id="btn-stats" class="nav-button active">📊 Estadísticas Globales</button>
-                    <button onclick="switchTab('tab-equipo')" id="btn-equipo" class="nav-button">👥 Equipo Especialista</button>
+                    <button onclick="switchTab('tab-equipo')" id="btn-equipo" class="nav-button">👥 Gestión Especialistas</button>
                     <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button">📁 Repositorio Maestro</button>
-                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Mi Perfil</button>
+                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Perfil Master</button>
                 `;
                 actualizarVistaMaster();
                 switchTab('tab-master-stats');
             } else {
                 document.getElementById('master-actions').classList.add('hidden');
                 menu.innerHTML = `
-                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button active">📁 Repositorio Casos</button>
-                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Mi Perfil</button>
+                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button active">📁 Mis Casos / Repositorio</button>
+                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Mi Perfil GTE</button>
                 `;
                 switchTab('tab-expedientes');
             }
             renderExps();
-        }
-
-        function generarDatosEnsayo() {
-            const demo = [
-                { id: "GTE-26-001", student: "ANDRES PÉREZ", inst: "U.E. VICENTE WALLIS", ci: "V-32.441.552", edad: "11", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-002", student: "MARIA GOMEZ", inst: "U.E. DIEGO IBARRA", ci: "V-33.111.999", edad: "10", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-003", student: "JESUS HERNANDEZ", inst: "ESC. MUN. GARCIA DE SENA", ci: "V-30.888.777", edad: "12", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-004", student: "LUCIA RODRIGUEZ", inst: "U.E. LUIS AUGUSTO MACHADO", ci: "V-31.222.333", edad: "9", seguimiento: "Sin Iniciar", psico: null, evolucion: "" },
-                { id: "GTE-26-005", student: "CARLOS RIVAS", inst: "U.E. SIMÓN BOLIVAR", ci: "V-34.555.444", edad: "13", seguimiento: "Sin Iniciar", psico: null, evolucion: "" }
-            ];
-            REPOSITORIO = [...demo, ...REPOSITORIO.filter(x => !demo.find(d => d.id === x.id))];
-            localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-            renderExps();
-            if(session.rol === "MASTER") actualizarVistaMaster();
-            showToast("🧪 Datos de Ensayo generados.");
         }
 
         function handleExcel(e) {
@@ -390,14 +360,12 @@
                 const data = new Uint8Array(evt.target.result);
                 const wb = XLSX.read(data, { type: 'array' });
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                
                 let start = 0;
-                for(let k=0; k<Math.min(rows.length, 15); k++) {
+                for(let k=0; k<15; k++) {
                     if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp") || String(cell).toLowerCase().includes("id"))) {
                         start = k + 1; break;
                     }
                 }
-
                 const nuevos = [];
                 for (let i = start; i < rows.length; i++) {
                     const r = rows[i]; if (!r || !r[1]) continue;
@@ -409,6 +377,7 @@
                         edad: String(r[5] || "N/I").trim(), 
                         seguimiento: "Sin Iniciar", 
                         psico: null, 
+                        psicoId: null,
                         evolucion: ""
                     });
                 }
@@ -417,7 +386,7 @@
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
                 renderExps(); 
                 if (session.rol === "MASTER") actualizarVistaMaster();
-                showToast(`✅ ${nuevos.length} casos nuevos cargados.`);
+                showToast(`✅ ${nuevos.length} registros cargados satisfactoriamente.`);
             };
             reader.readAsArrayBuffer(file);
         }
@@ -433,7 +402,7 @@
             document.getElementById('contador-resultados').innerText = filtrados.length;
 
             body.innerHTML = filtrados.map(exp => {
-                const myCase = exp.psico === session.nombre;
+                const myCase = exp.psicoId === session.user;
                 return `
                 <tr class="hover:bg-slate-50 transition border-b border-slate-50 text-xs animate-fade">
                     <td class="p-6 font-black text-gte-orange">${exp.id}</td>
@@ -450,10 +419,10 @@
                         ` : `<span class="px-3 py-1 rounded-full text-[9px] font-black uppercase bg-slate-100 text-slate-600">${exp.seguimiento}</span>`}
                     </td>
                     <td class="p-6 text-right">
-                        ${(!exp.psico && session.rol === 'ESPECIALISTA') 
-                            ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] py-2 px-4 shadow-lg uppercase">Adoptar</button>` 
+                        ${(!exp.psicoId && session.rol === 'ESPECIALISTA') 
+                            ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] py-2 px-4 shadow-lg uppercase">Adoptar Caso</button>` 
                             : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-2 px-6 rounded-xl text-[9px] font-black uppercase shadow-md hover:bg-gte-orange transition">Ver Evolución</button>`
-                            : `<p class="text-[10px] font-black text-slate-400 uppercase italic">${exp.psico || 'Esperando'}</p>`)
+                            : `<p class="text-[10px] font-black text-slate-400 uppercase italic">${exp.psico || 'Sin Responsable'}</p>`)
                         }
                     </td>
                 </tr>`;
@@ -482,11 +451,12 @@
 
         function adoptar(id) {
             const exp = REPOSITORIO.find(e => e.id === id);
+            exp.psicoId = session.user;
             exp.psico = session.nombre;
             exp.seguimiento = "Primera Consulta";
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             renderExps();
-            showToast("Caso vinculado correctamente.");
+            showToast("Caso vinculado a su gestión profesional.");
         }
 
         function updateSeguimiento(id, val) {
@@ -502,23 +472,42 @@
             body.innerHTML = DB_BASE.especialistas.map(esp => {
                 const stored = JSON.parse(localStorage.getItem(`perfil_${esp.user}`));
                 const nombre = stored?.nombre || esp.nombre;
-                const casos = REPOSITORIO.filter(e => e.psico === nombre).length;
+                const casos = REPOSITORIO.filter(e => e.psicoId === esp.user).length;
+                const isCustom = stored ? true : false;
+                
                 return `
                 <tr class="border-b text-xs">
                     <td class="p-6 font-black text-gte-blue">${esp.user}</td>
                     <td class="p-6 font-bold text-slate-600">${nombre}</td>
                     <td class="p-6 text-center font-black text-gte-orange text-sm">${casos}</td>
-                    <td class="p-6 text-right"><span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[9px] font-black uppercase">Activo</span></td>
+                    <td class="p-6 text-center">
+                        <span class="px-3 py-1 ${isCustom ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'} rounded-full text-[9px] font-black uppercase">
+                            ${isCustom ? 'Activo' : 'Sin Configurar'}
+                        </span>
+                    </td>
+                    <td class="p-6 text-right">
+                        <button onclick="resetearEspecialista('${esp.user}')" class="text-[9px] font-black text-blue-600 hover:text-orange-600 uppercase transition">
+                            Resetear Acceso
+                        </button>
+                    </td>
                 </tr>`;
             }).join('');
         }
 
+        function resetearEspecialista(uid) {
+            if(confirm(`¿Desea resetear el perfil de ${uid}? El especialista podrá volver a entrar con la clave genérica "1234". Sus casos adoptados no se borrarán.`)) {
+                localStorage.removeItem(`perfil_${uid}`);
+                renderEquipo();
+                showToast(`Perfil de ${uid} reseteado.`);
+            }
+        }
+
         function actualizarVistaMaster() {
             const stats = [
-                { l: "Atendidos", v: REPOSITORIO.length, c: "gte-blue" },
-                { l: "Altas/Cierres", v: REPOSITORIO.filter(e => e.seguimiento === "Alta" || e.seguimiento === "Cierre").length, c: "green-600" },
+                { l: "Total Atendidos", v: REPOSITORIO.length, c: "gte-blue" },
+                { l: "Altas GTE", v: REPOSITORIO.filter(e => e.seguimiento === "Alta" || e.seguimiento === "Cierre").length, c: "green-600" },
                 { l: "Derivaciones", v: REPOSITORIO.filter(e => e.seguimiento === "Derivación").length, c: "gte-orange" },
-                { l: "Casos Activos", v: REPOSITORIO.filter(e => e.psico !== null).length, c: "blue-500" }
+                { l: "En Consulta", v: REPOSITORIO.filter(e => e.psicoId !== null).length, c: "blue-500" }
             ];
             document.getElementById('stats-grid').innerHTML = stats.map(s => `
                 <div class="kpi-card shadow-sm">
@@ -530,26 +519,26 @@
         function actualizarDatosPersonales() {
             const nuevoNom = document.getElementById('perfil-nombre').value;
             if(!nuevoNom) return;
-            const perfil = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || {};
+            const perfil = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { pass: "1234" };
             perfil.nombre = nuevoNom;
             localStorage.setItem(`perfil_${session.user}`, JSON.stringify(perfil));
             session.nombre = nuevoNom;
             document.getElementById('user-display-name').innerText = nuevoNom;
-            showToast("Perfil Actualizado");
+            showToast("Perfil Profesional Actualizado");
         }
 
         function actualizarPassword() {
             const p1 = document.getElementById('perfil-pass1').value;
             const p2 = document.getElementById('perfil-pass2').value;
             if(!p1 || p1 !== p2) { alert("Las contraseñas no coinciden."); return; }
-            const perfil = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || {};
+            const perfil = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { nombre: session.nombre };
             perfil.pass = p1;
             localStorage.setItem(`perfil_${session.user}`, JSON.stringify(perfil));
-            showToast("Contraseña Cambiada");
+            showToast("Clave de Acceso Actualizada");
         }
 
         function limpiarRepositorio() { 
-            if(confirm("¿Seguro que desea vaciar todo el repositorio maestro?")) { 
+            if(confirm("ATENCIÓN: ¿Seguro que desea vaciar el repositorio maestro? Esta acción no se puede deshacer.")) { 
                 REPOSITORIO = []; 
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); 
                 renderExps(); 
@@ -558,9 +547,7 @@
         }
 
         function handleBusqueda(val) { filtroBusqueda = val.toLowerCase().trim(); renderExps(); }
-        
         function cerrarSesion() { location.reload(); }
-        
         function showToast(m) { 
             const t = document.getElementById('gte-toast'); 
             t.innerText = m; 
@@ -572,15 +559,8 @@
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); 
             document.getElementById(id).classList.remove('hidden');
             document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            
-            let btnId = "";
-            if(id === 'tab-master-stats') btnId = 'btn-stats';
-            else if(id === 'tab-equipo') btnId = 'btn-equipo';
-            else if(id === 'tab-expedientes') btnId = 'btn-exp';
-            else if(id === 'tab-perfil') btnId = 'btn-perfil';
-            
+            let btnId = (id === 'tab-master-stats' ? 'btn-stats' : id === 'tab-equipo' ? 'btn-equipo' : id === 'tab-expedientes' ? 'btn-exp' : 'btn-perfil');
             if(document.getElementById(btnId)) document.getElementById(btnId).classList.add('active');
-            
             if(id === 'tab-equipo') renderEquipo();
             if(id === 'tab-master-stats') actualizarVistaMaster();
         }
