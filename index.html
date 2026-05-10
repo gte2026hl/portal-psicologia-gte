@@ -229,13 +229,15 @@
             </div>
 
             <div class="content-card overflow-x-auto">
-                <table class="w-full text-left min-w-[900px]">
+                <table class="w-full text-left min-w-[1000px]">
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                             <th class="p-6">Expediente</th>
-                            <th class="p-6">Estudiante</th>
+                            <th class="p-6">Estudiante / C.I.</th>
                             <th class="p-6">Institución Educativa</th>
-                            <th class="p-6 text-center">Estatus</th>
+                            <th class="p-6 text-center">Edad</th>
+                            <th class="p-6 text-center">Fase Actual</th>
+                            <th class="p-6 text-center">Estatus / Seguimiento</th>
                             <th class="p-6 text-right">Responsable</th>
                         </tr>
                     </thead>
@@ -281,6 +283,7 @@
         };
 
         const SEGUIMIENTO_OPCIONES = ["Sin Iniciar", "Primera Consulta", "Segunda Consulta", "Tercera Consulta", "Derivación", "Cierre", "Alta"];
+        const FASE_OPCIONES = ["Fase 1: Captación", "Fase 2: Evaluación", "Fase 3: Diagnóstico", "Fase 4: Intervención", "Fase 5: Seguimiento"];
 
         let REPOSITORIO = JSON.parse(localStorage.getItem('gte_repositorio')) || [];
         let session = null;
@@ -369,12 +372,14 @@
                 const nuevos = [];
                 for (let i = start; i < rows.length; i++) {
                     const r = rows[i]; if (!r || !r[1]) continue;
+                    // Mapeo corregido: r[1]: EXP, r[2]: Nombre, r[3]: Institución, r[4]: C.I, r[5]: Edad
                     nuevos.push({
                         id: String(r[1]).trim(), 
                         student: String(r[2] || "N/I").trim().toUpperCase(),
                         inst: String(r[3] || "N/I").trim().toUpperCase(), 
                         ci: String(r[4] || "N/I").trim(),
                         edad: String(r[5] || "N/I").trim(), 
+                        fase: "Fase 1: Captación",
                         seguimiento: "Sin Iniciar", 
                         psico: null, 
                         psicoId: null,
@@ -408,9 +413,17 @@
                     <td class="p-6 font-black text-gte-orange">${exp.id}</td>
                     <td class="p-6">
                         <p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p>
-                        <p class="text-[9px] text-slate-400 mt-1 uppercase font-bold">C.I: ${exp.ci} | EDAD: ${exp.edad}</p>
+                        <p class="text-[9px] text-slate-400 mt-1 uppercase font-bold">C.I: ${exp.ci}</p>
                     </td>
                     <td class="p-6 font-bold text-slate-500 uppercase leading-snug">${exp.inst}</td>
+                    <td class="p-6 text-center font-black text-slate-600">${exp.edad}</td>
+                    <td class="p-6 text-center">
+                        ${myCase ? `
+                            <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-2 border border-slate-200 rounded-lg font-black text-gte-orange outline-none bg-white cursor-pointer">
+                                ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                            </select>
+                        ` : `<span class="px-2 py-1 rounded-md text-[8px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-100">${exp.fase || "Captación"}</span>`}
+                    </td>
                     <td class="p-6 text-center">
                         ${myCase ? `
                             <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[10px] p-2 border border-slate-200 rounded-lg font-black text-gte-blue outline-none bg-white cursor-pointer">
@@ -465,6 +478,13 @@
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             if(session.rol === "MASTER") actualizarVistaMaster();
             showToast(`Estatus actualizado: ${val}`);
+        }
+
+        function updateFase(id, val) {
+            const exp = REPOSITORIO.find(e => e.id === id);
+            exp.fase = val;
+            localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
+            showToast(`Fase actualizada: ${val}`);
         }
 
         function renderEquipo() {
