@@ -13,7 +13,7 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, getDocs, collection, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = JSON.parse(__firebase_config);
@@ -28,6 +28,17 @@
         window.collectionPath = `artifacts/${appId}/public/data/expedientes`;
         window.userCollectionPath = `artifacts/${appId}/public/data/usuarios`;
 
+        // Protocolo de Autenticación de Élite con Promesa de Estado
+        window.authReady = new Promise((resolve) => {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    window.currentUser = user;
+                    resolve(user);
+                    unsubscribe();
+                }
+            });
+        });
+
         const initAuth = async () => {
           if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
             await signInWithCustomToken(auth, __initial_auth_token);
@@ -40,148 +51,28 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap');
-        
-        :root { 
-            --gte-blue: #003366; 
-            --gte-orange: #FF6600; 
-            --gte-bg: #003366;
-        }
-        
-        body { 
-            font-family: 'Open Sans', sans-serif; 
-            background-color: #f1f5f9; 
-            margin: 0; 
-        }
-
+        :root { --gte-blue: #003366; --gte-orange: #FF6600; --gte-bg: #003366; }
+        body { font-family: 'Open Sans', sans-serif; background-color: #f1f5f9; margin: 0; }
         .bg-gte-main { background-color: var(--gte-bg); }
         .text-gte-blue { color: var(--gte-blue); }
         .text-gte-orange { color: var(--gte-orange); }
         .bg-gte-orange { background-color: var(--gte-orange); }
         .bg-gte-blue { background-color: var(--gte-blue); }
-
-        .btn-gte-main {
-            background-color: var(--gte-blue);
-            color: white;
-            font-weight: 800;
-            padding: 16px 24px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .btn-gte-main:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 51, 102, 0.2);
-        }
-
-        .btn-gte-orange-action {
-            background-color: var(--gte-orange);
-            color: white;
-            font-weight: 800;
-            padding: 12px 24px;
-            border-radius: 12px;
-            transition: 0.3s;
-        }
-
-        .login-card {
-            background: white;
-            width: 100%;
-            max-width: 450px;
-            border-radius: 45px;
-            padding: 60px 45px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            position: relative;
-            overflow: hidden;
-            border-top: 15px solid var(--gte-orange);
-        }
-
-        .form-label {
-            font-size: 10px;
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .form-input-gte {
-            width: 100%;
-            background-color: #f8fafc;
-            border: 1px solid #f1f5f9;
-            border-radius: 12px;
-            padding: 14px 18px;
-            font-weight: 600;
-            color: var(--gte-blue);
-            outline: none;
-            transition: 0.2s;
-        }
-        .form-input-gte:focus {
-            border-color: var(--gte-orange);
-            background-color: white;
-        }
-
-        .pass-toggle {
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            cursor: pointer;
-            transition: 0.2s;
-            background: none;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-button {
-            width: 100%;
-            text-align: left;
-            padding: 16px 24px;
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 700;
-            font-size: 13px;
-            border-left: 4px solid transparent;
-            transition: 0.3s;
-        }
-        .nav-button.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid var(--gte-orange);
-            color: white;
-        }
-
-        .clinical-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 51, 102, 0.95);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-        .clinical-box {
-            background: white;
-            width: 100%;
-            max-width: 850px;
-            border-radius: 35px;
-            overflow: hidden;
-            animation: slideUp 0.3s ease-out;
-        }
+        .btn-gte-main { background-color: var(--gte-blue); color: white; font-weight: 800; padding: 16px 24px; border-radius: 12px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-gte-main:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0, 51, 102, 0.2); }
+        .btn-gte-orange-action { background-color: var(--gte-orange); color: white; font-weight: 800; padding: 12px 24px; border-radius: 12px; transition: 0.3s; }
+        .login-card { background: white; width: 100%; max-width: 450px; border-radius: 45px; padding: 60px 45px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; overflow: hidden; border-top: 15px solid var(--gte-orange); }
+        .form-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .form-input-gte { width: 100%; background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 14px 18px; font-weight: 600; color: var(--gte-blue); outline: none; transition: 0.2s; }
+        .pass-toggle { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; background: none; border: none; display: flex; align-items: center; justify-content: center; }
+        .nav-button { width: 100%; text-align: left; padding: 16px 24px; color: rgba(255, 255, 255, 0.6); font-weight: 700; font-size: 13px; border-left: 4px solid transparent; transition: 0.3s; }
+        .nav-button.active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid var(--gte-orange); color: white; }
+        .clinical-modal { position: fixed; inset: 0; background: rgba(0, 51, 102, 0.95); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .clinical-box { background: white; width: 100%; max-width: 850px; border-radius: 35px; overflow: hidden; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         .animate-fade { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .stats-card {
-            background: white;
-            border-radius: 24px;
-            padding: 30px;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+        .stats-card { background: white; border-radius: 24px; padding: 30px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -214,35 +105,21 @@
         </div>
     </div>
 
-    <!-- MODAL HISTORIA CLÍNICA (INMUTABLE) -->
+    <!-- MODAL HISTORIA CLÍNICA -->
     <div id="modal-historia" class="clinical-modal">
         <div class="clinical-box flex flex-col max-h-[90vh]">
             <div class="bg-gte-blue p-8 text-white flex justify-between items-center">
-                <div>
-                    <h2 class="text-2xl font-black uppercase tracking-tight">Expediente Clínico</h2>
-                    <p id="modal-paciente-id" class="text-gte-orange font-bold text-[10px] mt-1 tracking-widest uppercase">---</p>
-                </div>
+                <div><h2 class="text-2xl font-black uppercase tracking-tight">Expediente Clínico</h2><p id="modal-paciente-id" class="text-gte-orange font-bold text-[10px] mt-1 tracking-widest uppercase">---</p></div>
                 <button onclick="cerrarHistoria()" class="bg-white/10 px-4 py-2 rounded-xl text-white font-bold hover:bg-white/20 transition">CERRAR</button>
             </div>
             <div class="p-10 overflow-y-auto flex-grow space-y-6 bg-white">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nombre del Paciente</p>
-                        <p id="modal-nombre" class="font-bold text-gte-blue uppercase text-sm">---</p>
-                    </div>
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución Educativa</p>
-                        <p id="modal-inst" class="font-bold text-gte-blue uppercase text-sm">---</p>
-                    </div>
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nombre del Paciente</p><p id="modal-nombre" class="font-bold text-gte-blue uppercase text-sm">---</p></div>
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución Educativa</p><p id="modal-inst" class="font-bold text-gte-blue uppercase text-sm">---</p></div>
                 </div>
-                <div>
-                    <label class="text-[10px] font-black text-gte-blue uppercase tracking-widest mb-3 block">Notas de Evolución y Seguimiento</label>
-                    <textarea id="modal-evolucion" class="form-input-gte h-64 resize-none leading-relaxed p-6" placeholder="Registre los hallazgos y avances de la sesión..."></textarea>
-                </div>
+                <div><label class="text-[10px] font-black text-gte-blue uppercase tracking-widest mb-3 block">Notas de Evolución y Seguimiento</label><textarea id="modal-evolucion" class="form-input-gte h-64 resize-none leading-relaxed p-6" placeholder="Registre los hallazgos y avances de la sesión..."></textarea></div>
             </div>
-            <div class="p-8 border-t bg-slate-50 flex gap-4">
-                <button onclick="guardarEvolucionCloud()" class="flex-grow btn-gte-orange-action py-5 shadow-lg uppercase text-xs tracking-widest">Sincronizar en la Nube</button>
-            </div>
+            <div class="p-8 border-t bg-slate-50 flex gap-4"><button onclick="guardarEvolucionCloud()" class="flex-grow btn-gte-orange-action py-5 shadow-lg uppercase text-xs tracking-widest">Sincronizar en la Nube</button></div>
         </div>
     </div>
 
@@ -252,79 +129,43 @@
             <h2 class="text-2xl font-black uppercase leading-tight tracking-tighter">GUACARA<br><span class="text-gte-orange">TE ESCUCHA</span></h2>
             <div class="mt-8 flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 cursor-pointer hover:bg-white/10 transition" onclick="switchTab('tab-perfil')">
                 <div class="w-12 h-12 bg-gte-orange rounded-xl flex items-center justify-center font-black text-white shadow-lg">👤</div>
-                <div>
-                    <p id="user-display-name" class="text-xs font-black leading-none uppercase">---</p>
-                    <p id="user-role-label" class="text-[9px] text-white/40 uppercase font-bold mt-1 tracking-widest">---</p>
-                </div>
+                <div><p id="user-display-name" class="text-xs font-black leading-none uppercase">---</p><p id="user-role-label" class="text-[9px] text-white/40 uppercase font-bold mt-1 tracking-widest">---</p></div>
             </div>
         </div>
         <div id="nav-menu" class="flex-grow space-y-1 px-4"></div>
-        <div class="p-8">
-            <button onclick="location.reload()" class="w-full py-4 bg-red-500/10 text-red-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition">Cerrar Sesión</button>
-        </div>
+        <div class="p-8"><button onclick="location.reload()" class="w-full py-4 bg-red-500/10 text-red-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition">Cerrar Sesión</button></div>
     </nav>
 
     <!-- MAIN CONTENT -->
     <main id="main-content" class="hidden flex-grow p-8 md:p-16 overflow-y-auto">
         <section id="tab-expedientes" class="tab-content animate-fade">
             <header class="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-                <div>
-                    <h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight leading-none">Repositorio GTE</h2>
-                    <p class="text-slate-500 mt-3 font-semibold">Gestión Masiva de Salud Mental Municipal.</p>
-                </div>
+                <div><h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight leading-none">Repositorio GTE</h2><p class="text-slate-500 mt-3 font-semibold">Gestión Masiva de Salud Mental Municipal.</p></div>
                 <div id="master-actions" class="hidden flex flex-wrap items-center gap-4">
-                    <button onclick="document.getElementById('bulk-input').click()" id="btn-excel-bulk" class="bg-gte-blue px-10 py-5 rounded-2xl shadow-xl text-white transition hover:scale-105 active:scale-95">
-                        <span class="text-gte-orange font-black text-[10px] uppercase tracking-widest">📊 Carga Masiva (Excel)</span>
-                    </button>
+                    <button onclick="document.getElementById('bulk-input').click()" id="btn-excel-bulk" class="bg-gte-blue px-10 py-5 rounded-2xl shadow-xl text-white transition hover:scale-105 active:scale-95"><span class="text-gte-orange font-black text-[10px] uppercase tracking-widest">📊 Carga Masiva (Excel)</span></button>
                     <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcelCloud(event)">
                 </div>
             </header>
-            
             <div class="mb-10 flex flex-col md:flex-row gap-4 items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <div class="relative flex-grow w-full">
-                    <span class="absolute inset-y-0 left-0 pl-5 flex items-center text-slate-300">🔍</span>
-                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-gte-blue placeholder-slate-300 outline-none focus:ring-2 ring-gte-orange transition" placeholder="Filtrar por expediente, nombre o institución...">
-                </div>
-                <div class="px-6 py-4 bg-gte-blue/5 rounded-2xl border border-gte-blue/5">
-                    <p class="text-[10px] font-black text-gte-blue uppercase tracking-widest whitespace-nowrap"><span id="contador-resultados" class="text-gte-orange">0</span> Registros</p>
-                </div>
+                <div class="relative flex-grow w-full"><span class="absolute inset-y-0 left-0 pl-5 flex items-center text-slate-300">🔍</span><input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-gte-blue placeholder-slate-300 outline-none focus:ring-2 ring-gte-orange transition" placeholder="Filtrar por expediente, nombre o institución..."></div>
+                <div class="px-6 py-4 bg-gte-blue/5 rounded-2xl border border-gte-blue/5"><p class="text-[10px] font-black text-gte-blue uppercase tracking-widest whitespace-nowrap"><span id="contador-resultados" class="text-gte-orange">0</span> Registros</p></div>
             </div>
-
             <div class="bg-white rounded-[35px] shadow-sm border border-slate-100 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left min-w-[900px]">
-                        <thead class="bg-slate-50 border-b border-slate-100">
-                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                <th class="p-8">Expediente</th>
-                                <th class="p-8">Estudiante / ID</th>
-                                <th class="p-8">Institución</th>
-                                <th class="p-8 text-center">Seguimiento</th>
-                                <th class="p-8 text-right">Acción Clínica</th>
-                            </tr>
-                        </thead>
-                        <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
+                <div class="overflow-x-auto"><table class="w-full text-left min-w-[900px]">
+                    <thead class="bg-slate-50 border-b border-slate-100"><tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest"><th class="p-8">Expediente</th><th class="p-8">Estudiante / ID</th><th class="p-8">Institución</th><th class="p-8 text-center">Seguimiento</th><th class="p-8 text-right">Acción Clínica</th></tr></thead>
+                    <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
+                </table></div>
             </div>
             <div class="mt-10 flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Página <span id="pag-actual" class="text-gte-orange">1</span> de Gestión</p>
-                <div class="flex gap-4">
-                    <button onclick="cambiarPagina(-1)" class="px-8 py-3 bg-gte-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gte-orange transition">Anterior</button>
-                    <button onclick="cambiarPagina(1)" class="px-8 py-3 bg-gte-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gte-orange transition">Siguiente</button>
-                </div>
+                <div class="flex gap-4"><button onclick="cambiarPagina(-1)" class="px-8 py-3 bg-gte-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gte-orange transition">Anterior</button><button onclick="cambiarPagina(1)" class="px-8 py-3 bg-gte-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gte-orange transition">Siguiente</button></div>
             </div>
         </section>
 
-        <!-- TABS ADICIONALES (PERFIL Y ESTADÍSTICAS) -->
         <section id="tab-estadisticas" class="tab-content hidden animate-fade">
              <header class="mb-12 flex justify-between items-end">
-                <div>
-                    <h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight">Estadísticas GTE</h2>
-                    <p class="text-slate-500 mt-3 font-semibold">Análisis objetivo de impacto en Salud Mental.</p>
-                </div>
-                <button onclick="generarReportePDF()" class="btn-gte-orange-action flex items-center gap-3">
-                    <span class="text-xs uppercase tracking-widest">Generar Reporte PDF</span>
-                </button>
+                <div><h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight">Estadísticas GTE</h2><p class="text-slate-500 mt-3 font-semibold">Análisis objetivo de impacto en Salud Mental.</p></div>
+                <button onclick="generarReportePDF()" class="btn-gte-orange-action flex items-center gap-3"><span class="text-xs uppercase tracking-widest">Generar Reporte PDF</span></button>
             </header>
             <div id="reporte-contenedor" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="stats-card"><h3 class="text-xs font-black text-gte-blue uppercase tracking-widest mb-6 border-b pb-4">Cobertura de Atención Municipal</h3><canvas id="chart-cobertura"></canvas></div>
@@ -365,6 +206,7 @@
         };
 
         let REPOSITORIO_FULL = [];
+        let USUARIOS_NUBE = [];
         let pagina = 0;
         const tamPagina = 15;
         let filtroBusqueda = "";
@@ -372,36 +214,56 @@
         let activeExpId = null;
         let chartInstances = {};
 
-        // INICIO SESIÓN
+        // INICIO SESIÓN RESILIENTE (FIX DE BLOQUEO)
         window.iniciarSesionCloud = async () => {
-            const u = document.getElementById('user_id').value.trim().toLowerCase();
-            const p = document.getElementById('user_pass').value;
+            const uInput = document.getElementById('user_id').value.trim().toLowerCase();
+            const pInput = document.getElementById('user_pass').value;
             const loading = document.getElementById('login-loading');
+            
+            if(!uInput || !pInput) { alert("Complete los campos."); return; }
+            
             loading.classList.remove('hidden');
 
             try {
-                const uSnap = await getDocs(collection(window.db, window.userCollectionPath));
-                const usuariosNube = uSnap.docs.map(d => d.data());
+                // Paso 1: Asegurar que Auth está listo
+                await window.authReady;
 
-                let targetUser = usuariosNube.find(usr => usr.user === u);
+                // Paso 2: Intentar fetch de usuarios nube (con timeout implícito por Firebase)
+                let cloudUsers = [];
+                try {
+                    const uSnap = await getDocs(collection(window.db, window.userCollectionPath));
+                    cloudUsers = uSnap.docs.map(d => d.data());
+                } catch (e) { console.warn("Modo Fallback local activado."); }
+
+                // Paso 3: Lógica de Identificación (Nube -> Estático)
+                let targetUser = cloudUsers.find(usr => usr.user === uInput);
+                
                 if (!targetUser) {
-                    if (u === DB_BASE.master.user) targetUser = { ...DB_BASE.master, rol: "MASTER" };
+                    if (uInput === DB_BASE.master.user) targetUser = { ...DB_BASE.master, rol: "MASTER" };
                     else {
-                        const staticPsic = DB_BASE.especialistas.find(e => e.user === u);
+                        const staticPsic = DB_BASE.especialistas.find(e => e.user === uInput);
                         if (staticPsic) targetUser = { ...staticPsic, rol: "ESPECIALISTA" };
                     }
                 }
 
-                if (!targetUser) alert("❌ El usuario no está bien escrito o no existe.");
-                else if (targetUser.pass !== p) alert("❌ Contraseña no válida.");
-                else {
+                // Paso 4: Validación Final de Credenciales
+                if (!targetUser) {
+                    alert("❌ El usuario no está bien escrito o no existe.");
+                } else if (targetUser.pass !== pInput) {
+                    alert("❌ Contraseña no válida.");
+                } else {
+                    // ÉXITO DE ACCESO
                     session = targetUser;
                     initInterface();
                     cargarDatosDesdeNube();
-                    if(session.rol === "MASTER") initUserAdmin(usuariosNube);
+                    if(session.rol === "MASTER") initUserAdmin(cloudUsers);
                 }
-            } catch (err) { alert("Error: " + err.message); }
-            finally { loading.classList.add('hidden'); }
+            } catch (err) {
+                console.error(err);
+                alert("Error crítico de acceso. Verifique su conexión.");
+            } finally {
+                loading.classList.add('hidden');
+            }
         };
 
         function initInterface() {
@@ -429,26 +291,18 @@
             }
         }
 
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            if(tabId === 'tab-estadisticas') renderStats();
-            const map = {'tab-expedientes':'nav-exp', 'tab-estadisticas':'nav-stat', 'tab-perfil':'nav-perf'};
-            if(map[tabId]) document.getElementById(map[tabId]).classList.add('active');
-        };
-
         async function cargarDatosDesdeNube() {
-            const querySnapshot = await getDocs(collection(window.db, window.collectionPath));
-            REPOSITORIO_FULL = querySnapshot.docs.map(doc => doc.data());
-            renderExps();
+            try {
+                const querySnapshot = await getDocs(collection(window.db, window.collectionPath));
+                REPOSITORIO_FULL = querySnapshot.docs.map(doc => doc.data());
+                renderExps();
+            } catch (error) { console.error("Error al cargar expedientes:", error); }
         }
 
-        // --- MOTOR DE EXCEL ROBUSTO (INTERVENCIÓN QUIRÚRGICA) ---
+        // MOTOR EXCEL (ROBUSTO)
         window.handleExcelCloud = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             const btn = document.getElementById('btn-excel-bulk');
             const originalText = btn.innerHTML;
             btn.innerHTML = `<span class="animate-pulse">⏳ ASUMIENDO DATOS...</span>`;
@@ -461,9 +315,6 @@
                     const wb = XLSX.read(data, { type: 'array' });
                     const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
                     
-                    if (rows.length < 2) throw new Error("El archivo parece estar vacío.");
-
-                    // Buscador inteligente de columnas
                     let colIdx = { id: -1, student: -1, inst: -1, ci: -1, edad: -1 };
                     let startRow = -1;
 
@@ -474,136 +325,73 @@
                             const val = String(cell || "").toLowerCase();
                             if (val.includes("exp") || val.includes("id")) colIdx.id = idx;
                             if (val.includes("estu") || val.includes("nombr")) colIdx.student = idx;
-                            if (val.includes("inst") || val.includes("plantel") || val.includes("colegio")) colIdx.inst = idx;
+                            if (val.includes("inst") || val.includes("plantel")) colIdx.inst = idx;
                             if (val.includes("ced") || val.includes("ci")) colIdx.ci = idx;
                             if (val.includes("edad")) colIdx.edad = idx;
                         });
                         if (colIdx.id !== -1) { startRow = i + 1; break; }
                     }
 
-                    if (startRow === -1 || colIdx.id === -1) {
-                        throw new Error("No se detectó la columna 'Expediente' o 'ID' en las primeras 10 filas.");
-                    }
+                    if (startRow === -1) throw new Error("Formato Excel no reconocido.");
 
                     let count = 0;
                     for (let i = startRow; i < rows.length; i++) {
                         const r = rows[i];
                         if (!r || !r[colIdx.id]) continue;
-
-                        try {
-                            const expId = String(r[colIdx.id]).trim();
-                            const docData = {
-                                id: expId,
-                                student: colIdx.student !== -1 ? String(r[colIdx.student] || "N/I").trim() : "N/I",
-                                inst: colIdx.inst !== -1 ? String(r[colIdx.inst] || "N/I").trim().toUpperCase() : "N/I",
-                                ci: colIdx.ci !== -1 ? String(r[colIdx.ci] || "N/I").trim() : "N/I",
-                                edad: colIdx.edad !== -1 ? String(r[colIdx.edad] || "N/I").trim() : "N/I",
-                                seguimiento: "Sin Iniciar",
-                                psico: null,
-                                evolucion: ""
-                            };
-                            await setDoc(doc(window.db, window.collectionPath, expId), docData);
-                            count++;
-                        } catch (err) { console.error(`Fila ${i} fallida:`, err); }
+                        const expId = String(r[colIdx.id]).trim();
+                        await setDoc(doc(window.db, window.collectionPath, expId), {
+                            id: expId,
+                            student: colIdx.student !== -1 ? String(r[colIdx.student] || "N/I").trim() : "N/I",
+                            inst: colIdx.inst !== -1 ? String(r[colIdx.inst] || "N/I").trim().toUpperCase() : "N/I",
+                            ci: colIdx.ci !== -1 ? String(r[colIdx.ci] || "N/I").trim() : "N/I",
+                            edad: colIdx.edad !== -1 ? String(r[colIdx.edad] || "N/I").trim() : "N/I",
+                            seguimiento: "Sin Iniciar", psico: null, evolucion: ""
+                        });
+                        count++;
                     }
-
-                    alert(`✅ Éxito: Se han asumido ${count} registros correctamente en la nube.`);
+                    alert(`✅ Procesados ${count} registros.`);
                     cargarDatosDesdeNube();
-                } catch (err) {
-                    alert("❌ Error Crítico: " + err.message);
-                } finally {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    e.target.value = ""; // Reset input
-                }
+                } catch (err) { alert("Error Excel: " + err.message); }
+                finally { btn.innerHTML = originalText; btn.disabled = false; }
             };
             reader.readAsArrayBuffer(file);
         };
 
-        // --- FUNCIONES DE SOPORTE ---
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            if(tabId === 'tab-estadisticas') renderStats();
+            const map = {'tab-expedientes':'nav-exp', 'tab-estadisticas':'nav-stat', 'tab-perfil':'nav-perf'};
+            if(map[tabId]) document.getElementById(map[tabId]).classList.add('active');
+        };
+
         window.renderExps = () => {
             const body = document.getElementById('exp-list');
-            const filtrados = REPOSITORIO_FULL.filter(exp => 
-                exp.id.toLowerCase().includes(filtroBusqueda) || 
-                exp.student.toLowerCase().includes(filtroBusqueda) || 
-                exp.inst.toLowerCase().includes(filtroBusqueda)
-            );
+            const filtrados = REPOSITORIO_FULL.filter(exp => exp.id.toLowerCase().includes(filtroBusqueda) || exp.student.toLowerCase().includes(filtroBusqueda) || exp.inst.toLowerCase().includes(filtroBusqueda));
             document.getElementById('contador-resultados').innerText = filtrados.length;
             document.getElementById('pag-actual').innerText = pagina + 1;
             const slice = filtrados.slice(pagina * tamPagina, (pagina + 1) * tamPagina);
             body.innerHTML = slice.map(exp => {
                 const myCase = exp.psico === session.nombre;
-                return `
-                <tr class="hover:bg-slate-50 transition border-b border-slate-100 text-xs animate-fade">
+                return `<tr class="hover:bg-slate-50 transition border-b border-slate-100 text-xs animate-fade">
                     <td class="p-8"><span class="bg-gte-blue/5 text-gte-blue px-4 py-2 rounded-lg font-black">${exp.id}</span></td>
                     <td class="p-8"><p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p><p class="text-[9px] text-slate-400 font-bold mt-1 uppercase">CI: ${exp.ci}</p></td>
                     <td class="p-8 font-bold text-slate-500 uppercase leading-snug">${exp.inst}</td>
                     <td class="p-8 text-center"><span class="px-4 py-2 rounded-full text-[9px] font-black uppercase ${exp.seguimiento === 'Sin Iniciar' ? 'bg-slate-100 text-slate-500' : 'bg-green-100 text-green-700'}">${exp.seguimiento}</span></td>
-                    <td class="p-8 text-right">
-                        ${(!exp.psico && session.rol === 'ESPECIALISTA') ? `<button onclick="window.adoptar('${exp.id}')" class="btn-gte-orange-action !py-3 !px-6 text-[9px] uppercase tracking-widest shadow-md">Adoptar</button>` : 
-                        myCase ? `<button onclick="window.verHistoria('${exp.id}')" class="btn-gte-main !py-3 !px-6 text-[9px] shadow-lg">Ver Evolución</button>` : 
-                        `<p class="text-[10px] font-black text-slate-300 italic uppercase">${exp.psico || 'Esperando'}</p>`}
-                    </td>
+                    <td class="p-8 text-right">${(!exp.psico && session.rol === 'ESPECIALISTA') ? `<button onclick="window.adoptar('${exp.id}')" class="btn-gte-orange-action !py-3 !px-6 text-[9px]">Adoptar</button>` : myCase ? `<button onclick="window.verHistoria('${exp.id}')" class="btn-gte-main !py-3 !px-6 text-[9px]">Ver Evolución</button>` : `<p class="text-[10px] font-black text-slate-300 italic uppercase">${exp.psico || 'Esperando'}</p>`}</td>
                 </tr>`;
             }).join('');
         };
 
-        window.adoptar = async (id) => {
-            const ref = doc(window.db, window.collectionPath, id);
-            await updateDoc(ref, { psico: session.nombre, seguimiento: "En Atención" });
-            cargarDatosDesdeNube();
-        };
-
-        window.verHistoria = (id) => {
-            const exp = REPOSITORIO_FULL.find(e => e.id === id);
-            activeExpId = id;
-            document.getElementById('modal-paciente-id').innerText = `EXPEDIENTE N° ${id}`;
-            document.getElementById('modal-nombre').innerText = exp.student;
-            document.getElementById('modal-inst').innerText = exp.inst;
-            document.getElementById('modal-evolucion').value = exp.evolucion || "";
-            document.getElementById('modal-historia').style.display = 'flex';
-        };
-
-        window.guardarEvolucionCloud = async () => {
-            const ref = doc(window.db, window.collectionPath, activeExpId);
-            await updateDoc(ref, { evolucion: document.getElementById('modal-evolucion').value });
-            document.getElementById('modal-historia').style.display = 'none';
-            cargarDatosDesdeNube();
-        };
-
-        window.generarReportePDF = async () => {
-            const { jsPDF } = window.jspdf;
-            const docPdf = new jsPDF('p', 'mm', 'a4');
-            const canvas = await html2canvas(document.getElementById('reporte-contenedor'), { scale: 2 });
-            docPdf.setFillColor(0, 51, 102); docPdf.rect(0, 0, 210, 40, 'F');
-            docPdf.setTextColor(255, 255, 255); docPdf.setFontSize(22); docPdf.text("INFORME DE IMPACTO GTE 2026", 15, 20);
-            docPdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 50, 190, 0);
-            docPdf.save(`Reporte_GTE_${Date.now()}.pdf`);
-        };
-
-        window.renderStats = () => {
-            const ctx1 = document.getElementById('chart-cobertura').getContext('2d');
-            const ctx2 = document.getElementById('chart-instituciones').getContext('2d');
-            const ctx3 = document.getElementById('chart-especialistas').getContext('2d');
-            const atendidos = REPOSITORIO_FULL.filter(e => e.seguimiento !== 'Sin Iniciar').length;
-            const pendientes = REPOSITORIO_FULL.length - atendidos;
-            Object.values(chartInstances).forEach(c => c.destroy());
-            chartInstances.cobertura = new Chart(ctx1, { type: 'doughnut', data: { labels: ['Atendidos', 'Pendientes'], datasets: [{ data: [atendidos, pendientes], backgroundColor: ['#FF6600', '#003366'] }] } });
-            const instMap = {}; REPOSITORIO_FULL.forEach(e => instMap[e.inst] = (instMap[e.inst] || 0) + 1);
-            const labels = Object.keys(instMap).slice(0, 5);
-            chartInstances.inst = new Chart(ctx2, { type: 'bar', data: { labels, datasets: [{ label: 'Casos', data: labels.map(l => instMap[l]), backgroundColor: '#003366' }] } });
-        };
-
+        window.adoptar = async (id) => { await updateDoc(doc(window.db, window.collectionPath, id), { psico: session.nombre, seguimiento: "En Atención" }); cargarDatosDesdeNube(); };
+        window.verHistoria = (id) => { const exp = REPOSITORIO_FULL.find(e => e.id === id); activeExpId = id; document.getElementById('modal-paciente-id').innerText = `EXPEDIENTE N° ${id}`; document.getElementById('modal-nombre').innerText = exp.student; document.getElementById('modal-inst').innerText = exp.inst; document.getElementById('modal-evolucion').value = exp.evolucion || ""; document.getElementById('modal-historia').style.display = 'flex'; };
+        window.guardarEvolucionCloud = async () => { await updateDoc(doc(window.db, window.collectionPath, activeExpId), { evolucion: document.getElementById('modal-evolucion').value }); document.getElementById('modal-historia').style.display = 'none'; cargarDatosDesdeNube(); };
         window.handleBusqueda = (v) => { filtroBusqueda = v.toLowerCase(); pagina = 0; renderExps(); };
         window.cambiarPagina = (dir) => { pagina = Math.max(0, pagina + dir); renderExps(); };
-        window.togglePasswordVisibility = () => {
-            const passInput = document.getElementById('user_pass');
-            const openEye = document.getElementById('eye-open');
-            const closedEye = document.getElementById('eye-closed');
-            if (passInput.type === 'password') { passInput.type = 'text'; openEye.classList.add('hidden'); closedEye.classList.remove('hidden'); }
-            else { passInput.type = 'password'; openEye.classList.remove('hidden'); closedEye.classList.add('hidden'); }
-        };
+        window.togglePasswordVisibility = () => { const passInput = document.getElementById('user_pass'); const openEye = document.getElementById('eye-open'); const closedEye = document.getElementById('eye-closed'); if (passInput.type === 'password') { passInput.type = 'text'; openEye.classList.add('hidden'); closedEye.classList.remove('hidden'); } else { passInput.type = 'password'; openEye.classList.remove('hidden'); closedEye.classList.add('hidden'); } };
         window.cerrarHistoria = () => { document.getElementById('modal-historia').style.display = 'none'; };
+        
         function initUserAdmin(uNube) {
             const container = document.getElementById('psico-list-admin');
             container.innerHTML = DB_BASE.especialistas.map(p => {
@@ -611,16 +399,26 @@
                 return `<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-between items-center"><div><p class="text-[10px] font-black text-gte-blue uppercase">${p.nombre}</p><p class="text-[9px] text-slate-400">Pass: <span class="font-bold text-gte-orange">${cloud ? cloud.pass : p.pass}</span></p></div><button onclick="resetUserPass('${p.user}')" class="btn-gte-main !py-2 !px-4 text-[9px]">Reset</button></div>`;
             }).join('');
         }
-        window.resetUserPass = async (uid) => {
-            await setDoc(doc(window.db, window.userCollectionPath, uid), { ...DB_BASE.especialistas.find(e => e.user === uid), pass: "1234", rol: "ESPECIALISTA" });
-            alert("Reseteado a 1234"); location.reload();
+
+        window.resetUserPass = async (uid) => { await setDoc(doc(window.db, window.userCollectionPath, uid), { ...DB_BASE.especialistas.find(e => e.user === uid), pass: "1234", rol: "ESPECIALISTA" }); alert("Reseteado a 1234"); location.reload(); };
+        window.guardarPerfil = async () => { const n = document.getElementById('perfil-nombre').value; const p = document.getElementById('perfil-pass').value; const up = { nombre: n }; if(p) up.pass = p; await setDoc(doc(window.db, window.userCollectionPath, session.user), { ...session, ...up }, { merge: true }); alert("Actualizado"); location.reload(); };
+        
+        window.renderStats = () => {
+            const ctx1 = document.getElementById('chart-cobertura').getContext('2d');
+            const atendidos = REPOSITORIO_FULL.filter(e => e.seguimiento !== 'Sin Iniciar').length;
+            const pendientes = REPOSITORIO_FULL.length - atendidos;
+            Object.values(chartInstances).forEach(c => c.destroy());
+            chartInstances.cobertura = new Chart(ctx1, { type: 'doughnut', data: { labels: ['Atendidos', 'Pendientes'], datasets: [{ data: [atendidos, pendientes], backgroundColor: ['#FF6600', '#003366'] }] } });
         };
-        window.guardarPerfil = async () => {
-            const n = document.getElementById('perfil-nombre').value;
-            const p = document.getElementById('perfil-pass').value;
-            const up = { nombre: n }; if(p) up.pass = p;
-            await setDoc(doc(window.db, window.userCollectionPath, session.user), { ...session, ...up }, { merge: true });
-            alert("Actualizado"); location.reload();
+
+        window.generarReportePDF = async () => {
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF('p', 'mm', 'a4');
+            const canvas = await html2canvas(document.getElementById('reporte-contenedor'), { scale: 2 });
+            docPdf.setFillColor(0, 51, 102); docPdf.rect(0, 0, 210, 40, 'F');
+            docPdf.setTextColor(255, 255, 255); docPdf.setFontSize(22); docPdf.text("INFORME GTE 2026", 15, 20);
+            docPdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 50, 190, 0);
+            docPdf.save(`Reporte_GTE.pdf`);
         };
     </script>
 </body>
