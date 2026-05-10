@@ -72,8 +72,6 @@
         .animate-fade { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .stats-card { background: white; border-radius: 24px; padding: 30px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        
-        /* Badge de Seguimiento según Estatus */
         .badge-step { padding: 4px 12px; border-radius: 99px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
         .status-sin { background: #f1f5f9; color: #64748b; }
         .status-cita { background: #dcfce7; color: #166534; }
@@ -84,7 +82,7 @@
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <!-- LOGIN SCREEN (INMUTABLE) -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-[100] bg-gte-main flex items-center justify-center p-6">
         <div class="login-card animate-fade text-center">
             <h1 class="text-4xl font-black text-gte-blue mb-12 uppercase tracking-tighter">GTE 2026</h1>
@@ -112,7 +110,7 @@
         </div>
     </div>
 
-    <!-- MODAL HISTORIA CLÍNICA (ACTUALIZADO CON FASES) -->
+    <!-- MODAL HISTORIA CLÍNICA -->
     <div id="modal-historia" class="clinical-modal">
         <div class="clinical-box flex flex-col max-h-[90vh]">
             <div class="bg-gte-blue p-8 text-white flex justify-between items-center">
@@ -182,7 +180,6 @@
             </div>
         </section>
 
-        <!-- OTROS TABS (ESTADÍSTICAS Y PERFIL) -->
         <section id="tab-estadisticas" class="tab-content hidden animate-fade">
              <header class="mb-12 flex justify-between items-end">
                 <div><h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight">Estadísticas GTE</h2><p class="text-slate-500 mt-3 font-semibold">Análisis objetivo de impacto en Salud Mental.</p></div>
@@ -276,13 +273,13 @@
             try { const querySnapshot = await getDocs(collection(window.db, window.collectionPath)); REPOSITORIO_FULL = querySnapshot.docs.map(doc => doc.data()); renderExps(); } catch (error) { }
         }
 
-        // --- MOTOR DE EXCEL ULTRA-ROBUSTO (FIX DEFINITIVO) ---
+        // --- MOTOR DE EXCEL ULTRA-ROBUSTO (CALIBRADO PARA image_59bbf8.png) ---
         window.handleExcelCloud = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const btn = document.getElementById('btn-excel-bulk');
             const originalText = btn.innerHTML;
-            btn.innerHTML = `<span class="animate-pulse">⏳ CARGANDO DATOS...</span>`;
+            btn.innerHTML = `<span class="animate-pulse">⏳ ASUMIENDO DATOS...</span>`;
             btn.disabled = true;
 
             const reader = new FileReader();
@@ -292,26 +289,28 @@
                     const wb = XLSX.read(data, { type: 'array' });
                     const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
                     
-                    if (rows.length < 2) throw new Error("Archivo vacío.");
+                    if (rows.length < 1) throw new Error("Archivo vacío.");
 
-                    // Buscador de cabeceras dinámico
+                    // Buscador de cabeceras de precisión quirúrgica
                     let colIdx = { id: -1, student: -1, inst: -1, ci: -1, edad: -1 };
                     let startRow = 0;
 
-                    for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                    for (let i = 0; i < Math.min(rows.length, 20); i++) {
                         const row = rows[i]; if (!row) continue;
+                        let foundExp = false;
                         row.forEach((cell, idx) => {
-                            const val = String(cell || "").toLowerCase();
-                            if (val.includes("exp") || val.includes("id")) colIdx.id = idx;
-                            if (val.includes("estu") || val.includes("nombr") || val.includes("paciente")) colIdx.student = idx;
+                            const val = String(cell || "").toLowerCase().trim();
+                            // Basado exactamente en la imagen: "N° EXP", "APELLIDOS Y NOMBRES", "INSTITUCION", "C.I", "EDAD"
+                            if (val.includes("exp") || val.includes("n°")) { colIdx.id = idx; foundExp = true; }
+                            if (val.includes("nombres") || val.includes("apellidos") || val.includes("paciente")) colIdx.student = idx;
                             if (val.includes("inst") || val.includes("plantel") || val.includes("escuela")) colIdx.inst = idx;
-                            if (val.includes("ced") || val.includes("ci")) colIdx.ci = idx;
+                            if (val.includes("ci") || val.includes("c.i") || val.includes("cedula")) colIdx.ci = idx;
                             if (val.includes("edad")) colIdx.edad = idx;
                         });
-                        if (colIdx.id !== -1 && colIdx.student !== -1) { startRow = i + 1; break; }
+                        if (foundExp) { startRow = i + 1; break; }
                     }
 
-                    // Fallback si no hay cabeceras claras: asumimos columnas 0, 1 y 2
+                    // Fallback de emergencia si falla la detección automática
                     if (colIdx.id === -1) colIdx.id = 0;
                     if (colIdx.student === -1) colIdx.student = 1;
                     if (colIdx.inst === -1) colIdx.inst = 2;
@@ -324,7 +323,7 @@
                         const expId = String(r[colIdx.id]).trim();
                         const docData = {
                             id: expId,
-                            student: String(r[colIdx.student] || "SIN NOMBRE").trim(),
+                            student: String(r[colIdx.student] || "SIN IDENTIFICAR").trim(),
                             inst: String(r[colIdx.inst] || "N/I").trim().toUpperCase(),
                             ci: colIdx.ci !== -1 ? String(r[colIdx.ci] || "N/I").trim() : "N/I",
                             edad: colIdx.edad !== -1 ? String(r[colIdx.edad] || "N/I").trim() : "N/I",
@@ -335,7 +334,7 @@
                         await setDoc(doc(window.db, window.collectionPath, expId), docData);
                         count++;
                     }
-                    alert(`✅ Procesados ${count} registros con éxito.`);
+                    alert(`✅ Éxito: Se han cargado ${count} expedientes meticulosamente.`);
                     cargarDatosDesdeNube();
                 } catch (err) { alert("Error de Carga: " + err.message); }
                 finally { btn.innerHTML = originalText; btn.disabled = false; e.target.value = ""; }
@@ -343,7 +342,6 @@
             reader.readAsArrayBuffer(file);
         };
 
-        // --- RENDERIZADO CON BADGES DINÁMICOS ---
         window.renderExps = () => {
             const body = document.getElementById('exp-list');
             const filtrados = REPOSITORIO_FULL.filter(exp => exp.id.toLowerCase().includes(filtroBusqueda) || exp.student.toLowerCase().includes(filtroBusqueda) || exp.inst.toLowerCase().includes(filtroBusqueda));
