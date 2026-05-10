@@ -83,7 +83,7 @@
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <!-- LOGIN SCREEN -->
+    <!-- PESTAÑA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden animate-fade">
             <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
@@ -229,13 +229,13 @@
             </div>
 
             <div class="content-card overflow-x-auto">
-                <table class="w-full text-left min-w-[1100px]">
+                <table class="w-full text-left min-w-[1200px]">
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                             <th class="p-6">Expediente</th>
                             <th class="p-6">Estudiante / C.I. / Edad</th>
                             <th class="p-6">Institución Educativa</th>
-                            <th class="p-6 text-center">Fase</th>
+                            <th class="p-6 text-center">Fase GTE</th>
                             <th class="p-6 text-center">Seguimiento / Estatus</th>
                             <th class="p-6 text-right">Responsable / Acción</th>
                         </tr>
@@ -354,7 +354,7 @@
             renderExps();
         }
 
-        /* MOTOR DE CARGA MAESTRA DINÁMICO GTE 2026 - CORREGIDO */
+        /* MOTOR DE CARGA MAESTRA QUIRÚRGICO GTE 2026 - PRIORIDAD FASE COL 1 */
         function handleExcel(e) {
             const file = e.target.files[0];
             if(!file) return;
@@ -365,41 +365,33 @@
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
                 
                 let headerRowIndex = -1;
-                let colMap = { id: -1, nombre: -1, inst: -1, ci: -1, edad: -1, fase: -1 };
 
-                for(let k=0; k < Math.min(rows.length, 25); k++) {
+                // Identificar fila de cabecera basándonos en la palabra "EXP"
+                for(let k=0; k < Math.min(rows.length, 30); k++) {
                     if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp"))) {
                         headerRowIndex = k;
-                        rows[k].forEach((cell, idx) => {
-                            const val = String(cell).toLowerCase().trim();
-                            if(val.includes("exp")) colMap.id = idx;
-                            else if(val.includes("nombre") || val.includes("estudiante")) colMap.nombre = idx;
-                            else if(val.includes("institución") || val.includes("colegio") || val.includes("inst")) colMap.inst = idx;
-                            else if(val.includes("cédula") || val.includes("ci") || val.includes("documento")) colMap.ci = idx;
-                            else if(val.includes("edad")) colMap.edad = idx;
-                            else if(val.includes("fase")) colMap.fase = idx;
-                        });
                         break;
                     }
                 }
 
-                if(headerRowIndex === -1 || colMap.id === -1) {
-                    alert("❌ Error de Estructura: No se detectó la columna 'EXPEDIENTE'.");
+                if(headerRowIndex === -1) {
+                    alert("❌ Error: No se localizó la columna de Expedientes para sincronizar.");
                     return;
                 }
 
                 const nuevos = [];
+                // Extracción meticulosa por índices directos según requerimiento
                 for (let i = headerRowIndex + 1; i < rows.length; i++) {
                     const r = rows[i]; 
-                    if (!r || !r[colMap.id]) continue;
+                    if (!r || !r[1]) continue; // R[1] es Expediente
 
                     nuevos.push({
-                        id: String(r[colMap.id] || "").trim(), 
-                        student: String(colMap.nombre !== -1 ? r[colMap.nombre] : "N/I").trim().toUpperCase(),
-                        inst: String(colMap.inst !== -1 ? r[colMap.inst] : "N/I").trim().toUpperCase(), 
-                        ci: String(colMap.ci !== -1 ? r[colMap.ci] : "N/I").trim(),
-                        edad: String(colMap.edad !== -1 ? r[colMap.edad] : "N/I").trim(), 
-                        fase: String(colMap.fase !== -1 ? r[colMap.fase] : "Fase 1: Captación").trim(),
+                        fase: String(r[0] || "Fase 1: Captación").trim(), // COL 1
+                        id: String(r[1] || "").trim(),                   // COL 2
+                        student: String(r[2] || "N/I").trim().toUpperCase(), // COL 3
+                        inst: String(r[3] || "N/I").trim().toUpperCase(),    // COL 4
+                        ci: String(r[4] || "N/I").trim(),                    // COL 5
+                        edad: String(r[5] || "N/I").trim(),                  // COL 6
                         seguimiento: "Sin Iniciar", 
                         psico: null, 
                         psicoId: null,
@@ -414,7 +406,7 @@
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
                 renderExps(); 
                 if (session.rol === "MASTER") actualizarVistaMaster();
-                showToast(`✅ Carga Exitosa: ${filtrados.length} registros.`);
+                showToast(`✅ Sincronización Exitosa: ${filtrados.length} expedientes.`);
             };
             reader.readAsArrayBuffer(file);
         }
@@ -444,7 +436,7 @@
                             <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-2 border border-slate-200 rounded-lg font-black text-gte-orange outline-none bg-white cursor-pointer">
                                 ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase.includes(opt.split(':')[0]) ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
-                        ` : `<span class="px-2 py-1 rounded-md text-[8px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-100">${exp.fase || "Captación"}</span>`}
+                        ` : `<span class="px-2 py-1 rounded-md text-[8px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-100">${exp.fase || "Fase 1: Captación"}</span>`}
                     </td>
                     <td class="p-6 text-center">
                         ${myCase ? `
@@ -457,7 +449,7 @@
                         ${(!exp.psicoId && session.rol === 'ESPECIALISTA') 
                             ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] py-2 px-4 shadow-lg uppercase">Adoptar Caso</button>` 
                             : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-2 px-6 rounded-xl text-[9px] font-black uppercase shadow-md hover:bg-gte-orange transition">Ver Evolución</button>`
-                            : `<p class="text-[10px] font-black text-slate-400 uppercase italic">${exp.psico || 'Sin Responsable'}</p>`)
+                            : `<p class="text-[10px] font-black text-slate-400 uppercase italic">${exp.psico || 'Esperando Asignación'}</p>`)
                         }
                     </td>
                 </tr>`;
@@ -491,7 +483,7 @@
             exp.seguimiento = "Primera Consulta";
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             renderExps();
-            showToast("Caso vinculado a su gestión profesional.");
+            showToast("Caso vinculado satisfactoriamente.");
         }
 
         function updateSeguimiento(id, val) {
@@ -499,14 +491,14 @@
             exp.seguimiento = val;
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             if(session.rol === "MASTER") actualizarVistaMaster();
-            showToast(`Estatus actualizado: ${val}`);
+            showToast(`Estatus: ${val}`);
         }
 
         function updateFase(id, val) {
             const exp = REPOSITORIO.find(e => e.id === id);
             exp.fase = val;
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-            showToast(`Fase actualizada: ${val}`);
+            showToast(`Fase Sincronizada: ${val}`);
         }
 
         function renderEquipo() {
@@ -524,12 +516,12 @@
                     <td class="p-6 text-center font-black text-gte-orange text-sm">${casos}</td>
                     <td class="p-6 text-center">
                         <span class="px-3 py-1 ${isCustom ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'} rounded-full text-[9px] font-black uppercase">
-                            ${isCustom ? 'Activo' : 'Sin Configurar'}
+                            ${isCustom ? 'Activo' : 'Sin Perfil'}
                         </span>
                     </td>
                     <td class="p-6 text-right">
                         <button onclick="resetearEspecialista('${esp.user}')" class="text-[9px] font-black text-blue-600 hover:text-orange-600 uppercase transition">
-                            Resetear Acceso
+                            Resetear Claves
                         </button>
                     </td>
                 </tr>`;
@@ -537,19 +529,19 @@
         }
 
         function resetearEspecialista(uid) {
-            if(confirm(`¿Desea resetear el perfil de ${uid}? El especialista podrá volver a entrar con la clave genérica "1234". Sus casos adoptados no se borrarán.`)) {
+            if(confirm(`¿Resetear el acceso de ${uid}? Podrá entrar con la clave genérica "1234". Sus casos vinculados NO se borrarán.`)) {
                 localStorage.removeItem(`perfil_${uid}`);
                 renderEquipo();
-                showToast(`Perfil de ${uid} reseteado.`);
+                showToast(`Perfil de ${uid} reiniciado.`);
             }
         }
 
         function actualizarVistaMaster() {
             const stats = [
-                { l: "Total Atendidos", v: REPOSITORIO.length, c: "gte-blue" },
-                { l: "Altas GTE", v: REPOSITORIO.filter(e => e.seguimiento === "Alta" || e.seguimiento === "Cierre").length, c: "green-600" },
+                { l: "Atendidos 2026", v: REPOSITORIO.length, c: "gte-blue" },
+                { l: "Altas Municipales", v: REPOSITORIO.filter(e => e.seguimiento === "Alta" || e.seguimiento === "Cierre").length, c: "green-600" },
                 { l: "Derivaciones", v: REPOSITORIO.filter(e => e.seguimiento === "Derivación").length, c: "gte-orange" },
-                { l: "En Consulta", v: REPOSITORIO.filter(e => e.psicoId !== null).length, c: "blue-500" }
+                { l: "Casos en Curso", v: REPOSITORIO.filter(e => e.psicoId !== null).length, c: "blue-500" }
             ];
             document.getElementById('stats-grid').innerHTML = stats.map(s => `
                 <div class="kpi-card shadow-sm">
@@ -566,7 +558,7 @@
             localStorage.setItem(`perfil_${session.user}`, JSON.stringify(perfil));
             session.nombre = nuevoNom;
             document.getElementById('user-display-name').innerText = nuevoNom;
-            showToast("Perfil Profesional Actualizado");
+            showToast("Perfil Actualizado");
         }
 
         function actualizarPassword() {
@@ -576,11 +568,11 @@
             const perfil = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { nombre: session.nombre };
             perfil.pass = p1;
             localStorage.setItem(`perfil_${session.user}`, JSON.stringify(perfil));
-            showToast("Clave de Acceso Actualizada");
+            showToast("Contraseña Sincronizada");
         }
 
         function limpiarRepositorio() { 
-            if(confirm("ATENCIÓN: ¿Seguro que desea vaciar el repositorio maestro? Esta acción no se puede deshacer.")) { 
+            if(confirm("¿Vaciar el repositorio maestro? Esta acción eliminará todos los registros del 2026.")) { 
                 REPOSITORIO = []; 
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); 
                 renderExps(); 
