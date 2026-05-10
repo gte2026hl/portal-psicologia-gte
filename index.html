@@ -79,11 +79,15 @@
         }
         .clinical-box { background: white; width: 100%; max-width: 850px; border-radius: 35px; overflow: hidden; animation: zoomIn 0.3s ease-out; }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        /* Table enhancements */
+        .gte-table th { padding: 20px 24px; white-space: nowrap; }
+        .gte-table td { padding: 18px 24px; vertical-align: middle; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <!-- PESTAÑA DE LOGIN -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden animate-fade">
             <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
@@ -169,41 +173,43 @@
     </nav>
 
     <!-- MAIN CONTENT -->
-    <main id="main-content" class="hidden flex-grow p-8 md:p-12 lg:p-16 overflow-y-auto">
+    <main id="main-content" class="hidden flex-grow p-6 md:p-10 lg:p-12 overflow-y-auto w-full">
 
         <!-- TAB: ESTADÍSTICAS MASTER -->
-        <section id="tab-master-stats" class="tab-content hidden animate-fade">
+        <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1600px] mx-auto">
             <header class="mb-10">
                 <h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight leading-none">Consola Master</h2>
                 <p class="text-slate-500 mt-2">Reporte Situacional de Salud Mental 2026.</p>
             </header>
-            <div id="stats-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"></div>
+            <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"></div>
         </section>
 
         <!-- TAB: GESTIÓN DE EQUIPO (MASTER) -->
-        <section id="tab-equipo" class="tab-content hidden animate-fade">
+        <section id="tab-equipo" class="tab-content hidden animate-fade max-w-[1600px] mx-auto">
             <header class="mb-10">
                 <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Gestión de Especialistas</h2>
                 <p class="text-slate-500 mt-2">Nómina y administración de perfiles psicológicos.</p>
             </header>
             <div class="content-card overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 border-b border-slate-100">
-                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <th class="p-6">Usuario ID</th>
-                            <th class="p-6">Nombre de Especialista</th>
-                            <th class="p-6 text-center">Casos</th>
-                            <th class="p-6 text-center">Estatus</th>
-                            <th class="p-6 text-right">Acciones de Reseteo</th>
-                        </tr>
-                    </thead>
-                    <tbody id="equipo-list-body" class="divide-y divide-slate-100"></tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left gte-table">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <th>Usuario ID</th>
+                                <th>Nombre de Especialista</th>
+                                <th class="text-center">Casos</th>
+                                <th class="text-center">Estatus</th>
+                                <th class="text-right">Acciones de Reseteo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="equipo-list-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
         <!-- TAB: REPOSITORIO -->
-        <section id="tab-expedientes" class="tab-content hidden animate-fade">
+        <section id="tab-expedientes" class="tab-content hidden animate-fade max-w-[1800px] mx-auto">
             <header class="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 <div>
                     <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Repositorio GTE 2026</h2>
@@ -228,25 +234,27 @@
                 </div>
             </div>
 
-            <div class="content-card overflow-x-auto">
-                <table class="w-full text-left min-w-[1200px]">
-                    <thead class="bg-slate-50 border-b border-slate-100">
-                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <th class="p-6">Expediente</th>
-                            <th class="p-6">Estudiante / C.I. / Edad</th>
-                            <th class="p-6">Institución Educativa</th>
-                            <th class="p-6 text-center">Fase GTE</th>
-                            <th class="p-6 text-center">Seguimiento / Estatus</th>
-                            <th class="p-6 text-right">Responsable / Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
-                </table>
+            <div class="content-card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left gte-table min-w-[1200px]">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <th>Expediente</th>
+                                <th>Estudiante / C.I. / Edad</th>
+                                <th>Institución Educativa</th>
+                                <th class="text-center">Fase GTE</th>
+                                <th class="text-center">Seguimiento / Estatus</th>
+                                <th class="text-right">Responsable / Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exp-list" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
         <!-- TAB: PERFIL -->
-        <section id="tab-perfil" class="tab-content hidden animate-fade">
+        <section id="tab-perfil" class="tab-content hidden animate-fade max-w-[1200px] mx-auto">
             <header class="mb-10"><h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Gestión de Perfil</h2></header>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div class="content-card p-10">
@@ -354,7 +362,6 @@
             renderExps();
         }
 
-        /* MOTOR DE CARGA MAESTRA QUIRÚRGICO GTE 2026 - PRIORIDAD FASE COL 1 */
         function handleExcel(e) {
             const file = e.target.files[0];
             if(!file) return;
@@ -366,7 +373,6 @@
                 
                 let headerRowIndex = -1;
 
-                // Identificar fila de cabecera basándonos en la palabra "EXP"
                 for(let k=0; k < Math.min(rows.length, 30); k++) {
                     if(rows[k] && rows[k].some(cell => String(cell).toLowerCase().includes("exp"))) {
                         headerRowIndex = k;
@@ -380,18 +386,17 @@
                 }
 
                 const nuevos = [];
-                // Extracción meticulosa por índices directos según requerimiento
                 for (let i = headerRowIndex + 1; i < rows.length; i++) {
                     const r = rows[i]; 
-                    if (!r || !r[1]) continue; // R[1] es Expediente
+                    if (!r || !r[1]) continue;
 
                     nuevos.push({
-                        fase: String(r[0] || "Fase 1: Captación").trim(), // COL 1
-                        id: String(r[1] || "").trim(),                   // COL 2
-                        student: String(r[2] || "N/I").trim().toUpperCase(), // COL 3
-                        inst: String(r[3] || "N/I").trim().toUpperCase(),    // COL 4
-                        ci: String(r[4] || "N/I").trim(),                    // COL 5
-                        edad: String(r[5] || "N/I").trim(),                  // COL 6
+                        fase: String(r[0] || "Fase 1: Captación").trim(),
+                        id: String(r[1] || "").trim(),
+                        student: String(r[2] || "N/I").trim().toUpperCase(),
+                        inst: String(r[3] || "N/I").trim().toUpperCase(),
+                        ci: String(r[4] || "N/I").trim(),
+                        edad: String(r[5] || "N/I").trim(),
                         seguimiento: "Sin Iniciar", 
                         psico: null, 
                         psicoId: null,
@@ -425,27 +430,27 @@
                 const myCase = exp.psicoId === session.user;
                 return `
                 <tr class="hover:bg-slate-50 transition border-b border-slate-50 text-xs animate-fade">
-                    <td class="p-6 font-black text-gte-orange">${exp.id}</td>
-                    <td class="p-6">
+                    <td class="font-black text-gte-orange">${exp.id}</td>
+                    <td class="min-w-[250px]">
                         <p class="font-black text-gte-blue uppercase leading-tight">${exp.student}</p>
                         <p class="text-[9px] text-slate-400 mt-1 uppercase font-bold">C.I: ${exp.ci} | EDAD: ${exp.edad}</p>
                     </td>
-                    <td class="p-6 font-bold text-slate-500 uppercase leading-snug">${exp.inst}</td>
-                    <td class="p-6 text-center">
+                    <td class="font-bold text-slate-500 uppercase leading-snug">${exp.inst}</td>
+                    <td class="text-center">
                          ${myCase ? `
-                            <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-2 border border-slate-200 rounded-lg font-black text-gte-orange outline-none bg-white cursor-pointer">
+                            <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-2 border border-slate-200 rounded-lg font-black text-gte-orange outline-none bg-white cursor-pointer w-full max-w-[140px]">
                                 ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase.includes(opt.split(':')[0]) ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
-                        ` : `<span class="px-2 py-1 rounded-md text-[8px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-100">${exp.fase || "Fase 1: Captación"}</span>`}
+                        ` : `<span class="px-2 py-1 rounded-md text-[8px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-100 block truncate max-w-[140px] mx-auto text-center">${exp.fase || "Fase 1: Captación"}</span>`}
                     </td>
-                    <td class="p-6 text-center">
+                    <td class="text-center">
                         ${myCase ? `
-                            <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[10px] p-2 border border-slate-200 rounded-lg font-black text-gte-blue outline-none bg-white cursor-pointer">
+                            <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[10px] p-2 border border-slate-200 rounded-lg font-black text-gte-blue outline-none bg-white cursor-pointer w-full max-w-[140px]">
                                 ${SEGUIMIENTO_OPCIONES.map(opt => `<option value="${opt}" ${exp.seguimiento === opt ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
-                        ` : `<span class="px-3 py-1 rounded-full text-[9px] font-black uppercase bg-slate-100 text-slate-600">${exp.seguimiento}</span>`}
+                        ` : `<span class="px-3 py-1 rounded-full text-[9px] font-black uppercase bg-slate-100 text-slate-600 block truncate max-w-[140px] mx-auto text-center">${exp.seguimiento}</span>`}
                     </td>
-                    <td class="p-6 text-right">
+                    <td class="text-right whitespace-nowrap">
                         ${(!exp.psicoId && session.rol === 'ESPECIALISTA') 
                             ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] py-2 px-4 shadow-lg uppercase">Adoptar Caso</button>` 
                             : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-2 px-6 rounded-xl text-[9px] font-black uppercase shadow-md hover:bg-gte-orange transition">Ver Evolución</button>`
@@ -511,15 +516,15 @@
                 
                 return `
                 <tr class="border-b text-xs">
-                    <td class="p-6 font-black text-gte-blue">${esp.user}</td>
-                    <td class="p-6 font-bold text-slate-600">${nombre}</td>
-                    <td class="p-6 text-center font-black text-gte-orange text-sm">${casos}</td>
-                    <td class="p-6 text-center">
+                    <td class="font-black text-gte-blue">${esp.user}</td>
+                    <td class="font-bold text-slate-600">${nombre}</td>
+                    <td class="text-center font-black text-gte-orange text-sm">${casos}</td>
+                    <td class="text-center">
                         <span class="px-3 py-1 ${isCustom ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'} rounded-full text-[9px] font-black uppercase">
                             ${isCustom ? 'Activo' : 'Sin Perfil'}
                         </span>
                     </td>
-                    <td class="p-6 text-right">
+                    <td class="text-right">
                         <button onclick="resetearEspecialista('${esp.user}')" class="text-[9px] font-black text-blue-600 hover:text-orange-600 uppercase transition">
                             Resetear Claves
                         </button>
