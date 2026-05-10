@@ -30,17 +30,16 @@
         .text-gte-orange { color: var(--gte-orange); }
 
         .btn-gte-orange {
-            background-color: var(--gte-orange); color: white; transition: all 0.3s ease;
+            background-color: var(--gte-orange); color: white; transition: all 0.2s ease;
             display: inline-flex; align-items: center; justify-content: center;
-            font-weight: 800; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;
+            font-weight: 800; padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer;
         }
         .btn-gte-orange:hover { background-color: var(--gte-blue); transform: translateY(-1px); }
 
         .btn-gte-blue {
-            background-color: var(--gte-blue); color: white; transition: all 0.3s ease;
+            background-color: var(--gte-blue); color: white; transition: all 0.2s ease;
             font-weight: 800; border-radius: 12px; border: none; padding: 12px 24px; cursor: pointer;
         }
-        .btn-gte-blue:hover { background-color: var(--gte-orange); transform: translateY(-1px); }
 
         .nav-button {
             width: 100%; text-align: left; padding: 16px 24px; display: flex; align-items: center; gap: 14px;
@@ -50,52 +49,59 @@
         .nav-button:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
         .nav-button.active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid var(--gte-orange); color: white; }
 
-        .content-card { background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #eef2f6; }
+        .content-card { background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); border: 1px solid #eef2f6; }
 
         .form-input { 
-            width: 100%; border: 2px solid #f1f5f9; border-radius: 14px; padding: 12px 16px; font-size: 14px; outline: none;
+            width: 100%; border: 2px solid #f1f5f9; border-radius: 12px; padding: 10px 14px; font-size: 14px; outline: none;
             transition: 0.2s; color: #1e293b; background: #f8fafc;
         }
-        .form-input:focus { border-color: var(--gte-orange); background: white; }
 
-        .kpi-card { background: white; padding: 25px; border-radius: 20px; border: 1px solid #eef2f6; transition: 0.3s; position: relative; overflow: hidden; }
-        .kpi-card::after { content: ""; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--gte-orange); opacity: 0; transition: 0.3s; }
+        .kpi-card { background: white; padding: 20px; border-radius: 18px; border: 1px solid #eef2f6; transition: 0.3s; position: relative; overflow: hidden; }
+        .kpi-card::after { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gte-orange); opacity: 0; transition: 0.3s; }
+        .kpi-card:hover { transform: translateY(-3px); border-color: var(--gte-orange); }
         .kpi-card:hover::after { opacity: 1; }
-        .kpi-card:hover { transform: translateY(-5px); border-color: var(--gte-orange); }
 
         #gte-toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background-color: var(--gte-blue); color: white; padding: 14px 40px; border-radius: 50px;
-            font-weight: 800; font-size: 11px; text-transform: uppercase; border: 2px solid var(--gte-orange);
-            z-index: 10000; display: none; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            background-color: var(--gte-blue); color: white; padding: 12px 30px; border-radius: 50px;
+            font-weight: 800; font-size: 10px; text-transform: uppercase; border: 2px solid var(--gte-orange);
+            z-index: 10000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
-        .animate-fade { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TABLA QUIRÚRGICA: ARMONÍA DE ESPACIOS */
+        .gte-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .gte-table th { 
+            padding: 10px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; 
+            color: #94a3b8; letter-spacing: 0.05em; border-bottom: 2px solid #f1f5f9; text-align: left;
+        }
+        .gte-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+
+        /* Control de anchos específicos para evitar dispersión */
+        .col-exp { width: 100px; }
+        .col-student { width: 280px; }
+        .col-inst { width: 200px; }
+        .col-fase { width: 60px; text-align: center; }
+        .col-status { width: 160px; }
+        .col-action { width: 180px; text-align: right; }
+
+        .exp-box { display: flex; flex-direction: column; line-height: 1.1; }
+        .exp-prefix { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
+        .exp-number { font-size: 14px; font-weight: 900; color: var(--gte-orange); }
+
+        .fase-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; border-radius: 8px; font-weight: 900; font-size: 12px;
+            background: #fff7ed; color: var(--gte-orange); border: 2px solid #ffedd5;
+        }
 
         .clinical-modal { 
             position: fixed; inset: 0; background: rgba(0, 51, 102, 0.9); 
             display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
         }
-        .clinical-box { background: white; width: 100%; max-width: 850px; border-radius: 35px; overflow: hidden; }
-        
-        /* Ajustes Quirúrgicos para Columnas */
-        .gte-table th { padding: 12px 10px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; background: #f8fafc; }
-        .gte-table td { padding: 10px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
-        
-        /* Control de anchos para evitar dispersión */
-        .col-exp { width: 90px; }
-        .col-student { min-width: 240px; }
-        .col-inst { width: 220px; }
-        .col-fase { width: 60px; text-align: center; }
-        .col-status { width: 150px; }
-        .col-action { width: 160px; text-align: right; }
-
-        .fase-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 24px; height: 24px; border-radius: 6px; font-weight: 900; font-size: 11px;
-            background: var(--gte-orange); color: white;
-        }
+        .clinical-box { background: white; width: 100%; max-width: 800px; border-radius: 30px; overflow: hidden; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -106,27 +112,18 @@
             <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
             <div class="p-12 text-center">
                 <h1 class="text-3xl font-black text-[#003366] mb-2 uppercase tracking-tighter">Guacara Te Escucha 2026</h1>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal de Gestión Municipal</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Consola Integral de Gestión</p>
                 <div class="space-y-6 text-left">
                     <div>
                         <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Identificación</label>
-                        <input type="text" id="user_id" class="form-input font-bold" placeholder="Ej: Administrador o Psicólogo">
+                        <input type="text" id="user_id" class="form-input font-bold" placeholder="Especialista o Master">
                     </div>
                     <div>
-                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Clave de Acceso</label>
-                        <div class="relative">
-                            <input type="password" id="user_pass" class="form-input font-bold pr-12" placeholder="••••••••">
-                            <button type="button" onclick="togglePasswordVisibility('user_pass', this)" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-gte-orange transition">
-                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </button>
-                        </div>
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Clave</label>
+                        <input type="password" id="user_pass" class="form-input font-bold" placeholder="••••••••">
                     </div>
-                    <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-5 uppercase text-xs tracking-widest shadow-lg">Entrar al Sistema</button>
+                    <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-4 uppercase text-xs tracking-widest shadow-lg">Ingresar</button>
                 </div>
-                <p class="mt-8 text-[9px] text-slate-300 font-bold uppercase tracking-widest italic">HDC 2026 - Guacara Te Escucha</p>
             </div>
         </div>
     </div>
@@ -136,126 +133,88 @@
     <!-- MODAL EVOLUCIÓN CLÍNICA -->
     <div id="modal-historia" class="clinical-modal">
         <div class="clinical-box flex flex-col max-h-[90vh] shadow-2xl">
-            <div class="bg-gte-blue p-8 text-white flex justify-between items-center">
+            <div class="bg-gte-blue p-6 text-white flex justify-between items-center">
                 <div>
-                    <h2 class="text-2xl font-black uppercase tracking-tight">Evolución Psicológica</h2>
-                    <p id="modal-paciente-id" class="text-gte-orange font-bold text-[10px] uppercase mt-1 tracking-widest">---</p>
+                    <h2 class="text-xl font-black uppercase tracking-tight">Evolución Psicológica</h2>
+                    <p id="modal-paciente-id" class="text-gte-orange font-bold text-[9px] uppercase tracking-widest">---</p>
                 </div>
-                <button onclick="cerrarHistoria()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl text-white font-bold transition">CERRAR</button>
+                <button onclick="cerrarHistoria()" class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded-lg text-[10px] font-bold transition">CERRAR</button>
             </div>
-            <div class="p-10 overflow-y-auto flex-grow space-y-8 bg-white">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Paciente</p>
-                        <p id="modal-nombre" class="font-bold text-gte-blue uppercase text-sm">---</p>
+            <div class="p-8 overflow-y-auto flex-grow space-y-6 bg-white">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-xl">
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Paciente</p>
+                        <p id="modal-nombre" class="font-bold text-gte-blue uppercase text-xs">---</p>
                     </div>
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución</p>
-                        <p id="modal-inst" class="font-bold text-gte-blue uppercase text-sm">---</p>
+                    <div class="bg-slate-50 p-4 rounded-xl">
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución</p>
+                        <p id="modal-inst" class="font-bold text-gte-blue uppercase text-xs">---</p>
                     </div>
                 </div>
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black text-gte-blue uppercase tracking-widest block">Notas de la Sesión</label>
-                    <textarea id="modal-evolucion" class="form-input h-64 resize-none font-semibold text-slate-700 leading-relaxed p-6" placeholder="Documente detalladamente..."></textarea>
-                </div>
+                <textarea id="modal-evolucion" class="form-input h-64 resize-none font-semibold text-slate-700 leading-relaxed" placeholder="Documente detalladamente los hallazgos..."></textarea>
             </div>
-            <div class="p-8 bg-slate-50 border-t flex gap-4">
-                <button onclick="guardarEvolucion()" class="flex-grow btn-gte-orange py-5 text-xs uppercase tracking-widest shadow-xl font-black">Guardar Historia</button>
+            <div class="p-6 bg-slate-50 border-t">
+                <button onclick="guardarEvolucion()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-xl font-black">Actualizar Historia</button>
             </div>
         </div>
     </div>
 
     <!-- SIDEBAR -->
-    <nav id="sidebar" class="hidden w-full md:w-80 bg-[#003366] text-white flex flex-col sticky top-0 md:h-screen z-50 shadow-2xl">
-        <div class="p-10">
-            <h2 class="text-2xl font-black uppercase leading-tight tracking-tighter">GUACARA<br><span class="text-gte-orange">TE ESCUCHA</span></h2>
-            <div class="mt-6 flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/5">
-                <div class="w-10 h-10 bg-gte-orange rounded-xl flex items-center justify-center font-black text-white text-xl">👤</div>
+    <nav id="sidebar" class="hidden w-full md:w-72 bg-[#003366] text-white flex flex-col sticky top-0 md:h-screen z-50 shadow-2xl">
+        <div class="p-8">
+            <h2 class="text-xl font-black uppercase leading-tight tracking-tighter">GUACARA<br><span class="text-gte-orange">TE ESCUCHA</span></h2>
+            <div class="mt-8 flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/5">
+                <div class="w-8 h-8 bg-gte-orange rounded-lg flex items-center justify-center font-black text-white text-base">👤</div>
                 <div class="overflow-hidden">
-                    <p id="user-display-name" class="text-xs font-black leading-none truncate">---</p>
-                    <p id="user-role-label" class="text-[9px] text-white/40 uppercase font-bold mt-1 tracking-widest">---</p>
+                    <p id="user-display-name" class="text-[11px] font-black leading-none truncate">---</p>
+                    <p id="user-role-label" class="text-[8px] text-white/40 uppercase font-bold mt-1 tracking-widest">---</p>
                 </div>
             </div>
         </div>
         <div id="nav-menu" class="flex-grow space-y-1 px-4 py-2"></div>
         <div class="p-8">
-            <button onclick="cerrarSesion()" class="w-full py-4 bg-red-500/10 hover:bg-red-500/20 rounded-2xl text-[10px] font-black text-red-400 uppercase transition border border-red-500/20">Cerrar Sesión</button>
+            <button onclick="cerrarSesion()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-[9px] font-black text-red-400 uppercase transition">Cerrar Sesión</button>
         </div>
     </nav>
 
     <!-- MAIN CONTENT -->
-    <main id="main-content" class="hidden flex-grow p-4 md:p-8 lg:p-10 overflow-y-auto w-full">
+    <main id="main-content" class="hidden flex-grow p-4 md:p-6 lg:p-8 overflow-y-auto w-full">
 
-        <!-- TAB: ESTADÍSTICAS MASTER -->
-        <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1400px]">
-            <header class="mb-10">
-                <h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight leading-none">Consola Master</h2>
-                <p class="text-slate-500 mt-2">Reporte Situacional de Salud Mental 2026.</p>
-            </header>
-            <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"></div>
-        </section>
-
-        <!-- TAB: GESTIÓN DE EQUIPO -->
-        <section id="tab-equipo" class="tab-content hidden animate-fade max-w-[1400px]">
-            <header class="mb-10">
-                <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Especialistas</h2>
-                <p class="text-slate-500 mt-2">Nómina y administración de perfiles.</p>
-            </header>
-            <div class="content-card overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left gte-table">
-                        <thead class="bg-slate-50">
-                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th class="text-center">Casos</th>
-                                <th class="text-center">Estatus</th>
-                                <th class="text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="equipo-list-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB: REPOSITORIO MAESTRO -->
-        <section id="tab-expedientes" class="tab-content hidden animate-fade max-w-[1500px]">
-            <header class="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+        <!-- TAB: REPOSITORIO MAESTRO (EL FOCO DE LA MEJORA) -->
+        <section id="tab-expedientes" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
+            <header class="mb-6 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
                 <div>
-                    <h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight leading-none">Repositorio Maestro</h2>
-                    <p class="text-slate-500 mt-1 uppercase text-[9px] font-bold tracking-widest">Gestión Centralizada GTE 2026</p>
+                    <h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight leading-none">Repositorio Maestro</h2>
+                    <p class="text-slate-500 mt-1 uppercase text-[8px] font-bold tracking-[0.2em]">Sincronización Municipal GTE 2026</p>
                 </div>
-                <div id="master-actions" class="hidden flex flex-wrap items-center gap-3">
-                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-5 py-3 rounded-xl text-[9px] uppercase shadow-md transition border-2 border-blue-600 flex items-center gap-2">
-                        <span class="text-blue-600 font-black">📊 CARGA MAESTRA</span>
-                    </button>
+                <div id="master-actions" class="hidden flex items-center gap-3">
+                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-4 py-2 rounded-lg text-[9px] uppercase shadow-sm transition border-2 border-blue-600 font-black text-blue-600">📊 CARGA MAESTRA</button>
                     <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcel(event)">
-                    <button onclick="limpiarRepositorio()" class="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase">Vaciar</button>
+                    <button onclick="limpiarRepositorio()" class="text-[9px] font-bold text-red-300 hover:text-red-500 uppercase">Vaciar</button>
                 </div>
             </header>
 
-            <div class="mb-6 flex flex-col md:flex-row gap-3 items-center bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+            <div class="mb-4 flex flex-col md:flex-row gap-3 items-center bg-white p-2 rounded-xl shadow-sm border border-slate-100">
                 <div class="relative flex-grow">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">🔍</span>
-                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-11 pr-4 py-2.5 rounded-xl text-sm font-semibold placeholder-slate-400 outline-none focus:ring-2 ring-gte-orange transition" placeholder="Filtrar registros...">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-300">🔍</span>
+                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-10 pr-4 py-2 rounded-lg text-sm font-semibold placeholder-slate-300 outline-none focus:ring-2 ring-gte-orange/20 transition" placeholder="Filtrar registros...">
                 </div>
-                <div class="px-3 text-[10px] font-bold text-slate-400 uppercase">
-                    <span id="contador-resultados" class="text-gte-orange font-black text-xs">0</span> Registros
+                <div class="px-3 text-[9px] font-bold text-slate-400 uppercase">
+                    <span id="contador-resultados" class="text-gte-orange font-black">0</span> Resultados
                 </div>
             </div>
 
             <div class="content-card overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left gte-table">
+                    <table class="gte-table">
                         <thead>
                             <tr>
-                                <th class="col-exp">EXP</th>
-                                <th class="col-student">ESTUDIANTE / C.I / EDAD</th>
-                                <th class="col-inst">INSTITUCIÓN</th>
-                                <th class="col-fase">FASE</th>
-                                <th class="col-status text-center">SEGUIMIENTO</th>
-                                <th class="col-action">RESPONSABLE</th>
+                                <th class="col-exp">Expediente</th>
+                                <th class="col-student">Estudiante / Identidad</th>
+                                <th class="col-inst">Institución</th>
+                                <th class="col-fase">Fase</th>
+                                <th class="col-status text-center">Estatus</th>
+                                <th class="col-action">Responsable</th>
                             </tr>
                         </thead>
                         <tbody id="exp-list" class="divide-y divide-slate-50"></tbody>
@@ -264,24 +223,35 @@
             </div>
         </section>
 
-        <!-- TAB: PERFIL -->
-        <section id="tab-perfil" class="tab-content hidden animate-fade max-w-[1200px]">
-            <header class="mb-10"><h2 class="text-4xl font-black text-[#003366] uppercase tracking-tight">Mi Perfil</h2></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <div class="content-card p-10">
-                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">👤 Identidad</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="perfil-nombre" class="form-input font-bold" placeholder="Nombre profesional">
-                        <button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full text-xs uppercase tracking-widest">Sincronizar</button>
-                    </div>
+        <!-- OTRAS SECCIONES (Estadísticas, Perfil, etc) -->
+        <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
+            <header class="mb-8"><h2 class="text-3xl font-black text-gte-blue uppercase tracking-tight">Consola Master</h2></header>
+            <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+        </section>
+
+        <section id="tab-equipo" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
+            <header class="mb-8"><h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight text-center">Gestión de Equipo</h2></header>
+            <div class="content-card overflow-hidden max-w-4xl mx-auto">
+                <table class="w-full text-left gte-table">
+                    <thead><tr><th>ID</th><th>Nombre</th><th class="text-center">Casos</th><th class="text-right">Acción</th></tr></thead>
+                    <tbody id="equipo-list-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="tab-perfil" class="tab-content hidden animate-fade max-w-[1000px] mx-auto">
+            <header class="mb-8"><h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight">Mi Perfil</h2></header>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="content-card p-8">
+                    <h3 class="text-sm font-black text-gte-blue uppercase mb-4">👤 Identidad</h3>
+                    <input type="text" id="perfil-nombre" class="form-input font-bold mb-4" placeholder="Nombre completo">
+                    <button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full text-[10px] uppercase tracking-widest">Sincronizar</button>
                 </div>
-                <div class="content-card p-10">
-                    <h3 class="text-lg font-black text-gte-blue uppercase mb-6">🔒 Seguridad</h3>
-                    <div class="space-y-4">
-                        <input type="password" id="perfil-pass1" class="form-input font-bold" placeholder="Nueva Clave">
-                        <input type="password" id="perfil-pass2" class="form-input font-bold" placeholder="Confirmar">
-                        <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-4 text-xs uppercase tracking-widest">Actualizar Clave</button>
-                    </div>
+                <div class="content-card p-8">
+                    <h3 class="text-sm font-black text-gte-blue uppercase mb-4">🔒 Seguridad</h3>
+                    <input type="password" id="perfil-pass1" class="form-input font-bold mb-2" placeholder="Nueva Clave">
+                    <input type="password" id="perfil-pass2" class="form-input font-bold mb-4" placeholder="Confirmar">
+                    <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-3 text-[10px] uppercase tracking-widest">Actualizar Clave</button>
                 </div>
             </div>
         </section>
@@ -298,8 +268,7 @@
         };
 
         const SEGUIMIENTO_OPCIONES = ["Sin Iniciar", "Primera Consulta", "Segunda Consulta", "Tercera Consulta", "Derivación", "Cierre", "Alta"];
-        const FASE_OPCIONES = ["1", "2", "3", "4", "5"]; // Simplificado a números según requerimiento
-
+        
         let REPOSITORIO = JSON.parse(localStorage.getItem('gte_repositorio')) || [];
         let session = null;
         let filtroBusqueda = "";
@@ -307,14 +276,7 @@
 
         function togglePasswordVisibility(id, btn) {
             const input = document.getElementById(id);
-            const icon = btn.querySelector('svg');
-            if (input.type === "password") {
-                input.type = "text";
-                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
-            } else {
-                input.type = "password";
-                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
-            }
+            input.type = input.type === "password" ? "text" : "password";
         }
 
         function accesoUniversal() {
@@ -324,18 +286,16 @@
             if (u === DB_BASE.master.user && p === DB_BASE.master.pass) {
                 session = { user: u, nombre: DB_BASE.master.nombre, rol: "MASTER" };
                 initInterface();
-                showToast("Acceso Maestro OK");
                 return;
             }
 
-            const especialista = DB_BASE.especialistas.find(e => e.user === u);
-            if (especialista) {
+            const esp = DB_BASE.especialistas.find(e => e.user === u);
+            if (esp) {
                 const stored = JSON.parse(localStorage.getItem(`perfil_${u}`));
-                const finalPass = stored?.pass || especialista.pass;
+                const finalPass = stored?.pass || esp.pass;
                 if (p === finalPass) {
-                    session = { user: u, nombre: stored?.nombre || especialista.nombre, rol: "ESPECIALISTA" };
+                    session = { user: u, nombre: stored?.nombre || esp.nombre, rol: "ESPECIALISTA" };
                     initInterface();
-                    showToast(`Bienvenido`);
                 } else alert("❌ Clave Incorrecta");
             } else alert("❌ No Registrado");
         }
@@ -382,12 +342,12 @@
                 for(let k=0; k < 30; k++) {
                     if(rows[k] && rows[k].some(c => String(c).toLowerCase().includes("exp"))) { hIdx = k; break; }
                 }
-                if(hIdx === -1) { alert("❌ Error: Columna EXP no hallada."); return; }
+                if(hIdx === -1) { alert("❌ Columna EXP no hallada."); return; }
                 const nuevos = [];
                 for (let i = hIdx + 1; i < rows.length; i++) {
                     const r = rows[i]; if (!r || !r[1]) continue;
                     nuevos.push({
-                        fase: String(r[0] || "1").trim(), // Fase desde la col 1
+                        fase: String(r[0] || "1").trim(),
                         id: String(r[1] || "").trim(),
                         student: String(r[2] || "N/I").trim().toUpperCase(),
                         inst: String(r[3] || "N/I").trim().toUpperCase(),
@@ -396,9 +356,7 @@
                         seguimiento: "Sin Iniciar", psico: null, psicoId: null, evolucion: ""
                     });
                 }
-                const idsExistentes = new Set(REPOSITORIO.map(e => e.id));
-                const filtrados = nuevos.filter(n => !idsExistentes.has(n.id));
-                REPOSITORIO = [...REPOSITORIO, ...filtrados];
+                REPOSITORIO = [...REPOSITORIO, ...nuevos.filter(n => !REPOSITORIO.some(x => x.id === n.id))];
                 localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
                 renderExps(); 
                 if (session.rol === "MASTER") actualizarVistaMaster();
@@ -419,33 +377,53 @@
 
             body.innerHTML = filtrados.map(exp => {
                 const myCase = exp.psicoId === session.user;
+                
+                // Procesamiento Quirúrgico de Expediente para dos líneas
+                let idText = exp.id;
+                let prefix = "EXP";
+                let num = idText;
+                if(idText.includes("-")) {
+                    let parts = idText.split("-");
+                    prefix = parts[0];
+                    num = parts.slice(1).join("-");
+                }
+
                 return `
                 <tr class="hover:bg-slate-50 transition border-b animate-fade">
-                    <td class="font-black text-gte-orange col-exp">${exp.id}</td>
+                    <td class="col-exp">
+                        <div class="exp-box">
+                            <span class="exp-prefix">${prefix}</span>
+                            <span class="exp-number">${num}</span>
+                        </div>
+                    </td>
                     <td class="col-student">
-                        <p class="font-black text-gte-blue uppercase leading-tight text-[12px]">${exp.student}</p>
-                        <p class="text-[9px] text-slate-400 mt-0.5 uppercase font-bold">CI: ${exp.ci} | ${exp.edad} AÑOS</p>
+                        <div class="flex flex-col">
+                            <span class="font-black text-gte-blue uppercase leading-tight text-[13px]">${exp.student}</span>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-[9px] text-slate-400 font-bold uppercase">CI: ${exp.ci}</span>
+                                <span class="h-1 w-1 rounded-full bg-slate-200"></span>
+                                <span class="text-[9px] text-slate-400 font-bold uppercase">${exp.edad} Años</span>
+                            </div>
+                        </div>
                     </td>
-                    <td class="font-bold text-slate-500 uppercase text-[10px] col-inst">${exp.inst}</td>
-                    <td class="text-center col-fase">
-                        ${myCase ? `
-                            <select onchange="updateFase('${exp.id}', this.value)" class="text-[9px] p-1 border border-slate-200 rounded font-black text-gte-orange outline-none bg-white cursor-pointer w-full text-center">
-                                ${FASE_OPCIONES.map(opt => `<option value="${opt}" ${exp.fase == opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                            </select>
-                        ` : `<span class="fase-badge">${exp.fase || "1"}</span>`}
+                    <td class="col-inst">
+                        <span class="font-bold text-slate-400 uppercase text-[10px] leading-relaxed block max-w-[180px] truncate">${exp.inst}</span>
                     </td>
-                    <td class="text-center col-status">
+                    <td class="col-fase">
+                        <span class="fase-badge">${exp.fase || "1"}</span>
+                    </td>
+                    <td class="col-status text-center">
                         ${myCase ? `
-                            <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[9px] p-1.5 border border-slate-200 rounded font-black text-gte-blue outline-none bg-white cursor-pointer w-full">
+                            <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[9px] p-1.5 border border-slate-200 rounded-lg font-black text-gte-blue outline-none bg-white cursor-pointer w-full">
                                 ${SEGUIMIENTO_OPCIONES.map(opt => `<option value="${opt}" ${exp.seguimiento === opt ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
-                        ` : `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 text-[8px] font-black uppercase truncate block text-center">${exp.seguimiento}</span>`}
+                        ` : `<span class="px-2 py-0.5 rounded bg-slate-50 text-slate-400 text-[8px] font-black uppercase truncate block text-center">${exp.seguimiento}</span>`}
                     </td>
-                    <td class="text-right col-action">
+                    <td class="col-action">
                         ${(!exp.psicoId && session.rol === 'ESPECIALISTA') 
-                            ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] px-3 py-1.5 shadow-sm uppercase font-black">Adoptar</button>` 
-                            : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-1.5 px-4 rounded-lg text-[9px] font-black uppercase hover:bg-gte-orange transition">Evolución</button>`
-                            : `<span class="text-[9px] font-black text-slate-400 uppercase italic truncate block">${exp.psico || 'Libre'}</span>`)
+                            ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] px-4 py-2 shadow-sm font-black uppercase">Adoptar</button>` 
+                            : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-2 px-5 rounded-xl text-[9px] font-black uppercase hover:bg-gte-orange transition shadow-sm">Evolución</button>`
+                            : `<span class="text-[9px] font-black text-slate-300 uppercase italic truncate block">${exp.psico || 'Libre'}</span>`)
                         }
                     </td>
                 </tr>`;
@@ -479,7 +457,7 @@
             exp.seguimiento = "Primera Consulta";
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             renderExps();
-            showToast("Caso Asumido");
+            showToast("Caso Adoptado");
         }
 
         function updateSeguimiento(id, val) {
@@ -488,13 +466,6 @@
             localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
             if(session.rol === "MASTER") actualizarVistaMaster();
             showToast(`Estatus: ${val}`);
-        }
-
-        function updateFase(id, val) {
-            const exp = REPOSITORIO.find(e => e.id === id);
-            exp.fase = val;
-            localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-            showToast(`Fase: ${val}`);
         }
 
         function renderEquipo() {
@@ -506,9 +477,8 @@
                 return `
                 <tr class="border-b text-xs">
                     <td class="p-4 font-black text-gte-blue">${esp.user}</td>
-                    <td class="p-4 font-bold text-slate-600">${n}</td>
+                    <td class="p-4 font-bold text-slate-600 uppercase text-[10px]">${n}</td>
                     <td class="p-4 text-center font-black text-gte-orange text-sm">${c}</td>
-                    <td class="p-4 text-center"><span class="${stored ? 'text-green-500' : 'text-slate-400'} font-black uppercase text-[9px]">${stored ? 'Activo' : 'Pendiente'}</span></td>
                     <td class="p-4 text-right"><button onclick="resetearEspecialista('${esp.user}')" class="text-[9px] font-black text-blue-600 hover:text-red-500 uppercase">Reset</button></td>
                 </tr>`;
             }).join('');
