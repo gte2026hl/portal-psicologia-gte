@@ -273,7 +273,7 @@
             try { const querySnapshot = await getDocs(collection(window.db, window.collectionPath)); REPOSITORIO_FULL = querySnapshot.docs.map(doc => doc.data()); renderExps(); } catch (error) { }
         }
 
-        // --- MOTOR DE EXCEL ULTRA-ROBUSTO (CALIBRADO PARA image_59bbf8.png) ---
+        // --- MOTOR DE EXCEL ULTRA-RESILIENTE (FIX PARA ALERTA DE CARGA) ---
         window.handleExcelCloud = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -291,29 +291,50 @@
                     
                     if (rows.length < 1) throw new Error("Archivo vacío.");
 
-                    // Buscador de cabeceras de precisión quirúrgica
+                    // Buscador de cabeceras de precisión (Normalizado para caracteres especiales)
                     let colIdx = { id: -1, student: -1, inst: -1, ci: -1, edad: -1 };
                     let startRow = 0;
+                    let foundAnyHeader = false;
 
-                    for (let i = 0; i < Math.min(rows.length, 20); i++) {
-                        const row = rows[i]; if (!row) continue;
-                        let foundExp = false;
+                    for (let i = 0; i < Math.min(rows.length, 50); i++) {
+                        const row = rows[i]; if (!row || row.length === 0) continue;
+                        let rowHasIdHeader = false;
+                        
                         row.forEach((cell, idx) => {
-                            const val = String(cell || "").toLowerCase().trim();
-                            // Basado exactamente en la imagen: "N° EXP", "APELLIDOS Y NOMBRES", "INSTITUCION", "C.I", "EDAD"
-                            if (val.includes("exp") || val.includes("n°")) { colIdx.id = idx; foundExp = true; }
-                            if (val.includes("nombres") || val.includes("apellidos") || val.includes("paciente")) colIdx.student = idx;
-                            if (val.includes("inst") || val.includes("plantel") || val.includes("escuela")) colIdx.inst = idx;
-                            if (val.includes("ci") || val.includes("c.i") || val.includes("cedula")) colIdx.ci = idx;
-                            if (val.includes("edad")) colIdx.edad = idx;
+                            if (cell === undefined || cell === null) return;
+                            // Normalización: elimina acentos, puntos y pasa a minúsculas
+                            const val = String(cell).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                            
+                            // Coincidencias amplias para Expediente / ID
+                            if (val.includes("exp") || val.includes("id") || val.includes("nº") || val.includes("num") || val === "n") { 
+                                colIdx.id = idx; 
+                                rowHasIdHeader = true; 
+                            }
+                            // Coincidencias para Nombre
+                            if (val.includes("nombre") || val.includes("apellido") || val.includes("estudiante") || val.includes("paciente")) colIdx.student = idx;
+                            // Coincidencias para Institución
+                            if (val.includes("inst") || val.includes("plantel") || val.includes("escuela") || val.includes("colegio") || val.includes("unidad")) colIdx.inst = idx;
+                            // Coincidencias para Cédula
+                            if (val.includes("ci") || val.includes("cedula") || val.includes("identidad") || val.includes("c.i")) colIdx.ci = idx;
+                            // Coincidencias para Edad
+                            if (val.includes("edad") || val.includes("anos")) colIdx.edad = idx;
                         });
-                        if (foundExp) { startRow = i + 1; break; }
+                        
+                        if (rowHasIdHeader) { 
+                            startRow = i + 1; 
+                            foundAnyHeader = true; 
+                            break; 
+                        }
                     }
 
-                    // Fallback de emergencia si falla la detección automática
-                    if (colIdx.id === -1) colIdx.id = 0;
-                    if (colIdx.student === -1) colIdx.student = 1;
-                    if (colIdx.inst === -1) colIdx.inst = 2;
+                    // PROTOCOLO DE ASUNCIÓN FORZADA (Si falla el scanner, usamos columnas 0, 1 y 2 por defecto)
+                    if (!foundAnyHeader) {
+                        console.warn("Scanner falló. Activando Protocolo de Asunción Forzada.");
+                        colIdx.id = 0;
+                        colIdx.student = 1;
+                        colIdx.inst = 2;
+                        startRow = 0; // Intentamos desde el inicio
+                    }
 
                     let count = 0;
                     for (let i = startRow; i < rows.length; i++) {
@@ -323,8 +344,8 @@
                         const expId = String(r[colIdx.id]).trim();
                         const docData = {
                             id: expId,
-                            student: String(r[colIdx.student] || "SIN IDENTIFICAR").trim(),
-                            inst: String(r[colIdx.inst] || "N/I").trim().toUpperCase(),
+                            student: colIdx.student !== -1 ? String(r[colIdx.student] || "SIN IDENTIFICAR").trim() : "SIN IDENTIFICAR",
+                            inst: colIdx.inst !== -1 ? String(r[colIdx.inst] || "N/I").trim().toUpperCase() : "N/I",
                             ci: colIdx.ci !== -1 ? String(r[colIdx.ci] || "N/I").trim() : "N/I",
                             edad: colIdx.edad !== -1 ? String(r[colIdx.edad] || "N/I").trim() : "N/I",
                             seguimiento: "Sin Iniciar",
@@ -334,9 +355,9 @@
                         await setDoc(doc(window.db, window.collectionPath, expId), docData);
                         count++;
                     }
-                    alert(`✅ Éxito: Se han cargado ${count} expedientes meticulosamente.`);
+                    alert(`✅ Operación Exitosa: Se han asumido ${count} expedientes en la nube.`);
                     cargarDatosDesdeNube();
-                } catch (err) { alert("Error de Carga: " + err.message); }
+                } catch (err) { alert("Error Crítico: " + err.message); }
                 finally { btn.innerHTML = originalText; btn.disabled = false; e.target.value = ""; }
             };
             reader.readAsArrayBuffer(file);
