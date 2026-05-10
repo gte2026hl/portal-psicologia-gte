@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GTE 2026 - Gestión Clínica Masiva</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Librerías de Apoyo -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -160,14 +160,18 @@
             <header class="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div><h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight leading-none">Repositorio GTE</h2><p class="text-slate-500 mt-3 font-semibold">Gestión Masiva de Salud Mental Municipal.</p></div>
                 <div id="master-actions" class="hidden flex flex-wrap items-center gap-4">
-                    <button onclick="document.getElementById('bulk-input').click()" id="btn-excel-bulk" class="bg-gte-blue px-10 py-5 rounded-2xl shadow-xl text-white transition hover:scale-105 active:scale-95"><span class="text-gte-orange font-black text-[10px] uppercase tracking-widest">📊 Carga Masiva (Excel)</span></button>
+                    <button onclick="triggerExcel()" id="btn-excel-bulk" class="bg-gte-blue px-10 py-5 rounded-2xl shadow-xl text-white transition hover:scale-105 active:scale-95">
+                        <span class="text-gte-orange font-black text-[10px] uppercase tracking-widest">📊 Carga Masiva (Excel)</span>
+                    </button>
                     <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcelCloud(event)">
                 </div>
             </header>
+            
             <div class="mb-10 flex flex-col md:flex-row gap-4 items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                 <div class="relative flex-grow w-full"><span class="absolute inset-y-0 left-0 pl-5 flex items-center text-slate-300">🔍</span><input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-12 pr-6 py-4 rounded-2xl text-sm font-bold text-gte-blue placeholder-slate-300 outline-none focus:ring-2 ring-gte-orange transition" placeholder="Filtrar por expediente, nombre o institución..."></div>
                 <div class="px-6 py-4 bg-gte-blue/5 rounded-2xl border border-gte-blue/5"><p class="text-[10px] font-black text-gte-blue uppercase tracking-widest whitespace-nowrap"><span id="contador-resultados" class="text-gte-orange">0</span> Registros</p></div>
             </div>
+
             <div class="bg-white rounded-[35px] shadow-sm border border-slate-100 overflow-hidden">
                 <div class="overflow-x-auto"><table class="w-full text-left min-w-[900px]">
                     <thead class="bg-slate-50 border-b border-slate-100"><tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest"><th class="p-8">Expediente</th><th class="p-8">Paciente / Identidad</th><th class="p-8">Institución</th><th class="p-8 text-center">Seguimiento</th><th class="p-8 text-right">Acción Clínica</th></tr></thead>
@@ -180,6 +184,7 @@
             </div>
         </section>
 
+        <!-- OTROS TABS (ESTADÍSTICAS Y PERFIL) -->
         <section id="tab-estadisticas" class="tab-content hidden animate-fade">
              <header class="mb-12 flex justify-between items-end">
                 <div><h2 class="text-4xl font-black text-gte-blue uppercase tracking-tight">Estadísticas GTE</h2><p class="text-slate-500 mt-3 font-semibold">Análisis objetivo de impacto en Salud Mental.</p></div>
@@ -213,6 +218,17 @@
 
     <script type="module">
         import { doc, setDoc, getDocs, collection, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 1. CARGA DINÁMICA DE LIBRERÍA XLSX (Basado en su requerimiento)
+        let isXLSXReady = false;
+        function ensureXLSX(callback) {
+            if (window.XLSX) { isXLSXReady = true; return callback(); }
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+            script.async = true;
+            script.onload = () => { isXLSXReady = true; callback(); };
+            document.head.appendChild(script);
+        }
 
         const DB_BASE = {
             master: { user: "admin_master", pass: "gte2026master", nombre: "COORDINADOR MASTER" },
@@ -274,6 +290,12 @@
         }
 
         // --- MOTOR DE EXCEL ULTRA-RESILIENTE (FIX PARA ALERTA DE CARGA) ---
+        window.triggerExcel = () => {
+            ensureXLSX(() => {
+                document.getElementById('bulk-input').click();
+            });
+        };
+
         window.handleExcelCloud = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -294,52 +316,31 @@
                     // Buscador de cabeceras de precisión (Normalizado para caracteres especiales)
                     let colIdx = { id: -1, student: -1, inst: -1, ci: -1, edad: -1 };
                     let startRow = 0;
-                    let foundAnyHeader = false;
+                    let foundHeader = false;
 
                     for (let i = 0; i < Math.min(rows.length, 50); i++) {
                         const row = rows[i]; if (!row || row.length === 0) continue;
-                        let rowHasIdHeader = false;
-                        
                         row.forEach((cell, idx) => {
                             if (cell === undefined || cell === null) return;
-                            // Normalización: elimina acentos, puntos y pasa a minúsculas
                             const val = String(cell).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-                            
-                            // Coincidencias amplias para Expediente / ID
-                            if (val.includes("exp") || val.includes("id") || val.includes("nº") || val.includes("num") || val === "n") { 
-                                colIdx.id = idx; 
-                                rowHasIdHeader = true; 
-                            }
-                            // Coincidencias para Nombre
+                            if (val.includes("exp") || val.includes("id") || val.includes("n") || val.includes("num")) { colIdx.id = idx; foundHeader = true; }
                             if (val.includes("nombre") || val.includes("apellido") || val.includes("estudiante") || val.includes("paciente")) colIdx.student = idx;
-                            // Coincidencias para Institución
-                            if (val.includes("inst") || val.includes("plantel") || val.includes("escuela") || val.includes("colegio") || val.includes("unidad")) colIdx.inst = idx;
-                            // Coincidencias para Cédula
+                            if (val.includes("inst") || val.includes("plantel") || val.includes("escuela")) colIdx.inst = idx;
                             if (val.includes("ci") || val.includes("cedula") || val.includes("identidad") || val.includes("c.i")) colIdx.ci = idx;
-                            // Coincidencias para Edad
-                            if (val.includes("edad") || val.includes("anos")) colIdx.edad = idx;
+                            if (val.includes("edad")) colIdx.edad = idx;
                         });
-                        
-                        if (rowHasIdHeader) { 
-                            startRow = i + 1; 
-                            foundAnyHeader = true; 
-                            break; 
-                        }
+                        if (foundHeader && colIdx.student !== -1) { startRow = i + 1; break; }
                     }
 
-                    // PROTOCOLO DE ASUNCIÓN FORZADA (Si falla el scanner, usamos columnas 0, 1 y 2 por defecto)
-                    if (!foundAnyHeader) {
-                        console.warn("Scanner falló. Activando Protocolo de Asunción Forzada.");
-                        colIdx.id = 0;
-                        colIdx.student = 1;
-                        colIdx.inst = 2;
-                        startRow = 0; // Intentamos desde el inicio
-                    }
+                    // PROTOCOLO DE ASUNCIÓN FORZADA (Si falla el escáner, forzamos columnas 0, 1 y 2)
+                    if (colIdx.id === -1) colIdx.id = 0;
+                    if (colIdx.student === -1) colIdx.student = 1;
+                    if (colIdx.inst === -1) colIdx.inst = 2;
 
                     let count = 0;
                     for (let i = startRow; i < rows.length; i++) {
                         const r = rows[i];
-                        if (!r || !r[colIdx.id]) continue;
+                        if (!r || !r[colIdx.id] || String(r[colIdx.id]).trim() === "") continue;
                         
                         const expId = String(r[colIdx.id]).trim();
                         const docData = {
