@@ -173,36 +173,67 @@
         }
 
         // FUNCIÓN QUIRÚRGICA: LIMPIA DUPLICADOS ANTES DE SUBIR
-        async function handleExcel(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
-                const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("exp")));
-                if(hIdx === -1) { alert("❌ Estructura no válida"); return; }
+async function handleExcel(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const wb = XLSX.read(data, { type: 'array' });
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+            
+            // 1. Encontrar la fila de encabezados (buscamos donde diga "Expediente")
+            let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("expediente")));
+            if(hIdx === -1) { alert("❌ No encontré la columna 'Expediente'"); return; }
 
-                const mapaLimpio = new Map();
-                for (let i = hIdx + 1; i < rows.length; i++) {
-                    const r = rows[i]; if (!r || !r[1]) continue;
-                    const id_gte = String(r[0] || "").trim();
-                    mapaLimpio.set(id_gte, {
-                        id_gte: id_gte,
-                        nombre_paciente: String(r[1] || "N/I").trim().toUpperCase(),
-                        institucion_educativa: String(r[2] || "N/I").trim().toUpperCase(),
-                        cedula_paciente: String(r[3] || "N/I").trim(),
-                        edad_paciente: parseInt(r[4]) || 0,
-                        fase_actual: String(r[5] || "1").trim(),
-                        seguimiento: "Sin Iniciar"
-                    });
-                }
-                const { error } = await _supabase.from('expedientes').upsert(Array.from(mapaLimpio.values()), { onConflict: 'id_gte' });
-                if (error) alert("Error: " + error.message);
-                else { showToast("✅ Nube Sincronizada"); await cargarDesdeNube(); }
-            };
-            reader.readAsArrayBuffer(file);
+            const mapaLimpio = new Map();
+
+            // 2. Procesar filas desde el encabezado hacia abajo
+            for (let i = hIdx + 1; i < rows.length; i++) {
+                const r = rows[i];
+                // Verificamos que la fila tenga datos y que el ID del expediente no esté vacío
+                if (!r || r.length < 2 || !r[1]) continue;
+
+                const id_gte = String(r[1]).trim(); // Columna 1: Expediente
+
+                mapaLimpio.set(id_gte, {
+                    id_gte: id_gte,
+                    nombre_paciente: String(r[2] || "N/I").trim().toUpperCase(),    // Columna 2: Nombre
+                    institucion_educativa: String(r[3] || "N/I").trim().toUpperCase(), // Columna 3: Institución
+                    cedula_paciente: String(r[4] || "N/I").trim(),                // Columna 4: Cédula
+                    edad_paciente: parseInt(r[5]) || 0,                            // Columna 5: Edad
+                    fase_actual: String(r[0] || "3").trim(),                       // Columna 0: Fase
+                    seguimiento: "Sin Iniciar"
+                });
+            }
+
+            const datosFinales = Array.from(mapaLimpio.values());
+            
+            if (datosFinales.length === 0) {
+                alert("⚠️ No se encontraron datos válidos para cargar.");
+                return;
+            }
+
+            // 3. Disparo masivo a Supabase
+            const { error } = await _supabase
+                .from('expedientes')
+                .upsert(datosFinales, { onConflict: 'id_gte' });
+
+            if (error) {
+                console.error("Error Supabase:", error);
+                alert("Error de Sincronización: " + error.message);
+            } else {
+                showToast(`✅ ¡Nube Sincronizada! ${datosFinales.length} casos únicos cargados.`);
+                await cargarDesdeNube();
+            }
+        } catch (err) {
+            console.error("Error procesando Excel:", err);
+            alert("❌ Error al procesar el archivo. Revisa el formato.");
         }
+    };
+    reader.readAsArrayBuffer(file);
+}
 
         async function adoptar(id_gte) {
             const { error } = await _supabase.from('expedientes')
