@@ -6,142 +6,50 @@
     <title>GTE 2026 - Portal Clínico de Gestión Municipal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap');
-        
-        :root { 
-            --gte-blue: #003366; 
-            --gte-orange: #FF6600; 
-            --gte-gold: #D4AF37;
-            --gte-bg: #f8fafc;
-        }
-
-        body { 
-            font-family: 'Open Sans', sans-serif; 
-            background-color: var(--gte-bg); 
-            margin: 0; 
-            overflow-x: hidden; 
-        }
-
+        :root { --gte-blue: #003366; --gte-orange: #FF6600; --gte-gold: #D4AF37; --gte-bg: #f8fafc; }
+        body { font-family: 'Open Sans', sans-serif; background-color: var(--gte-bg); margin: 0; overflow-x: hidden; }
         h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
-
         .text-gte-blue { color: var(--gte-blue); }
         .bg-gte-blue { background-color: var(--gte-blue); }
         .text-gte-orange { color: var(--gte-orange); }
-
-        .btn-gte-orange {
-            background-color: var(--gte-orange); color: white; transition: all 0.2s ease;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-weight: 800; padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer;
-        }
+        .btn-gte-orange { background-color: var(--gte-orange); color: white; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer; }
         .btn-gte-orange:hover { background-color: var(--gte-blue); transform: translateY(-1px); }
-
-        .btn-gte-blue {
-            background-color: var(--gte-blue); color: white; transition: all 0.2s ease;
-            font-weight: 800; border-radius: 12px; border: none; padding: 12px 24px; cursor: pointer;
-        }
-
-        .nav-button {
-            width: 100%; text-align: left; padding: 16px 24px; display: flex; align-items: center; gap: 14px;
-            color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 700; transition: all 0.3s ease;
-            border-left: 4px solid transparent; cursor: pointer; background: transparent;
-        }
+        .btn-gte-blue { background-color: var(--gte-blue); color: white; transition: all 0.2s ease; font-weight: 800; border-radius: 12px; border: none; padding: 12px 24px; cursor: pointer; }
+        .nav-button { width: 100%; text-align: left; padding: 16px 24px; display: flex; align-items: center; gap: 14px; color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 700; transition: all 0.3s ease; border-left: 4px solid transparent; cursor: pointer; background: transparent; }
         .nav-button:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
         .nav-button.active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid var(--gte-orange); color: white; }
-
         .content-card { background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); border: 1px solid #eef2f6; }
-
-        .form-input { 
-            width: 100%; border: 2px solid #f1f5f9; border-radius: 12px; padding: 10px 14px; font-size: 14px; outline: none;
-            transition: 0.2s; color: #1e293b; background: #f8fafc;
-        }
-
+        .form-input { width: 100%; border: 2px solid #f1f5f9; border-radius: 12px; padding: 10px 14px; font-size: 14px; outline: none; transition: 0.2s; color: #1e293b; background: #f8fafc; }
         .kpi-card { background: white; padding: 20px; border-radius: 18px; border: 1px solid #eef2f6; transition: 0.3s; position: relative; overflow: hidden; }
-        .kpi-card::after { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gte-orange); opacity: 0; transition: 0.3s; }
         .kpi-card:hover { transform: translateY(-3px); border-color: var(--gte-orange); }
-        .kpi-card:hover::after { opacity: 1; }
-
-        #gte-toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background-color: var(--gte-blue); color: white; padding: 12px 30px; border-radius: 50px;
-            font-weight: 800; font-size: 10px; text-transform: uppercase; border: 2px solid var(--gte-orange);
-            z-index: 10000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-
-        .animate-fade { animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* TABLA QUIRÚRGICA: ARMONÍA DE ESPACIOS */
+        #gte-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: var(--gte-blue); color: white; padding: 12px 30px; border-radius: 50px; font-weight: 800; font-size: 10px; text-transform: uppercase; border: 2px solid var(--gte-orange); z-index: 10000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
         .gte-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        .gte-table th { 
-            padding: 10px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; 
-            color: #94a3b8; letter-spacing: 0.05em; border-bottom: 2px solid #f1f5f9; text-align: left;
-        }
+        .gte-table th { padding: 10px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; border-bottom: 2px solid #f1f5f9; text-align: left; }
         .gte-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
-
-        .col-exp { width: 100px; }
-        .col-student { width: 280px; }
-        .col-inst { width: 200px; }
-        .col-fase { width: 60px; text-align: left; }
-        .col-status { width: 155px; }
-        .col-action { width: 180px; text-align: left; }
-
-        .exp-box { display: flex; flex-direction: column; line-height: 1.1; }
         .exp-prefix { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
         .exp-number { font-size: 14px; font-weight: 900; color: var(--gte-orange); }
-
-        .fase-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 26px; height: 26px; border-radius: 8px; font-weight: 900; font-size: 12px;
-            background: #fff7ed; color: var(--gte-orange); border: 2px solid #ffedd5;
-        }
-
-        .clinical-modal { 
-            position: fixed; inset: 0; background: rgba(0, 51, 102, 0.9); 
-            display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
-        }
+        .fase-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; font-weight: 900; font-size: 12px; background: #fff7ed; color: var(--gte-orange); border: 2px solid #ffedd5; }
+        .clinical-modal { position: fixed; inset: 0; background: rgba(0, 51, 102, 0.9); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
         .clinical-box { background: white; width: 100%; max-width: 800px; border-radius: 30px; overflow: hidden; }
-
-        .gradient-text-footer {
-            background: linear-gradient(to right, #FF6600, #D4AF37);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
+        .gradient-text-footer { background: linear-gradient(to right, #FF6600, #D4AF37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden animate-fade">
+        <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden">
             <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
             <div class="p-12 text-center">
                 <h1 class="text-3xl font-black text-[#003366] mb-2 uppercase tracking-tighter">Guacara Te Escucha 2026</h1>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal Clínico de Gestión Municipal</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal Clínico Municipal</p>
                 <div class="space-y-6 text-left">
-                    <div>
-                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Identificación</label>
-                        <input type="text" id="user_id" class="form-input font-bold" placeholder="Especialista o Master">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2 mb-2 block">Clave de Acceso</label>
-                        <div class="relative">
-                            <input type="password" id="user_pass" class="form-input font-bold pr-12" placeholder="••••••••">
-                            <button type="button" onclick="togglePasswordVisibility('user_pass', this)" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-300 hover:text-gte-orange transition">
-                                <svg id="eye-icon-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                    <input type="text" id="user_id" class="form-input font-bold" placeholder="Usuario">
+                    <input type="password" id="user_pass" class="form-input font-bold" placeholder="••••••••">
                     <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-4 uppercase text-xs tracking-widest shadow-lg">Ingresar</button>
-                </div>
-                <div class="mt-10">
-                    <p class="text-[9px] font-bold uppercase tracking-widest leading-relaxed">
-                        <span class="text-slate-300">Alcaldia de Guacara/Dierección Ejecutiva</span><br>
-                        <span class="gradient-text-footer">HDC2026 — Guacara Te Escucha</span>
-                    </p>
                 </div>
             </div>
         </div>
@@ -149,7 +57,6 @@
 
     <div id="gte-toast">Operación Exitosa</div>
 
-    <!-- MODAL EVOLUCIÓN CLÍNICA -->
     <div id="modal-historia" class="clinical-modal">
         <div class="clinical-box flex flex-col max-h-[90vh] shadow-2xl">
             <div class="bg-gte-blue p-6 text-white flex justify-between items-center">
@@ -160,123 +67,62 @@
                 <button onclick="cerrarHistoria()" class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded-lg text-[10px] font-bold transition">CERRAR</button>
             </div>
             <div class="p-8 overflow-y-auto flex-grow space-y-6 bg-white">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-slate-50 p-4 rounded-xl">
-                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Paciente</p>
-                        <p id="modal-nombre" class="font-bold text-gte-blue uppercase text-xs">---</p>
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-xl">
-                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Institución</p>
-                        <p id="modal-inst" class="font-bold text-gte-blue uppercase text-xs">---</p>
-                    </div>
-                </div>
                 <textarea id="modal-evolucion" class="form-input h-64 resize-none font-semibold text-slate-700 leading-relaxed" placeholder="Documente detalladamente los hallazgos..."></textarea>
             </div>
             <div class="p-6 bg-slate-50 border-t">
-                <button onclick="guardarEvolucion()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-xl font-black">Actualizar Historia</button>
+                <button onclick="guardarEvolucion()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-xl font-black">Actualizar Historia en la Nube</button>
             </div>
         </div>
     </div>
 
-    <!-- SIDEBAR -->
-    <nav id="sidebar" class="hidden w-full md:w-72 bg-[#003366] text-white flex flex-col sticky top-0 md:h-screen z-50 shadow-2xl">
+    <nav id="sidebar" class="hidden w-full md:w-72 bg-[#003366] text-white flex flex-col sticky top-0 md:h-screen z-50">
         <div class="p-8">
             <h2 class="text-xl font-black uppercase leading-tight tracking-tighter">GUACARA<br><span class="text-gte-orange">TE ESCUCHA</span></h2>
-            <div class="mt-8 flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/5">
-                <div class="w-8 h-8 bg-gte-orange rounded-lg flex items-center justify-center font-black text-white text-base">👤</div>
-                <div class="overflow-hidden">
-                    <p id="user-display-name" class="text-[11px] font-black leading-none truncate">---</p>
-                    <p id="user-role-label" class="text-[8px] text-white/40 uppercase font-bold mt-1 tracking-widest">---</p>
-                </div>
+            <div class="mt-8 flex items-center gap-3 bg-white/5 p-3 rounded-2xl">
+                <div id="user-display-name" class="text-[11px] font-black truncate">Cargando...</div>
             </div>
         </div>
         <div id="nav-menu" class="flex-grow space-y-1 px-4 py-2"></div>
-        <div class="p-8">
-            <button onclick="cerrarSesion()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-[9px] font-black text-red-400 uppercase transition">Cerrar Sesión</button>
-        </div>
+        <div class="p-8"><button onclick="cerrarSesion()" class="w-full py-3 bg-red-500/10 rounded-xl text-[9px] font-black text-red-400 uppercase">Cerrar Sesión</button></div>
     </nav>
 
-    <!-- MAIN CONTENT -->
     <main id="main-content" class="hidden flex-grow p-4 md:p-6 lg:p-8 overflow-y-auto w-full">
-
-        <!-- TAB: REPOSITORIO MAESTRO -->
         <section id="tab-expedientes" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
-            <header class="mb-6 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+            <header class="mb-6 flex justify-between items-end">
                 <div>
-                    <h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight leading-none">Repositorio Maestro</h2>
-                    <p class="text-slate-500 mt-1 uppercase text-[8px] font-bold tracking-[0.2em]">Sincronización Municipal GTE 2026</p>
+                    <h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight">Repositorio Maestro</h2>
+                    <p class="text-slate-500 uppercase text-[8px] font-bold tracking-widest">Sincronización en Tiempo Real</p>
                 </div>
-                <div id="master-actions" class="hidden flex items-center gap-3">
-                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-4 py-2 rounded-lg text-[9px] uppercase shadow-sm transition border-2 border-blue-600 font-black text-blue-600">📊 CARGA MAESTRA</button>
+                <div id="master-actions" class="hidden flex gap-3">
+                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-4 py-2 rounded-lg text-[9px] border-2 border-blue-600 font-black text-blue-600">📊 CARGA EXCEL</button>
                     <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcel(event)">
-                    <button onclick="limpiarRepositorio()" class="text-[9px] font-bold text-red-300 hover:text-red-500 uppercase">Vaciar</button>
                 </div>
             </header>
-
-            <div class="mb-4 flex flex-col md:flex-row gap-3 items-center bg-white p-2 rounded-xl shadow-sm border border-slate-100">
-                <div class="relative flex-grow">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-300">🔍</span>
-                    <input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="w-full bg-slate-50 border-none pl-10 pr-4 py-2 rounded-lg text-sm font-semibold placeholder-slate-300 outline-none focus:ring-2 ring-gte-orange/20 transition" placeholder="Filtrar registros...">
-                </div>
-                <div class="px-3 text-[9px] font-bold text-slate-400 uppercase">
-                    <span id="contador-resultados" class="text-gte-orange font-black">0</span> Resultados
-                </div>
-            </div>
+            
+            <div class="mb-4"><input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="form-input" placeholder="Buscar por nombre, expediente o escuela..."></div>
 
             <div class="content-card overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="gte-table">
-                        <thead>
-                            <tr>
-                                <th class="col-exp">Expediente</th>
-                                <th class="col-student">Estudiante / Identidad</th>
-                                <th class="col-inst">Institución</th>
-                                <th class="col-fase">Fase</th>
-                                <th class="col-status text-center">Estatus</th>
-                                <th class="col-action">Responsable</th>
-                            </tr>
-                        </thead>
-                        <tbody id="exp-list" class="divide-y divide-slate-50"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- OTRAS SECCIONES -->
-        <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
-            <header class="mb-8"><h2 class="text-3xl font-black text-gte-blue uppercase tracking-tight">Consola Master</h2></header>
-            <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
-        </section>
-
-        <section id="tab-equipo" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
-            <header class="mb-8"><h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight text-center">Gestión de Equipo</h2></header>
-            <div class="content-card overflow-hidden max-w-4xl mx-auto">
-                <table class="w-full text-left gte-table">
-                    <thead><tr><th>ID</th><th>Nombre</th><th class="text-center">Casos</th><th class="text-right">Acción</th></tr></thead>
-                    <tbody id="equipo-list-body"></tbody>
+                <table class="gte-table">
+                    <thead>
+                        <tr><th>Expediente</th><th>Estudiante</th><th>Institución</th><th>Fase</th><th class="text-center">Estatus</th><th>Acción</th></tr>
+                    </thead>
+                    <tbody id="exp-list"></tbody>
                 </table>
             </div>
         </section>
 
-        <section id="tab-perfil" class="tab-content hidden animate-fade max-w-[1000px] mx-auto">
-            <header class="mb-8"><h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight">Mi Perfil</h2></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="content-card p-8">
-                    <h3 class="text-sm font-black text-gte-blue uppercase mb-4">👤 Identidad</h3>
-                    <input type="text" id="perfil-nombre" class="form-input font-bold mb-4" placeholder="Nombre completo">
-                    <button onclick="actualizarDatosPersonales()" class="btn-gte-orange w-full text-[10px] uppercase tracking-widest">Sincronizar</button>
-                </div>
-                <div class="content-card p-8">
-                    <h3 class="text-sm font-black text-gte-blue uppercase mb-4">🔒 Seguridad</h3>
-                    <input type="password" id="perfil-pass1" class="form-input font-bold mb-2" placeholder="Nueva Clave">
-                    <input type="password" id="perfil-pass2" class="form-input font-bold mb-4" placeholder="Confirmar">
-                    <button onclick="actualizarPassword()" class="btn-gte-blue w-full py-3 text-[10px] uppercase tracking-widest">Actualizar Clave</button>
-                </div>
-            </div>
+        <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
+             <header class="mb-8"><h2 class="text-3xl font-black text-gte-blue uppercase tracking-tight">Consola de Control Municipal</h2></header>
+             <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
         </section>
     </main>
 
     <script>
+        // --- 1. CONFIGURACIÓN SUPABASE (EL CHIP) ---
+        const SUPABASE_URL = "https://mltfjgkbparwwofgknjg.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_RSR809FqZWUorWzfJnjomA_gA33qeLK";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const DB_BASE = {
             master: { user: "admin_master", pass: "gte2026master", nombre: "MASTER ADMIN" },
             especialistas: Array.from({ length: 20 }, (_, i) => ({
@@ -286,27 +132,13 @@
             }))
         };
 
-        /* SEGUIMIENTO OPTIMIZADO Y ABREVIADO SEGÚN SOLICITUD */
         const SEGUIMIENTO_OPCIONES = ["Sin Iniciar", "1era Consulta", "2da Consulta", "3era Consulta", "4ta Consulta", "Derivación", "Cerrado", "Alta"];
-        
-        let REPOSITORIO = JSON.parse(localStorage.getItem('gte_repositorio')) || [];
+        let REPOSITORIO = [];
         let session = null;
         let filtroBusqueda = "";
         let activeExpId = null;
 
-        function togglePasswordVisibility(id, btn) {
-            const input = document.getElementById(id);
-            const icon = document.getElementById('eye-icon-svg');
-            
-            if (input.type === "password") {
-                input.type = "text";
-                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
-            } else {
-                input.type = "password";
-                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
-            }
-        }
-
+        // --- 2. MOTOR DE ACCESO ---
         function accesoUniversal() {
             const u = document.getElementById('user_id').value.trim().toLowerCase();
             const p = document.getElementById('user_pass').value;
@@ -314,142 +146,125 @@
             if (u === DB_BASE.master.user && p === DB_BASE.master.pass) {
                 session = { user: u, nombre: DB_BASE.master.nombre, rol: "MASTER" };
                 initInterface();
-                return;
-            }
-
-            const esp = DB_BASE.especialistas.find(e => e.user === u);
-            if (esp) {
-                const stored = JSON.parse(localStorage.getItem(`perfil_${u}`));
-                const finalPass = stored?.pass || esp.pass;
-                if (p === finalPass) {
-                    session = { user: u, nombre: stored?.nombre || esp.nombre, rol: "ESPECIALISTA" };
+            } else {
+                const esp = DB_BASE.especialistas.find(e => e.user === u && p === e.pass);
+                if (esp) {
+                    session = { user: u, nombre: esp.nombre, rol: "ESPECIALISTA" };
                     initInterface();
-                } else alert("❌ Clave Incorrecta");
-            } else alert("❌ No Registrado");
+                } else alert("❌ Credenciales Incorrectas");
+            }
         }
 
-        function initInterface() {
+        async function initInterface() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display-name').innerText = session.nombre;
-            document.getElementById('user-role-label').innerText = session.rol;
-            document.getElementById('perfil-nombre').value = session.nombre;
 
             const menu = document.getElementById('nav-menu');
             if (session.rol === "MASTER") {
                 document.getElementById('master-actions').classList.remove('hidden');
                 menu.innerHTML = `
-                    <button onclick="switchTab('tab-master-stats')" id="btn-stats" class="nav-button active">📊 Estadísticas</button>
-                    <button onclick="switchTab('tab-equipo')" id="btn-equipo" class="nav-button">👥 Especialistas</button>
-                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button">📁 Repositorio</button>
-                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Perfil</button>
+                    <button onclick="switchTab('tab-master-stats')" class="nav-button active">📊 Estadísticas</button>
+                    <button onclick="switchTab('tab-expedientes')" class="nav-button">📁 Repositorio Maestro</button>
                 `;
-                actualizarVistaMaster();
                 switchTab('tab-master-stats');
             } else {
-                document.getElementById('master-actions').classList.add('hidden');
-                menu.innerHTML = `
-                    <button onclick="switchTab('tab-expedientes')" id="btn-exp" class="nav-button active">📁 Mis Casos</button>
-                    <button onclick="switchTab('tab-perfil')" id="btn-perfil" class="nav-button">⚙️ Perfil</button>
-                `;
+                menu.innerHTML = `<button onclick="switchTab('tab-expedientes')" class="nav-button active">📁 Mis Casos Asignados</button>`;
                 switchTab('tab-expedientes');
             }
-            renderExps();
+            await cargarDesdeNube();
         }
 
-        function handleExcel(e) {
+        // --- 3. MOTOR DE NUBE (SUPABASE) ---
+        async function cargarDesdeNube() {
+            const { data, error } = await _supabase.from('expedientes').select('*').order('created_at', { ascending: false });
+            if (error) { console.error(error); return; }
+            REPOSITORIO = data;
+            renderExps();
+            if (session.rol === "MASTER") actualizarKPIs();
+        }
+
+        async function handleExcel(e) {
             const file = e.target.files[0];
             if(!file) return;
             const reader = new FileReader();
-            reader.onload = (evt) => {
-                const data = new Uint8Array(evt.target.result);
-                const wb = XLSX.read(data, { type: 'array' });
+            reader.onload = async (evt) => {
+                const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let hIdx = -1;
-                for(let k=0; k < 30; k++) {
-                    if(rows[k] && rows[k].some(c => String(c).toLowerCase().includes("exp"))) { hIdx = k; break; }
-                }
-                if(hIdx === -1) { alert("❌ Estructura no hallada."); return; }
+                
+                // Buscamos encabezado
+                let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("exp")));
                 const nuevos = [];
                 for (let i = hIdx + 1; i < rows.length; i++) {
                     const r = rows[i]; if (!r || !r[1]) continue;
                     nuevos.push({
-                        fase: String(r[0] || "1").trim(),
-                        id: String(r[1] || "").trim(),
-                        student: String(r[2] || "N/I").trim().toUpperCase(),
-                        inst: String(r[3] || "N/I").trim().toUpperCase(),
-                        ci: String(r[4] || "N/I").trim(),
-                        edad: String(r[5] || "N/I").trim(),
-                        seguimiento: "Sin Iniciar", psico: null, psicoId: null, evolucion: ""
+                        id_gte: String(r[0] || "").trim(),
+                        nombre_paciente: String(r[1] || "N/I").trim().toUpperCase(),
+                        institucion_educativa: String(r[2] || "N/I").trim().toUpperCase(),
+                        cedula_paciente: String(r[3] || "N/I").trim(),
+                        edad_paciente: parseInt(r[4]) || 0,
+                        fase_actual: String(r[5] || "1").trim(),
+                        seguimiento: "Sin Iniciar"
                     });
                 }
-                REPOSITORIO = [...REPOSITORIO, ...nuevos.filter(n => !REPOSITORIO.some(x => x.id === n.id))];
-                localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-                renderExps(); 
-                if (session.rol === "MASTER") actualizarVistaMaster();
-                showToast(`✅ Sincronizado`);
+                
+                const { error } = await _supabase.from('expedientes').upsert(nuevos, { onConflict: 'id_gte' });
+                if (error) alert("Error: " + error.message);
+                else { showToast("✅ Nube Sincronizada"); await cargarDesdeNube(); }
             };
             reader.readAsArrayBuffer(file);
         }
 
+        async function adoptar(id_gte) {
+            const { error } = await _supabase.from('expedientes')
+                .update({ psico_asignado_id: session.user, psico_asignado_nombre: session.nombre, seguimiento: '1era Consulta' })
+                .eq('id_gte', id_gte);
+            
+            if (!error) { showToast("Caso Adoptado"); await cargarDesdeNube(); }
+        }
+
+        async function updateSeguimiento(id_gte, val) {
+            await _supabase.from('expedientes').update({ seguimiento: val }).eq('id_gte', id_gte);
+            showToast("Estatus Actualizado");
+            await cargarDesdeNube();
+        }
+
+        async function guardarEvolucion() {
+            const txt = document.getElementById('modal-evolucion').value;
+            const { error } = await _supabase.from('expedientes').update({ evolucion_clinica: txt }).eq('id_gte', activeExpId);
+            if (!error) { showToast("Historia Guardada en Nube"); cerrarHistoria(); await cargarDesdeNube(); }
+        }
+
+        // --- 4. RENDERIZADO DE INTERFAZ ---
         function renderExps() {
             const body = document.getElementById('exp-list');
-            if (!body) return;
             const filtrados = REPOSITORIO.filter(exp => 
-                exp.id.toLowerCase().includes(filtroBusqueda) || 
-                exp.student.toLowerCase().includes(filtroBusqueda) || 
-                exp.inst.toLowerCase().includes(filtroBusqueda)
+                exp.id_gte.toLowerCase().includes(filtroBusqueda) || 
+                exp.nombre_paciente.toLowerCase().includes(filtroBusqueda) || 
+                exp.institucion_educativa.toLowerCase().includes(filtroBusqueda)
             );
-            document.getElementById('contador-resultados').innerText = filtrados.length;
 
             body.innerHTML = filtrados.map(exp => {
-                const myCase = exp.psicoId === session.user;
-                let idText = exp.id;
-                let prefix = "EXP";
-                let num = idText;
-                if(idText.includes("-")) {
-                    let parts = idText.split("-");
-                    prefix = parts[0];
-                    num = parts.slice(1).join("-");
-                }
-
+                const myCase = exp.psico_asignado_id === session.user;
                 return `
-                <tr class="hover:bg-slate-50 transition border-b animate-fade">
-                    <td class="col-exp">
-                        <div class="exp-box">
-                            <span class="exp-prefix">${prefix}</span>
-                            <span class="exp-number">${num}</span>
-                        </div>
-                    </td>
-                    <td class="col-student">
-                        <div class="flex flex-col">
-                            <span class="font-black text-gte-blue uppercase leading-tight text-[13px]">${exp.student}</span>
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-[9px] text-slate-400 font-bold uppercase">CI: ${exp.ci}</span>
-                                <span class="h-1 w-1 rounded-full bg-slate-200"></span>
-                                <span class="text-[9px] text-slate-400 font-bold uppercase">${exp.edad} Años</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="col-inst">
-                        <span class="font-bold text-slate-400 uppercase text-[10px] leading-relaxed block max-w-[180px] truncate">${exp.inst}</span>
-                    </td>
-                    <td class="col-fase">
-                        <span class="fase-badge">${exp.fase || "1"}</span>
-                    </td>
-                    <td class="col-status text-center">
+                <tr class="hover:bg-slate-50 border-b">
+                    <td><div class="exp-box"><span class="exp-prefix">ID</span><span class="exp-number">${exp.id_gte}</span></div></td>
+                    <td><span class="font-black text-gte-blue uppercase text-[12px]">${exp.nombre_paciente}</span></td>
+                    <td><span class="text-slate-400 font-bold uppercase text-[9px]">${exp.institucion_educativa}</span></td>
+                    <td><span class="fase-badge">${exp.fase_actual}</span></td>
+                    <td class="text-center">
                         ${myCase ? `
-                            <select onchange="updateSeguimiento('${exp.id}', this.value)" class="text-[9px] p-1.5 border border-slate-200 rounded-lg font-black text-gte-blue outline-none bg-white cursor-pointer w-full">
+                            <select onchange="updateSeguimiento('${exp.id_gte}', this.value)" class="text-[9px] p-1 border rounded-lg font-black bg-white">
                                 ${SEGUIMIENTO_OPCIONES.map(opt => `<option value="${opt}" ${exp.seguimiento === opt ? 'selected' : ''}>${opt}</option>`).join('')}
                             </select>
-                        ` : `<span class="px-2 py-0.5 rounded bg-slate-50 text-slate-400 text-[8px] font-black uppercase truncate block text-center">${exp.seguimiento}</span>`}
+                        ` : `<span class="text-[8px] font-black uppercase text-slate-400">${exp.seguimiento}</span>`}
                     </td>
-                    <td class="col-action">
-                        ${(!exp.psicoId && session.rol === 'ESPECIALISTA') 
-                            ? `<button onclick="adoptar('${exp.id}')" class="btn-gte-orange text-[9px] px-4 py-2 shadow-sm font-black uppercase">Adoptar</button>` 
-                            : (myCase ? `<button onclick="verHistoria('${exp.id}')" class="bg-gte-blue text-white py-2 px-5 rounded-xl text-[9px] font-black uppercase hover:bg-gte-orange transition shadow-sm">Evolución</button>`
-                            : `<span class="text-[9px] font-black text-slate-300 uppercase italic truncate block">${exp.psico || 'Libre'}</span>`)
+                    <td>
+                        ${(!exp.psico_asignado_id && session.rol === 'ESPECIALISTA') 
+                            ? `<button onclick="adoptar('${exp.id_gte}')" class="btn-gte-orange text-[9px]">Adoptar</button>` 
+                            : (myCase ? `<button onclick="verHistoria('${exp.id_gte}')" class="btn-gte-blue text-[9px] px-4 py-1">Evolución</button>` 
+                            : `<span class="text-[9px] font-bold text-slate-300 uppercase italic">${exp.psico_asignado_nombre || 'Disponible'}</span>`)
                         }
                     </td>
                 </tr>`;
@@ -457,119 +272,40 @@
         }
 
         function verHistoria(id) {
-            const exp = REPOSITORIO.find(e => e.id === id);
+            const exp = REPOSITORIO.find(e => e.id_gte === id);
             activeExpId = id;
-            document.getElementById('modal-paciente-id').innerText = `ID: ${id}`;
-            document.getElementById('modal-nombre').innerText = exp.student;
-            document.getElementById('modal-inst').innerText = exp.inst;
-            document.getElementById('modal-evolucion').value = exp.evolucion || "";
+            document.getElementById('modal-paciente-id').innerText = `EXPEDIENTE: ${id}`;
+            document.getElementById('modal-evolucion').value = exp.evolucion_clinica || "";
             document.getElementById('modal-historia').style.display = 'flex';
         }
 
-        function guardarEvolucion() {
-            const exp = REPOSITORIO.find(e => e.id === activeExpId);
-            exp.evolucion = document.getElementById('modal-evolucion').value;
-            localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-            cerrarHistoria(); 
-            showToast("Guardado");
-        }
-
-        function cerrarHistoria() { document.getElementById('modal-historia').style.display = 'none'; activeExpId = null; }
-
-        function adoptar(id) {
-            const exp = REPOSITORIO.find(e => e.id === id);
-            exp.psicoId = session.user;
-            exp.psico = session.nombre;
-            exp.seguimiento = "1era Consulta";
-            localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-            renderExps();
-            showToast("Caso Adoptado");
-        }
-
-        function updateSeguimiento(id, val) {
-            const exp = REPOSITORIO.find(e => e.id === id);
-            exp.seguimiento = val;
-            localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO));
-            if(session.rol === "MASTER") actualizarVistaMaster();
-            showToast(`Estatus: ${val}`);
-        }
-
-        function renderEquipo() {
-            const body = document.getElementById('equipo-list-body');
-            body.innerHTML = DB_BASE.especialistas.map(esp => {
-                const stored = JSON.parse(localStorage.getItem(`perfil_${esp.user}`));
-                const n = stored?.nombre || esp.nombre;
-                const c = REPOSITORIO.filter(e => e.psicoId === esp.user).length;
-                return `
-                <tr class="border-b text-xs">
-                    <td class="p-4 font-black text-gte-blue">${esp.user}</td>
-                    <td class="p-4 font-bold text-slate-600 uppercase text-[10px]">${n}</td>
-                    <td class="p-4 text-center font-black text-gte-orange text-sm">${c}</td>
-                    <td class="p-4 text-right"><button onclick="resetearEspecialista('${esp.user}')" class="text-[9px] font-black text-blue-600 hover:text-red-500 uppercase">Reset</button></td>
-                </tr>`;
-            }).join('');
-        }
-
-        function resetearEspecialista(uid) {
-            if(confirm("¿Resetear?")) { localStorage.removeItem(`perfil_${uid}`); renderEquipo(); showToast("Listo"); }
-        }
-
-        function actualizarVistaMaster() {
-            const s = [
-                { l: "Atendidos", v: REPOSITORIO.length, c: "gte-blue" },
-                { l: "Altas", v: REPOSITORIO.filter(e => e.seguimiento === "Alta" || e.seguimiento === "Cerrado").length, c: "green-600" },
-                { l: "Derivaciones", v: REPOSITORIO.filter(e => e.seguimiento === "Derivación").length, c: "gte-orange" },
-                { l: "En Curso", v: REPOSITORIO.filter(e => e.psicoId !== null).length, c: "blue-500" }
+        function actualizarKPIs() {
+            const stats = [
+                { l: "Total Casos", v: REPOSITORIO.length, c: "gte-blue" },
+                { l: "En Consulta", v: REPOSITORIO.filter(e => e.psico_asignado_id).length, c: "blue-500" },
+                { l: "Altas Clínicas", v: REPOSITORIO.filter(e => e.seguimiento === "Alta").length, c: "green-600" },
+                { l: "Pendientes", v: REPOSITORIO.filter(e => !e.psico_asignado_id).length, c: "gte-orange" }
             ];
-            document.getElementById('stats-grid').innerHTML = s.map(x => `
+            document.getElementById('stats-grid').innerHTML = stats.map(x => `
                 <div class="kpi-card shadow-sm">
                     <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${x.l}</p>
                     <h3 class="text-2xl font-black text-${x.c} mt-1">${x.v}</h3>
                 </div>`).join('');
         }
 
-        function actualizarDatosPersonales() {
-            const n = document.getElementById('perfil-nombre').value;
-            if(!n) return;
-            const p = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { pass: "1234" };
-            p.nombre = n;
-            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(p));
-            session.nombre = n;
-            document.getElementById('user-display-name').innerText = n;
-            showToast("Perfil Actualizado");
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        function actualizarPassword() {
-            const p1 = document.getElementById('perfil-pass1').value;
-            const p2 = document.getElementById('perfil-pass2').value;
-            if(!p1 || p1 !== p2) { alert("Claves no coinciden"); return; }
-            const p = JSON.parse(localStorage.getItem(`perfil_${session.user}`)) || { nombre: session.nombre };
-            p.pass = p1;
-            localStorage.setItem(`perfil_${session.user}`, JSON.stringify(p));
-            showToast("Clave Actualizada");
-        }
-
-        function limpiarRepositorio() { 
-            if(confirm("¿Vaciar Todo?")) { REPOSITORIO = []; localStorage.setItem('gte_repositorio', JSON.stringify(REPOSITORIO)); renderExps(); actualizarVistaMaster(); }
+        function showToast(m) { 
+            const t = document.getElementById('gte-toast'); t.innerText = m; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
         }
 
         function handleBusqueda(v) { filtroBusqueda = v.toLowerCase().trim(); renderExps(); }
+        function cerrarHistoria() { document.getElementById('modal-historia').style.display = 'none'; }
         function cerrarSesion() { location.reload(); }
-        function showToast(m) { 
-            const t = document.getElementById('gte-toast'); 
-            t.innerText = m; t.style.display = 'block'; 
-            setTimeout(()=>t.style.display='none',2000); 
-        }
-
-        function switchTab(id) { 
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); 
-            document.getElementById(id).classList.remove('hidden');
-            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            let bId = (id === 'tab-master-stats' ? 'btn-stats' : id === 'tab-equipo' ? 'btn-equipo' : id === 'tab-expedientes' ? 'btn-exp' : 'btn-perfil');
-            if(document.getElementById(bId)) document.getElementById(bId).classList.add('active');
-            if(id === 'tab-equipo') renderEquipo();
-            if(id === 'tab-master-stats') actualizarVistaMaster();
-        }
     </script>
 </body>
 </html>
