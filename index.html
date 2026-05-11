@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTE 2026 - Gestión Municipal</title>
+    <title>GTE 2026 - Portal de Gestión Clínica</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -15,45 +15,47 @@
         body { font-family: 'Open Sans', sans-serif; background-color: var(--gte-bg); margin: 0; }
         h1, h2, h3 { font-family: 'Poppins', sans-serif; }
         
-        /* Estilos de Componentes */
         .btn-gte-orange { background: var(--gte-orange); color: white; font-weight: 800; border-radius: 12px; transition: 0.3s; }
         .btn-gte-orange:hover { background: var(--gte-blue); transform: translateY(-2px); }
         .nav-button { width: 100%; text-align: left; padding: 14px 20px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: #94a3b8; transition: 0.3s; border-radius: 12px; }
         .nav-button.active { background: rgba(255,102,0,0.1); color: var(--gte-orange); }
         .form-input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; outline: none; transition: 0.3s; }
         .form-input:focus { border-color: var(--gte-orange); }
-        .clinical-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999; }
-        #gte-toast { position: fixed; bottom: 20px; right: 20px; background: var(--gte-blue); color: white; padding: 15px 25px; border-radius: 10px; border-left: 5px solid var(--gte-orange); display: none; z-index: 10001; font-weight: 800; font-size: 12px; }
+        .clinical-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        #gte-toast { position: fixed; bottom: 20px; right: 20px; background: var(--gte-blue); color: white; padding: 15px 25px; border-radius: 10px; border-left: 5px solid var(--gte-orange); display: none; z-index: 10001; font-weight: 800; font-size: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10 text-center">
-            <h1 class="text-2xl font-black text-gte-blue uppercase tracking-tighter">Guacara Te Escucha</h1>
-            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-8">Portal de Gestión Clínica 2026</p>
+        <div class="bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10 text-center border-t-8 border-gte-orange">
+            <h1 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Guacara Te Escucha</h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Acceso Restringido 2026</p>
             <div class="space-y-4">
-                <input type="email" id="login-email" class="form-input" placeholder="Correo Institucional">
-                <input type="password" id="login-pass" class="form-input" placeholder="Contraseña">
-                <button onclick="ejecutarLogin()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-lg">Entrar al Sistema</button>
+                <div class="text-left"><label class="text-[9px] font-bold text-slate-400 ml-2 uppercase">Correo Institucional</label>
+                <input type="email" id="login-email" class="form-input" placeholder="ejemplo@gte.com"></div>
+                <div class="text-left"><label class="text-[9px] font-bold text-slate-400 ml-2 uppercase">Contraseña</label>
+                <input type="password" id="login-pass" class="form-input" placeholder="••••••••"></div>
+                <button onclick="ejecutarLogin()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-lg mt-4">Validar Identidad</button>
             </div>
         </div>
     </div>
 
     <div id="modal-setup" class="clinical-modal">
-        <div class="bg-white p-10 rounded-[30px] max-w-md w-full shadow-2xl border-4 border-gte-orange">
-            <h2 class="text-xl font-black text-gte-blue uppercase text-center mb-2">Activación de Cuenta</h2>
-            <p class="text-[10px] text-slate-400 text-center mb-6 uppercase font-bold">Por seguridad, actualiza tus datos de acceso.</p>
+        <div class="bg-white p-10 rounded-[35px] max-w-md w-full shadow-2xl">
+            <div class="w-16 h-1 w-full bg-gte-orange mb-6 rounded-full mx-auto"></div>
+            <h2 class="text-xl font-black text-gte-blue uppercase text-center mb-2">Activación de Perfil</h2>
+            <p class="text-[10px] text-slate-400 text-center mb-8 uppercase font-bold">Por seguridad municipal, actualiza tus datos.</p>
             <div class="space-y-4">
-                <input type="text" id="setup-nombre" class="form-input" placeholder="Tu Nombre y Apellido">
+                <input type="text" id="setup-nombre" class="form-input" placeholder="Nombre Completo">
                 <input type="password" id="setup-pass1" class="form-input" placeholder="Nueva Contraseña">
                 <input type="password" id="setup-pass2" class="form-input" placeholder="Confirmar Contraseña">
-                <button onclick="guardarConfiguracionInicial()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest">Activar Perfil</button>
+                <button onclick="guardarConfiguracionInicial()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-xl">Guardar y Entrar</button>
             </div>
         </div>
     </div>
 
-    <nav id="sidebar" class="hidden w-full md:w-64 bg-white border-r h-screen sticky top-0 flex flex-col p-6">
+    <nav id="sidebar" class="hidden w-full md:w-64 bg-white border-r h-screen sticky top-0 flex flex-col p-6 shadow-sm">
         <div class="mb-10">
             <h2 class="text-lg font-black text-gte-blue leading-tight uppercase">GTE<span class="text-gte-orange">2026</span></h2>
             <p id="display-user-rol" class="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1">Cargando...</p>
@@ -63,49 +65,46 @@
             </div>
 
         <div class="pt-6 border-t">
-            <div class="text-[10px] font-bold text-slate-400 mb-2 uppercase" id="display-user-name">Usuario</div>
-            <button onclick="cerrarSesion()" class="w-full py-3 bg-red-50 rounded-xl text-[10px] font-black text-red-500 uppercase">Salir</button>
+            <div class="text-[10px] font-black text-gte-blue mb-2 uppercase truncate" id="display-user-name">Usuario</div>
+            <button onclick="cerrarSesion()" class="w-full py-3 bg-red-50 rounded-xl text-[10px] font-black text-red-500 uppercase hover:bg-red-100 transition">Cerrar Sesión</button>
         </div>
     </nav>
 
     <main id="main-content" class="hidden flex-grow p-8 overflow-y-auto">
         
-        <section id="tab-master-stats" class="tab-content hidden animate-fade">
-            <h2 class="text-3xl font-black text-gte-blue mb-8 uppercase tracking-tighter">Panel de Control Municipal</h2>
-            <div id="kpi-grid" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
+        <section id="tab-master-stats" class="tab-content hidden">
+            <h2 class="text-3xl font-black text-gte-blue mb-8 uppercase tracking-tighter">Control de Gestión</h2>
+            <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
         </section>
 
-        <section id="tab-repositorio" class="tab-content hidden animate-fade">
-            <div class="flex justify-between items-end mb-6">
+        <section id="tab-repositorio" class="tab-content hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                 <div>
-                    <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Expedientes</h2>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Base de Datos Centralizada</p>
+                    <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Repositorio Maestro</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Base de Datos de Niños y Adolescentes</p>
                 </div>
-                <div id="master-only-upload" class="hidden">
+                <div id="master-only-upload" class="hidden flex gap-2">
                     <input type="file" id="excel-file" class="hidden" accept=".xlsx" onchange="procesarCargaMaestra(event)">
-                    <button onclick="document.getElementById('excel-file').click()" class="bg-white border-2 border-gte-blue text-gte-blue px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gte-blue hover:text-white transition">📊 Carga Maestra</button>
+                    <button onclick="document.getElementById('excel-file').click()" class="bg-white border-2 border-gte-blue text-gte-blue px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gte-blue hover:text-white transition shadow-sm">📊 Importar Excel</button>
                 </div>
             </div>
-            <div class="bg-white rounded-[20px] shadow-sm border overflow-hidden">
+
+            <div class="bg-white rounded-[25px] shadow-sm border border-slate-100 overflow-hidden">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-50 border-b">
+                    <thead class="bg-slate-50 border-b border-slate-100">
                         <tr class="text-[10px] font-black text-slate-400 uppercase">
-                            <th class="p-4">ID Expediente</th>
-                            <th class="p-4">Paciente</th>
-                            <th class="p-4">Escuela</th>
-                            <th class="p-4">Fase</th>
-                            <th class="p-4">Estatus</th>
-                            <th class="p-4 text-right">Acción</th>
+                            <th class="p-5">Expediente</th>
+                            <th class="p-5">Nombre del Paciente</th>
+                            <th class="p-5">Institución</th>
+                            <th class="p-5 text-center">Fase</th>
+                            <th class="p-5">Estatus</th>
+                            <th class="p-5 text-right">Acción</th>
                         </tr>
                     </thead>
-                    <tbody id="lista-expedientes" class="text-sm"></tbody>
+                    <tbody id="lista-expedientes" class="text-sm">
+                        </tbody>
                 </table>
             </div>
-        </section>
-
-        <section id="tab-equipo" class="tab-content hidden animate-fade">
-            <h2 class="text-3xl font-black text-gte-blue mb-8 uppercase tracking-tighter">Gestión de Especialistas</h2>
-            <div id="lista-especialistas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </section>
 
     </main>
@@ -113,23 +112,39 @@
     <div id="gte-toast">Operación Exitosa</div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE
-        const _supabase = supabase.createClient("https://mltfjgkbparwwofgknjg.supabase.co", "sb_publishable_RSR809FqZWUorWzfJnjomA_gA33qeLK");
+        // 1. CONFIGURACIÓN METICULOSA DE SUPABASE
+        const SUPABASE_URL = "https://mltfjgkbparwwofgknjg.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sdGZqZ2ticGFyd3dvZmdrbmpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MjExNTIsImV4cCI6MjA5Mzk5NzE1Mn0.LZQESe5Nvuor2apbAdhfHlCr_hBtI-pb6wTEKAK0ldU";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioActual = null;
-        let repositorioGlobal = [];
 
-        // 1. LÓGICA DE LOGIN Y ROLES
+        // 2. LÓGICA DE LOGIN BLINDADA
         async function ejecutarLogin() {
-            const email = document.getElementById('login-email').value;
+            const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value;
+
+            if(!email || !pass) return alert("Completa todos los campos");
 
             const { data: { user }, error: authError } = await _supabase.auth.signInWithPassword({ email, password: pass });
 
-            if (authError) { alert("❌ Acceso denegado: " + authError.message); return; }
+            if (authError) { 
+                alert("❌ Error: " + authError.message); 
+                return; 
+            }
 
-            // Buscamos perfil en la tabla 'usuarios'
-            const { data: perfil } = await _supabase.from('usuarios').select('*').eq('id', user.id).single();
+            // Consultar perfil en tabla pública 'usuarios'
+            const { data: perfil, error: dbError } = await _supabase
+                .from('usuarios')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (dbError) {
+                console.error(dbError);
+                alert("❌ Conexión exitosa, pero no se encontró tu perfil en la tabla 'usuarios'.");
+                return;
+            }
 
             usuarioActual = perfil;
 
@@ -140,112 +155,136 @@
             }
         }
 
-        // 2. CONFIGURACIÓN DE INTERFAZ
+        // 3. INICIO DE INTERFAZ POR ROL
         function iniciarApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             
             document.getElementById('display-user-name').innerText = usuarioActual.nombre;
-            document.getElementById('display-user-rol').innerText = usuarioActual.rol + " • GTE 2026";
+            document.getElementById('display-user-rol').innerText = usuarioActual.rol + " • SISTEMA GTE";
 
             const menu = document.getElementById('nav-menu');
             if (usuarioActual.rol === 'MASTER') {
                 document.getElementById('master-only-upload').classList.remove('hidden');
                 menu.innerHTML = `
-                    <button onclick="cambiarTab('tab-master-stats')" class="nav-button active">📊 Estadísticas</button>
+                    <button onclick="cambiarTab('tab-master-stats')" class="nav-button active">📊 Estadísticas Globales</button>
                     <button onclick="cambiarTab('tab-repositorio')" class="nav-button">📁 Repositorio Maestro</button>
-                    <button onclick="cambiarTab('tab-equipo')" class="nav-button">👥 Gestión de Equipo</button>
+                    <button onclick="lanzarToast('Módulo en construcción')" class="nav-button">👥 Gestión de Equipo</button>
                 `;
                 cambiarTab('tab-master-stats');
                 cargarEstadisticas();
-                cargarEquipo();
             } else {
                 menu.innerHTML = `
                     <button onclick="cambiarTab('tab-repositorio')" class="nav-button active">📁 Casos Disponibles</button>
-                    <button onclick="cambiarTab('tab-mis-casos')" class="nav-button">💼 Mis Pacientes</button>
+                    <button onclick="lanzarToast('Módulo en construcción')" class="nav-button">💼 Mis Pacientes</button>
                 `;
                 cambiarTab('tab-repositorio');
             }
             cargarExpedientes();
         }
 
-        // 3. CARGA MAESTRA EXCEL (LÓGICA SHEETJS)
+        // 4. CARGA MAESTRA DE EXCEL (Mapeo de tus columnas)
         async function procesarCargaMaestra(e) {
             const file = e.target.files[0];
+            if(!file) return;
+
             const reader = new FileReader();
             reader.onload = async (evt) => {
                 const wb = XLSX.read(evt.target.result, { type: 'binary' });
-                const ws = wb.Sheets[wb.SheetNames[0]];
-                const data = XLSX.utils.sheet_to_json(ws);
+                const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
 
-                // Mapeo meticuloso al esquema de Supabase
+                // Transformar datos del Excel al formato de la DB
                 const lotes = data.map(f => ({
-                    id_gte: String(f['EXPEDIENTE'] || f['EXP']).trim(),
+                    id_gte: String(f['EXPEDIENTE'] || f['EXP'] || '').trim(),
                     fase_actual: String(f['FASE'] || '3'),
-                    nombre_paciente: f['NOMBRE Y APELLIDO'] || 'N/I',
-                    institucion_educativa: f['INSTITUCIÓN'] || 'N/I',
-                    cedula_paciente: String(f['CÉDULA'] || 'N/I'),
+                    nombre_paciente: (f['NOMBRE Y APELLIDO'] || f['NOMBRE'] || 'N/I').toUpperCase(),
+                    institucion_educativa: (f['INSTITUCIÓN'] || f['ESCUELA'] || 'N/I').toUpperCase(),
+                    cedula_paciente: String(f['CÉDULA'] || f['CI'] || 'N/I'),
                     edad_paciente: parseInt(f['EDAD']) || 0,
                     seguimiento: 'Sin Iniciar'
-                }));
+                })).filter(x => x.id_gte !== '');
 
                 const { error } = await _supabase.from('expedientes').upsert(lotes, { onConflict: 'id_gte' });
                 
                 if(!error) {
-                    lanzarToast(`✅ ${lotes.length} CASOS CARGADOS`);
+                    lanzarToast(`✅ ${lotes.length} EXPEDIENTES SINCRONIZADOS`);
                     cargarExpedientes();
                     if(usuarioActual.rol === 'MASTER') cargarEstadisticas();
                 } else {
-                    alert("Error en carga: " + error.message);
+                    alert("Error en base de datos: " + error.message);
                 }
             };
             reader.readAsBinaryString(file);
         }
 
-        // 4. GESTIÓN DE EXPEDIENTES
+        // 5. RENDERIZADO DE TABLA
         async function cargarExpedientes() {
-            const { data } = await _supabase.from('expedientes').select('*').order('id_gte', { ascending: true });
-            repositorioGlobal = data;
+            const { data, error } = await _supabase.from('expedientes').select('*').order('id_gte', { ascending: true });
+            if(error) return;
+
             const body = document.getElementById('lista-expedientes');
             body.innerHTML = data.map(exp => `
-                <tr class="border-b hover:bg-slate-50 transition">
-                    <td class="p-4"><span class="font-black text-gte-orange">${exp.id_gte}</span></td>
-                    <td class="p-4 font-bold text-gte-blue uppercase text-xs">${exp.nombre_paciente}</td>
-                    <td class="p-4 text-[10px] font-bold text-slate-400 uppercase">${exp.institucion_educativa}</td>
-                    <td class="p-4"><span class="bg-orange-50 text-orange-600 px-2 py-1 rounded-lg font-black text-xs">${exp.fase_actual}</span></td>
-                    <td class="p-4 text-[10px] font-black uppercase text-slate-400">${exp.seguimiento}</td>
-                    <td class="p-4 text-right">
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="p-5 font-black text-gte-orange text-xs">${exp.id_gte}</td>
+                    <td class="p-5">
+                        <div class="font-bold text-gte-blue text-[11px] uppercase">${exp.nombre_paciente}</div>
+                        <div class="text-[9px] text-slate-400">CI: ${exp.cedula_paciente}</div>
+                    </td>
+                    <td class="p-5 text-[9px] font-bold text-slate-400 uppercase">${exp.institucion_educativa}</td>
+                    <td class="p-5 text-center"><span class="bg-blue-50 text-gte-blue px-3 py-1 rounded-full font-black text-[10px] border border-blue-100">${exp.fase_actual}</span></td>
+                    <td class="p-5"><span class="text-[9px] font-black uppercase text-slate-300">${exp.seguimiento}</span></td>
+                    <td class="p-5 text-right">
                         ${!exp.psico_asignado_id && usuarioActual.rol === 'PSICOLOGO' 
-                            ? `<button onclick="adoptarCaso('${exp.id_gte}')" class="btn-gte-orange px-4 py-1 text-[9px] uppercase">Adoptar</button>` 
-                            : `<span class="text-[9px] font-bold italic text-slate-300">${exp.psico_asignado_nombre || 'Disponible'}</span>`}
+                            ? `<button onclick="adoptarCaso('${exp.id_gte}')" class="btn-gte-orange px-5 py-2 text-[9px] uppercase shadow-sm">Adoptar</button>` 
+                            : `<span class="text-[9px] font-bold italic text-slate-400">${exp.psico_asignado_nombre || 'Libre'}</span>`}
                     </td>
                 </tr>
             `).join('');
         }
 
-        // 5. FUNCIONES DE PERFIL
+        // 6. DASHBOARD (KPIs)
+        async function cargarEstadisticas() {
+            const { data } = await _supabase.from('expedientes').select('fase_actual, seguimiento, psico_asignado_id');
+            
+            const stats = [
+                { t: "Total Casos", v: data.length, c: "text-gte-blue" },
+                { t: "En Atención", v: data.filter(x => x.psico_asignado_id).length, c: "text-blue-500" },
+                { t: "Pendientes", v: data.filter(x => !x.psico_asignado_id).length, c: "text-gte-orange" },
+                { t: "Fase 4 (Críticos)", v: data.filter(x => x.fase_actual == "4").length, c: "text-red-600" }
+            ];
+
+            document.getElementById('kpi-grid').innerHTML = stats.map(s => `
+                <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm hover:shadow-md transition">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p>
+                    <h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3>
+                </div>
+            `).join('');
+        }
+
+        // 7. FUNCIONES DE SEGURIDAD Y CIERRE
         async function guardarConfiguracionInicial() {
-            const n = document.getElementById('setup-nombre').value;
+            const nombre = document.getElementById('setup-nombre').value;
             const p1 = document.getElementById('setup-pass1').value;
             const p2 = document.getElementById('setup-pass2').value;
 
-            if(!n || p1 !== p2 || p1.length < 6) { alert("Revisa los datos (mínimo 6 caracteres en clave)"); return; }
+            if(!nombre || p1 !== p2 || p1.length < 6) return alert("Revisa los datos (mínimo 6 caracteres)");
 
-            // Actualizar tabla pública
-            await _supabase.from('usuarios').update({ nombre: n, debe_cambiar_pass: false }).eq('id', usuarioActual.id);
-            // Actualizar clave en Auth
-            await _supabase.auth.updateUser({ password: p1 });
+            // Actualizar tabla pública y Auth
+            const { error: err1 } = await _supabase.from('usuarios').update({ nombre: nombre, debe_cambiar_pass: false }).eq('id', usuarioActual.id);
+            const { error: err2 } = await _supabase.auth.updateUser({ password: p1 });
 
-            location.reload();
+            if(!err1 && !err2) {
+                lanzarToast("PERFIL ACTIVADO");
+                location.reload();
+            }
         }
 
-        // UTILITARIOS
         function cambiarTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            event?.currentTarget?.classList?.add('active');
+            event.currentTarget.classList.add('active');
         }
 
         function lanzarToast(m) {
