@@ -185,13 +185,53 @@
             if (session.rol === "MASTER") actualizarKPIs();
         }
 
-        async function handleExcel(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
-                const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+async function handleExcel(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+        const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+        
+        let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("exp")));
+        if(hIdx === -1) { alert("❌ Estructura no válida"); return; }
+
+        const mapaLimpio = new Map(); // Usamos un mapa para eliminar duplicados por ID
+
+        for (let i = hIdx + 1; i < rows.length; i++) {
+            const r = rows[i]; 
+            if (!r || !r[1]) continue;
+
+            const id_gte = String(r[0] || "").trim();
+            
+            // Si el ID ya existe en este Excel, el mapa lo sobreescribe automáticamente
+            // asegurando que cada ID_GTE solo viaje UNA VEZ a Supabase.
+            mapaLimpio.set(id_gte, {
+                id_gte: id_gte,
+                nombre_paciente: String(r[1] || "N/I").trim().toUpperCase(),
+                institucion_educativa: String(r[2] || "N/I").trim().toUpperCase(),
+                cedula_paciente: String(r[3] || "N/I").trim(),
+                edad_paciente: parseInt(r[4]) || 0,
+                fase_actual: String(r[5] || "1").trim(),
+                seguimiento: "Sin Iniciar"
+            });
+        }
+
+        const datosFinales = Array.from(mapaLimpio.values());
+
+        const { error } = await _supabase
+            .from('expedientes')
+            .upsert(datosFinales, { onConflict: 'id_gte' });
+
+        if (error) {
+            alert("Error de Sincronización: " + error.message);
+        } else {
+            showToast(`✅ Sincronizados ${datosFinales.length} expedientes únicos`);
+            await cargarDesdeNube();
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
                 
                 // Buscamos encabezado
                 let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("exp")));
