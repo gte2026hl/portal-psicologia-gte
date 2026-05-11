@@ -24,7 +24,7 @@
         body { font-family: 'Open Sans', sans-serif; background-color: var(--gte-bg); margin: 0; overflow-x: hidden; }
         h1, h2, h3 { font-family: 'Poppins', sans-serif; }
         
-        /* Estilos de Identidad HDC2026 */
+        /* Identidad HDC2026 */
         .gradient-border { 
             border-top: 8px solid;
             border-image: linear-gradient(to right, var(--gte-gold), var(--gte-orange)) 1; 
@@ -40,7 +40,7 @@
         /* Barra de Carga Superior */
         #loading-bar-container { 
             position: fixed; top: 0; left: 0; width: 100%; height: 4px; 
-            background: rgba(226, 232, 240, 0.3); z-index: 10001; display: none; 
+            background: rgba(226, 232, 240, 0.3); z-index: 10005; display: none; 
         }
         #loading-bar { 
             height: 100%; width: 0; 
@@ -57,7 +57,10 @@
         .form-input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; outline: none; transition: 0.3s; font-size: 13px; }
         .form-input:focus { border-color: var(--gte-orange); }
         
-        #gte-toast { position: fixed; bottom: 20px; right: 20px; background: var(--gte-blue); color: white; padding: 15px 25px; border-radius: 10px; border-left: 5px solid var(--gte-orange); display: none; z-index: 10001; font-weight: 800; font-size: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        /* Modales Clínicos */
+        .clinical-modal { position: fixed; inset: 0; background: rgba(0,51,102,0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10010; }
+
+        #gte-toast { position: fixed; bottom: 20px; right: 20px; background: var(--gte-blue); color: white; padding: 15px 25px; border-radius: 10px; border-left: 5px solid var(--gte-orange); display: none; z-index: 10015; font-weight: 800; font-size: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
         
         @media print { .no-print { display: none !important; } }
     </style>
@@ -73,15 +76,13 @@
             
             <div class="space-y-4">
                 <input type="email" id="login-email" class="form-input" placeholder="Correo Institucional">
-                
                 <div class="relative">
                     <input type="password" id="login-pass" class="form-input" placeholder="••••••••">
                     <button type="button" onclick="togglePassword()" class="absolute right-4 top-3 text-slate-300 hover:text-gte-orange transition">
-                        <span id="eye-icon" style="font-size: 18px;">👁️</span>
+                        <span id="eye-icon">👁️</span>
                     </button>
                 </div>
-                
-                <button onclick="ejecutarLogin()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-lg mt-4">Validar Identidad</button>
+                <button onclick="ejecutarLogin()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-lg mt-4">Ingresar al Sistema</button>
             </div>
 
             <div class="mt-10">
@@ -109,17 +110,13 @@
         
         <section id="tab-master-stats" class="tab-content hidden">
             <div class="flex justify-between items-center mb-8 no-print">
-                <div>
-                    <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Impacto de Gestión</h2>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Análisis Estadístico Consolidado</p>
-                </div>
-                <button onclick="generarPDF()" class="bg-gte-blue text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg cursor-pointer">📄 Exportar Reporte</button>
+                <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Impacto de Gestión</h2>
+                <button onclick="generarPDF()" class="bg-gte-blue text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg cursor-pointer">📄 Descargar Reporte</button>
             </div>
-
             <div id="reporte-area">
                 <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"></div>
                 <div class="bg-white p-8 rounded-[35px] border border-slate-100 shadow-sm mb-8">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest">Distribución por Institución Educativa</h4>
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest text-center">Focos por Institución Educativa</h4>
                     <div style="height: 350px;"><canvas id="chartInstituciones"></canvas></div>
                 </div>
             </div>
@@ -127,35 +124,107 @@
 
         <section id="tab-repositorio" class="tab-content hidden">
             <div class="flex justify-between items-end mb-6">
-                <div>
-                    <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Repositorio Maestro</h2>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Fuerza de Tarea GTE</p>
-                </div>
+                <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Repositorio Maestro</h2>
                 <div id="master-only-upload" class="hidden">
-                    <input type="file" id="excel-file" class="hidden" accept=".xlsx" onchange="procesarCargaMaestra(event)">
-                    <button onclick="document.getElementById('excel-file').click()" class="bg-white border-2 border-gte-blue text-gte-blue px-6 py-2 rounded-xl text-[10px] font-black uppercase cursor-pointer">Sincronizar Repositorio</button>
+                    <input type="file" id="excel-file" class="hidden" onchange="procesarCargaMaestra(event)">
+                    <button onclick="document.getElementById('excel-file').click()" class="bg-white border-2 border-gte-blue text-gte-blue px-6 py-2 rounded-xl text-[10px] font-black uppercase cursor-pointer">Sincronizar Excel</button>
                 </div>
             </div>
-
             <input type="text" id="buscador-input" oninput="filtrarTabla()" class="form-input mb-6 border-2 border-orange-50 font-bold" placeholder="🔍 BUSCAR POR NOMBRE, CI, EXPEDIENTE O ESCUELA...">
-
             <div class="bg-white rounded-[25px] shadow-sm border border-slate-100 overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-slate-50">
                         <tr class="text-[10px] font-black text-slate-400 uppercase">
-                            <th class="p-5">Expediente</th>
+                            <th class="p-5">ID GTE</th>
                             <th class="p-5">Paciente y Datos</th>
                             <th class="p-5">Institución</th>
                             <th class="p-5 text-center">Fase</th>
-                            <th class="p-5">Estatus Cita</th>
-                            <th class="p-5 text-right">Especialista / Acción</th>
+                            <th class="p-5">Estatus</th>
+                            <th class="p-5 text-right">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="lista-expedientes" class="text-sm"></tbody>
                 </table>
             </div>
         </section>
+
+        <section id="tab-mis-pacientes" class="tab-content hidden">
+            <div class="mb-8">
+                <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Mis Pacientes Adoptados</h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Gestión Clínica Individual</p>
+            </div>
+            <div class="bg-white rounded-[25px] shadow-sm border border-slate-100 overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50">
+                        <tr class="text-[10px] font-black text-slate-400 uppercase">
+                            <th class="p-5">ID GTE</th>
+                            <th class="p-5">Paciente</th>
+                            <th class="p-5">Estatus Actual</th>
+                            <th class="p-5 text-right">Acción Clínico</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-mis-pacientes" class="text-sm"></tbody>
+                </table>
+            </div>
+        </section>
     </main>
+
+    <div id="modal-demograficos" class="clinical-modal">
+        <div class="bg-white p-8 rounded-[40px] max-w-4xl w-full h-[85vh] overflow-y-auto shadow-2xl gradient-border">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-gte-blue uppercase">Portal 1: Caracterización Social</h2>
+                <button onclick="cerrarModales()" class="text-slate-300 hover:text-red-500 font-bold">X</button>
+            </div>
+            <form id="form-caracterizacion" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-1"><label class="text-[9px] font-black uppercase ml-2">Sexo</label>
+                    <select id="cs-sexo" class="form-input"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+                <div class="md:col-span-1"><label class="text-[9px] font-black uppercase ml-2">Fecha Nacimiento</label>
+                    <input type="date" id="cs-fecha-nac" class="form-input"></div>
+                <div class="md:col-span-1"><label class="text-[9px] font-black uppercase ml-2">Teléfono</label>
+                    <input type="text" id="cs-tlf" class="form-input" placeholder="04XX-XXXXXXX"></div>
+                
+                <input type="text" id="cs-sector" class="form-input" placeholder="Sector">
+                <input type="text" id="cs-calle" class="form-input" placeholder="Calle">
+                <input type="text" id="cs-casa" class="form-input" placeholder="Casa N°">
+                
+                <div class="md:col-span-3 border-t pt-4"><h4 class="text-[10px] font-black text-gte-blue uppercase">Datos de la Madre</h4></div>
+                <input type="text" id="cs-m-nombre" class="form-input" placeholder="Nombre Madre">
+                <input type="text" id="cs-m-ci" class="form-input" placeholder="C.I. Madre">
+                <input type="number" id="cs-m-edad" class="form-input" placeholder="Edad">
+                <input type="text" id="cs-m-escolaridad" class="form-input" placeholder="Escolaridad">
+                <input type="text" id="cs-m-ocupacion" class="form-input" placeholder="Ocupación">
+                <div class="flex items-center ml-2"><input type="checkbox" id="cs-m-vive" checked class="mr-2"> <span class="text-[10px] font-bold uppercase">Vive con el niño</span></div>
+
+                <div class="md:col-span-3 border-t pt-4"><h4 class="text-[10px] font-black text-gte-blue uppercase">Datos del Padre</h4></div>
+                <input type="text" id="cs-p-nombre" class="form-input" placeholder="Nombre Padre">
+                <input type="text" id="cs-p-ci" class="form-input" placeholder="C.I. Padre">
+                <input type="number" id="cs-p-edad" class="form-input" placeholder="Edad">
+                <input type="text" id="cs-p-escolaridad" class="form-input" placeholder="Escolaridad">
+                <input type="text" id="cs-p-ocupacion" class="form-input" placeholder="Ocupación">
+                <div class="flex items-center ml-2"><input type="checkbox" id="cs-p-vive" class="mr-2"> <span class="text-[10px] font-bold uppercase">Vive con el niño</span></div>
+
+                <textarea id="cs-grupo-familiar" class="md:col-span-3 form-input h-20" placeholder="Composición Familiar..."></textarea>
+                <button type="button" onclick="guardarCaracterizacion()" class="md:col-span-3 btn-gte-orange py-4 uppercase text-xs shadow-xl">Guardar y Ir a Portal Clínico</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-historia" class="clinical-modal">
+        <div class="bg-white p-8 rounded-[40px] max-w-5xl w-full h-[90vh] overflow-y-auto shadow-2xl gradient-border">
+            <h2 class="text-2xl font-black text-gte-blue uppercase mb-2">Portal 2: Historia Clínica</h2>
+            <form id="form-historia" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <textarea id="hc-motivo" class="md:col-span-2 form-input h-24" placeholder="Motivo de Consulta..."></textarea>
+                <textarea id="hc-psicomotor" class="form-input h-20" placeholder="Desarrollo Psicomotor"></textarea>
+                <textarea id="hc-lenguaje" class="form-input h-20" placeholder="Lenguaje"></textarea>
+                <textarea id="hc-habitos" class="form-input h-20" placeholder="Hábitos"></textarea>
+                <textarea id="hc-escolaridad" class="form-input h-20" placeholder="Escolaridad"></textarea>
+                <textarea id="hc-examen-mental" class="form-input h-20" placeholder="Examen Mental"></textarea>
+                <textarea id="hc-apariencia" class="form-input h-20" placeholder="Apariencia Física"></textarea>
+                <textarea id="hc-notas" class="md:col-span-2 form-input h-32" placeholder="Notas adicionales de la entrevista..."></textarea>
+                <button type="button" onclick="guardarHistoriaClinica()" class="md:col-span-2 btn-gte-orange py-4 uppercase text-xs">Finalizar Historia Clínica</button>
+            </form>
+        </div>
+    </div>
 
     <div id="gte-toast"></div>
 
@@ -167,50 +236,44 @@
         let usuarioActual = null;
         let todosLosExpedientes = [];
         let chartInst = null;
+        let expActivo = null;
 
-        // --- PERSISTENCIA DE SESIÓN ---
+        // Persistencia de Sesión
         window.onload = async () => {
             animarCarga(30);
             const { data: { session } } = await _supabase.auth.getSession();
             if (session) {
                 const { data: perfiles } = await _supabase.from('usuarios').select('*').eq('id', session.user.id);
-                if (perfiles && perfiles.length > 0) {
+                if (perfiles && perfiles.length) {
                     usuarioActual = perfiles[0];
-                    animarCarga(100);
-                    setTimeout(iniciarApp, 400);
-                } else { animarCarga(100); }
-            } else { animarCarga(100); }
+                    animarCarga(100); iniciarApp();
+                } else animarCarga(100);
+            } else animarCarga(100);
         };
 
         function togglePassword() {
-            const input = document.getElementById('login-pass');
-            const icon = document.getElementById('eye-icon');
-            if (input.type === "password") {
-                input.type = "text"; icon.innerText = "🔒";
-            } else {
-                input.type = "password"; icon.innerText = "👁️";
-            }
+            const i = document.getElementById('login-pass');
+            const e = document.getElementById('eye-icon');
+            i.type = i.type === "password" ? "text" : "password";
+            e.innerText = i.type === "password" ? "👁️" : "🔒";
         }
 
         function animarCarga(p) {
-            const c = document.getElementById('loading-bar-container');
             const b = document.getElementById('loading-bar');
+            const c = document.getElementById('loading-bar-container');
             c.style.display = 'block'; b.style.width = p + '%';
             if (p >= 100) setTimeout(() => c.style.display = 'none', 800);
         }
 
         async function ejecutarLogin() {
             animarCarga(40);
-            const email = document.getElementById('login-email').value.trim();
-            const pass = document.getElementById('login-pass').value;
-            const { data: { user }, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-            
-            if (error) { animarCarga(100); return alert("Credenciales inválidas."); }
-
-            const { data: perfiles } = await _supabase.from('usuarios').select('*').eq('id', user.id);
-            usuarioActual = perfiles[0];
-            animarCarga(100);
-            iniciarApp();
+            const e = document.getElementById('login-email').value;
+            const p = document.getElementById('login-pass').value;
+            const { data: { user }, error } = await _supabase.auth.signInWithPassword({ email: e, password: p });
+            if (error) { animarCarga(100); return alert("Error de acceso."); }
+            const { data: per } = await _supabase.from('usuarios').select('*').eq('id', user.id);
+            usuarioActual = per[0];
+            animarCarga(100); iniciarApp();
         }
 
         function iniciarApp() {
@@ -218,7 +281,7 @@
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('display-user-name').innerText = usuarioActual.nombre;
-            document.getElementById('display-user-rol').innerText = "ACCESO: " + usuarioActual.rol;
+            document.getElementById('display-user-rol').innerText = "ROL: " + usuarioActual.rol;
 
             const menu = document.getElementById('nav-menu');
             if (usuarioActual.rol === 'MASTER') {
@@ -227,7 +290,8 @@
                                   <button onclick="cambiarTab('tab-repositorio')" class="nav-button">📁 Repositorio Maestro</button>`;
                 cambiarTab('tab-master-stats');
             } else {
-                menu.innerHTML = `<button onclick="cambiarTab('tab-repositorio')" class="nav-button active">📁 Casos Disponibles</button>`;
+                menu.innerHTML = `<button onclick="cambiarTab('tab-repositorio')" class="nav-button active">📁 Repositorio Maestro</button>
+                                  <button onclick="cambiarTab('tab-mis-pacientes')" class="nav-button">💼 Mis Pacientes</button>`;
                 cambiarTab('tab-repositorio');
             }
             cargarExpedientes();
@@ -237,75 +301,98 @@
             const { data } = await _supabase.from('expedientes').select('*').order('id_gte', { ascending: true });
             todosLosExpedientes = data || [];
             renderizarTabla(todosLosExpedientes);
-            if (usuarioActual.rol === 'MASTER') cargarEstadisticas(todosLosExpedientes);
+            if(usuarioActual.rol === 'MASTER') cargarEstadisticas(todosLosExpedientes);
+            if(document.getElementById('tab-mis-pacientes').style.display !== 'none') renderizarMisPacientes();
         }
 
         function renderizarTabla(datos) {
-            const body = document.getElementById('lista-expedientes');
-            body.innerHTML = datos.map(exp => {
-                const esMio = exp.psico_asignado_id === usuarioActual.id;
-                const estatus = ["Sin Iniciar", "1ra Cita", "2da Cita", "3ra Cita", "4ta Cita", "Derivación (SMPNNA)", "Alta Psicológica"];
-                
-                return `
-                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+            const b = document.getElementById('lista-expedientes');
+            b.innerHTML = datos.map(exp => `
+                <tr class="border-b border-slate-50">
                     <td class="p-5 font-black text-gte-orange text-[10px]">${exp.id_gte}</td>
-                    <td class="p-5">
-                        <div class="font-bold text-gte-blue text-[11px] uppercase">${exp.nombre_paciente}</div>
-                        <div class="text-[9px] text-slate-400 font-bold uppercase">CI: ${exp.cedula_paciente} - EDAD: ${exp.edad_paciente}</div>
-                    </td>
+                    <td class="p-5"><div class="font-bold text-gte-blue text-[11px] uppercase">${exp.nombre_paciente}</div>
+                        <div class="text-[9px] text-slate-400 font-bold uppercase">CI: ${exp.cedula_paciente} - EDAD: ${exp.edad_paciente}</div></td>
                     <td class="p-5 text-[9px] font-bold text-slate-400 uppercase">${exp.institucion_educativa}</td>
                     <td class="p-5 text-center"><span class="bg-blue-50 text-gte-blue px-3 py-1 rounded-full font-black text-[10px]">${exp.fase_actual}</span></td>
-                    <td class="p-5">
-                        ${esMio ? 
-                            `<select onchange="actualizarEstatus('${exp.id_gte}', this.value)" class="text-[10px] font-black uppercase p-1 border-2 border-blue-100 rounded-lg outline-none">
-                                ${estatus.map(e => `<option value="${e}" ${exp.seguimiento === e ? 'selected' : ''}>${e}</option>`).join('')}
-                            </select>` : 
-                            `<span class="text-[9px] font-black uppercase ${exp.psico_asignado_id ? 'text-blue-600' : 'text-slate-300'}">${exp.seguimiento || 'Sin Iniciar'}</span>`
-                        }
-                    </td>
+                    <td class="p-5 text-[9px] font-black uppercase text-blue-600">${exp.seguimiento || 'Sin Iniciar'}</td>
                     <td class="p-5 text-right">
                         ${!exp.psico_asignado_id && usuarioActual.rol === 'PSICOLOGO' ? 
-                            `<button onclick="adoptarCaso('${exp.id_gte}')" class="btn-gte-orange px-5 py-2 text-[9px] uppercase shadow-sm">Adoptar</button>` : 
+                            `<button onclick="adoptarCaso('${exp.id_gte}')" class="btn-gte-orange px-4 py-2 text-[9px] uppercase">Adoptar</button>` : 
                             `<div class="text-[9px] font-bold italic text-slate-400 uppercase">${exp.psico_asignado_nombre || 'Disponible'}</div>`
                         }
                     </td>
-                </tr>`;
-            }).join('');
+                </tr>`).join('');
+        }
+
+        function renderizarMisPacientes() {
+            const mis = todosLosExpedientes.filter(x => x.psico_asignado_id === usuarioActual.id);
+            const body = document.getElementById('lista-mis-pacientes');
+            const estatus = ["1ra Cita", "2da Cita", "3ra Cita", "4ta Cita", "Derivación (SMPNNA)", "Alta Psicológica"];
+            body.innerHTML = mis.map(exp => `
+                <tr class="border-b border-slate-50">
+                    <td class="p-5 font-black text-gte-orange text-[10px]">${exp.id_gte}</td>
+                    <td class="p-5 font-bold text-gte-blue uppercase text-[11px]">${exp.nombre_paciente}</td>
+                    <td class="p-5"><select onchange="actualizarEstatus('${exp.id_gte}', this.value)" class="text-[10px] font-black uppercase p-1 border-2 border-blue-100 rounded-lg outline-none">
+                        ${estatus.map(e => `<option value="${e}" ${exp.seguimiento === e ? 'selected' : ''}>${e}</option>`).join('')}
+                    </select></td>
+                    <td class="p-5 text-right"><button onclick="abrirAtencion('${exp.id_gte}')" class="btn-gte-orange px-4 py-2 text-[9px] uppercase">Portal Atención</button></td>
+                </tr>`).join('');
+        }
+
+        function abrirAtencion(id) {
+            expActivo = id;
+            document.getElementById('modal-demograficos').style.display = 'flex';
+        }
+
+        async function guardarCaracterizacion() {
+            animarCarga(40);
+            const d = {
+                id_gte: expActivo, sexo: document.getElementById('cs-sexo').value, fecha_nacimiento: document.getElementById('cs-fecha-nac').value,
+                telefono_contacto: document.getElementById('cs-tlf').value, sector: document.getElementById('cs-sector').value, calle: document.getElementById('cs-calle').value,
+                casa: document.getElementById('cs-casa').value, madre_nombre: document.getElementById('cs-m-nombre').value, madre_ci: document.getElementById('cs-m-ci').value,
+                madre_edad: parseInt(document.getElementById('cs-m-edad').value) || 0, madre_escolaridad: document.getElementById('cs-m-escolaridad').value,
+                madre_ocupacion: document.getElementById('cs-m-ocupacion').value, madre_vive_con_nino: document.getElementById('cs-m-vive').checked,
+                padre_nombre: document.getElementById('cs-p-nombre').value, padre_ci: document.getElementById('cs-p-ci').value, padre_edad: parseInt(document.getElementById('cs-p-edad').value) || 0,
+                padre_escolaridad: document.getElementById('cs-p-escolaridad').value, padre_ocupacion: document.getElementById('cs-p-ocupacion').value,
+                padre_vive_con_nino: document.getElementById('cs-p-vive').checked, grupo_familiar: document.getElementById('cs-grupo-familiar').value
+            };
+            const { error } = await _supabase.from('caracterizacion_social').upsert(d, { onConflict: 'id_gte' });
+            if (!error) {
+                animarCarga(100); lanzarToast("PORTAL 1 LISTO");
+                document.getElementById('modal-demograficos').style.display = 'none';
+                document.getElementById('modal-historia').style.display = 'flex';
+            } else alert(error.message);
+        }
+
+        async function guardarHistoriaClinica() {
+            animarCarga(40);
+            const d = {
+                id_gte: expActivo, psico_id: usuarioActual.id, motivo_consulta: document.getElementById('hc-motivo').value, examen_mental: document.getElementById('hc-examen-mental').value,
+                apariencia_fisica: document.getElementById('hc-apariencia').value, entrevista_notas: document.getElementById('hc-notas').value,
+                desarrollo_psicomotor: { nota: document.getElementById('hc-psicomotor').value }, lenguaje: { nota: document.getElementById('hc-lenguaje').value },
+                habitos: { nota: document.getElementById('hc-habitos').value }, escolaridad: { nota: document.getElementById('hc-escolaridad').value }
+            };
+            const { error } = await _supabase.from('historias_clinicas').insert(d);
+            if (!error) { animarCarga(100); lanzarToast("ATENCIÓN FINALIZADA"); cerrarModales(); cargarExpedientes(); }
+            else alert(error.message);
         }
 
         async function adoptarCaso(id) {
-            animarCarga(50);
-            const { error } = await _supabase.from('expedientes').update({ 
-                psico_asignado_id: usuarioActual.id, psico_asignado_nombre: usuarioActual.nombre, seguimiento: '1ra Cita'
-            }).eq('id_gte', id);
-            animarCarga(100);
-            if (!error) { lanzarToast("CASO ASIGNADO"); cargarExpedientes(); }
+            await _supabase.from('expedientes').update({ psico_asignado_id: usuarioActual.id, psico_asignado_nombre: usuarioActual.nombre, seguimiento: '1ra Cita' }).eq('id_gte', id);
+            lanzarToast("CASO ADOPTADO"); cargarExpedientes();
         }
 
-        async function actualizarEstatus(id, v) {
-            await _supabase.from('expedientes').update({ seguimiento: v }).eq('id_gte', id);
-            lanzarToast("ESTATUS ACTUALIZADO");
-            cargarExpedientes();
+        async function actualizarEstatus(id, val) {
+            await _supabase.from('expedientes').update({ seguimiento: val }).eq('id_gte', id);
+            lanzarToast("ESTATUS ACTUALIZADO"); cargarExpedientes();
         }
 
         function cargarEstadisticas(data) {
             const peso = { "1ra Cita": 1, "2da Cita": 2, "3ra Cita": 3, "4ta Cita": 4, "Alta Psicológica": 4, "Derivación (SMPNNA)": 1 };
             const citas = data.reduce((acc, x) => acc + (peso[x.seguimiento] || 0), 0);
             const psicos = new Set(data.filter(x => x.psico_asignado_id).map(x => x.psico_asignado_id)).size;
-
-            const kpis = [
-                { t: "Expedientes", v: data.length, c: "text-gte-blue" },
-                { t: "Citas (Impacto)", v: citas, c: "text-gte-orange" },
-                { t: "Especialistas", v: psicos, c: "text-blue-500" },
-                { t: "Críticos (Fase 4)", v: data.filter(x => x.fase_actual == "4").length, c: "text-red-600" }
-            ];
-
-            document.getElementById('kpi-grid').innerHTML = kpis.map(s => `
-                <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center">
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p>
-                    <h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3>
-                </div>`).join('');
-
+            const kpis = [{ t: "Expedientes", v: data.length, c: "text-gte-blue" }, { t: "Impacto (Citas)", v: citas, c: "text-gte-orange" }, { t: "Especialistas", v: psicos, c: "text-blue-500" }, { t: "Fase 4", v: data.filter(x => x.fase_actual == "4").length, c: "text-red-600" }];
+            document.getElementById('kpi-grid').innerHTML = kpis.map(s => `<div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p><h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3></div>`).join('');
             renderChart(data);
         }
 
@@ -314,35 +401,8 @@
             const instMap = {};
             data.forEach(x => instMap[x.institucion_educativa] = (instMap[x.institucion_educativa] || 0) + 1);
             const labels = Object.keys(instMap).sort((a,b) => instMap[b] - instMap[a]).slice(0, 10);
-            
             if(chartInst) chartInst.destroy();
-            chartInst = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{ label: 'Casos', data: labels.map(l => instMap[l]), backgroundColor: '#FFD700', borderRadius: 5 }]
-                },
-                options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-        }
-
-        function generarPDF() {
-            const area = document.getElementById('reporte-area');
-            html2pdf().set({ margin: 0.5, filename: 'GTE_Reporte.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(area).save();
-        }
-
-        function filtrarTabla() {
-            const b = document.getElementById('buscador-input').value.toLowerCase();
-            renderizarTabla(todosLosExpedientes.filter(x => x.nombre_paciente.toLowerCase().includes(b) || x.id_gte.toLowerCase().includes(b) || x.cedula_paciente.includes(b) || x.institucion_educativa.toLowerCase().includes(b)));
-        }
-
-        function cambiarTab(id) {
-            animarCarga(60);
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            if(event) event.currentTarget.classList.add('active');
-            animarCarga(100);
+            chartInst = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Casos', data: labels.map(l => instMap[l]), backgroundColor: '#FFD700', borderRadius: 5 }] }, options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         }
 
         async function procesarCargaMaestra(e) {
@@ -352,36 +412,39 @@
             reader.onload = async (evt) => {
                 const wb = XLSX.read(evt.target.result, { type: 'binary' });
                 const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                const lotes = raw.map(fila => {
-                    const f = {};
-                    Object.keys(fila).forEach(k => f[k.trim().toUpperCase()] = fila[k]);
-                    return {
-                        id_gte: String(f['EXPEDIENTE'] || '').trim(),
-                        fase_actual: String(f['FASE'] || '3').trim(),
-                        nombre_paciente: String(f['NOMBRE Y APELLIDO'] || '').trim().toUpperCase(),
-                        institucion_educativa: String(f['INSTITUCIÓN'] || '').trim().toUpperCase(),
-                        cedula_paciente: String(f['CÉDULA'] || '').trim(),
-                        edad_paciente: parseInt(f['EDAD']) || 0,
-                        seguimiento: 'Sin Iniciar'
-                    };
+                const lotes = raw.map(f => {
+                    const r = {}; Object.keys(f).forEach(k => r[k.trim().toUpperCase()] = f[k]);
+                    return { id_gte: String(r['EXPEDIENTE'] || '').trim(), fase_actual: String(r['FASE'] || '3').trim(), nombre_paciente: String(r['NOMBRE Y APELLIDO'] || '').trim().toUpperCase(), institucion_educativa: String(r['INSTITUCIÓN'] || '').trim().toUpperCase(), cedula_paciente: String(r['CÉDULA'] || '').trim(), edad_paciente: parseInt(r['EDAD']) || 0, seguimiento: 'Sin Iniciar' };
                 }).filter(x => x.id_gte !== '');
                 await _supabase.from('expedientes').upsert(lotes, { onConflict: 'id_gte' });
-                animarCarga(100); lanzarToast("SINCRONIZADO"); cargarExpedientes();
+                animarCarga(100); lanzarToast("REPOSITORIO SINCRONIZADO"); cargarExpedientes();
             };
             reader.readAsBinaryString(file);
         }
 
-        function lanzarToast(m) {
-            const t = document.getElementById('gte-toast');
-            t.innerText = m; t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
+        function cambiarTab(id) {
+            animarCarga(50);
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            if(event) event.currentTarget.classList.add('active');
+            if(id === 'tab-mis-pacientes') renderizarMisPacientes();
+            animarCarga(100);
         }
 
-        async function cerrarSesion() {
-            animarCarga(50);
-            await _supabase.auth.signOut();
-            location.reload();
+        function filtrarTabla() {
+            const b = document.getElementById('buscador-input').value.toLowerCase();
+            renderizarTabla(todosLosExpedientes.filter(x => x.nombre_paciente.toLowerCase().includes(b) || x.id_gte.toLowerCase().includes(b) || x.cedula_paciente.includes(b) || x.institucion_educativa.toLowerCase().includes(b)));
         }
+
+        function generarPDF() {
+            const area = document.getElementById('reporte-area');
+            html2pdf().set({ margin: 0.5, filename: 'GTE_Reporte.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(area).save();
+        }
+
+        function cerrarModales() { document.getElementById('modal-demograficos').style.display = 'none'; document.getElementById('modal-historia').style.display = 'none'; }
+        function lanzarToast(m) { const t = document.getElementById('gte-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
+        async function cerrarSesion() { await _supabase.auth.signOut(); location.reload(); }
     </script>
 </body>
 </html>
