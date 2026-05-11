@@ -153,6 +153,7 @@
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display-name').innerText = session.nombre;
             const menu = document.getElementById('nav-menu');
+            
             if (session.rol === "MASTER") {
                 document.getElementById('master-actions').classList.remove('hidden');
                 menu.innerHTML = `
@@ -161,79 +162,56 @@
                 `;
                 switchTab('tab-master-stats');
             } else {
-                menu.innerHTML = `<button onclick="switchTab('tab-expedientes')" class="nav-button active">📁 Mis Casos Asignados</button>`;
+                menu.innerHTML = `<button onclick="switchTab('tab-expedientes')" class="nav-button active">📁 Casos Disponibles</button>`;
                 switchTab('tab-expedientes');
             }
             await cargarDesdeNube();
         }
 
         async function cargarDesdeNube() {
+            console.log("⏳ Descargando datos de Supabase...");
             const { data, error } = await _supabase.from('expedientes').select('*').order('created_at', { ascending: false });
-            if (!error) { REPOSITORIO = data; renderExps(); if (session.rol === "MASTER") actualizarKPIs(); }
+            if (error) { console.error("Error al cargar:", error); return; }
+            REPOSITORIO = data || [];
+            console.log("✅ Datos recibidos:", REPOSITORIO.length);
+            renderExps();
+            if (session.rol === "MASTER") actualizarKPIs();
         }
 
-        // FUNCIÓN QUIRÚRGICA: LIMPIA DUPLICADOS ANTES DE SUBIR
-async function handleExcel(e) {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-        try {
-            const data = new Uint8Array(evt.target.result);
-            const wb = XLSX.read(data, { type: 'array' });
-            const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-            
-            // 1. Encontrar la fila de encabezados (buscamos donde diga "Expediente")
-            let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("expediente")));
-            if(hIdx === -1) { alert("❌ No encontré la columna 'Expediente'"); return; }
+        // CARGA EXCEL CORREGIDA (ÍNDICES REALES DEL REPOSITORIO MATER)
+        async function handleExcel(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+                let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("exp")));
+                if(hIdx === -1) { alert("❌ No encontré la columna Expediente"); return; }
 
-            const mapaLimpio = new Map();
-
-            // 2. Procesar filas desde el encabezado hacia abajo
-            for (let i = hIdx + 1; i < rows.length; i++) {
-                const r = rows[i];
-                // Verificamos que la fila tenga datos y que el ID del expediente no esté vacío
-                if (!r || r.length < 2 || !r[1]) continue;
-
-                const id_gte = String(r[1]).trim(); // Columna 1: Expediente
-
-                mapaLimpio.set(id_gte, {
-                    id_gte: id_gte,
-                    nombre_paciente: String(r[2] || "N/I").trim().toUpperCase(),    // Columna 2: Nombre
-                    institucion_educativa: String(r[3] || "N/I").trim().toUpperCase(), // Columna 3: Institución
-                    cedula_paciente: String(r[4] || "N/I").trim(),                // Columna 4: Cédula
-                    edad_paciente: parseInt(r[5]) || 0,                            // Columna 5: Edad
-                    fase_actual: String(r[0] || "3").trim(),                       // Columna 0: Fase
-                    seguimiento: "Sin Iniciar"
-                });
-            }
-
-            const datosFinales = Array.from(mapaLimpio.values());
-            
-            if (datosFinales.length === 0) {
-                alert("⚠️ No se encontraron datos válidos para cargar.");
-                return;
-            }
-
-            // 3. Disparo masivo a Supabase
-            const { error } = await _supabase
-                .from('expedientes')
-                .upsert(datosFinales, { onConflict: 'id_gte' });
-
-            if (error) {
-                console.error("Error Supabase:", error);
-                alert("Error de Sincronización: " + error.message);
-            } else {
-                showToast(`✅ ¡Nube Sincronizada! ${datosFinales.length} casos únicos cargados.`);
-                await cargarDesdeNube();
-            }
-        } catch (err) {
-            console.error("Error procesando Excel:", err);
-            alert("❌ Error al procesar el archivo. Revisa el formato.");
+                const mapaLimpio = new Map();
+                for (let i = hIdx + 1; i < rows.length; i++) {
+                    const r = rows[i]; if (!r || !r[1]) continue;
+                    
+                    const id_gte = String(r[1]).trim(); // Columna 1 es el Expediente
+                    mapaLimpio.set(id_gte, {
+                        fase_actual: String(r[0] || "3").trim(), // Columna 0 es Fase
+                        id_gte: id_gte,
+                        nombre_paciente: String(r[2] || "N/I").trim().toUpperCase(), // Columna 2 es Nombre
+                        institucion_educativa: String(r[3] || "N/I").trim().toUpperCase(), // Columna 3 es Escuela
+                        cedula_paciente: String(r[4] || "N/I").trim(), // Columna 4 es CI
+                        edad_paciente: parseInt(r[5]) || 0, // Columna 5 es Edad
+                        seguimiento: "Sin Iniciar"
+                    });
+                }
+                
+                const datos = Array.from(mapaLimpio.values());
+                const { error } = await _supabase.from('expedientes').upsert(datos, { onConflict: 'id_gte' });
+                if (error) alert("Error: " + error.message);
+                else { showToast(`✅ Sincronizados ${datos.length} expedientes`); await cargarDesdeNube(); }
+            };
+            reader.readAsArrayBuffer(file);
         }
-    };
-    reader.readAsArrayBuffer(file);
-}
 
         async function adoptar(id_gte) {
             const { error } = await _supabase.from('expedientes')
@@ -254,24 +232,30 @@ async function handleExcel(e) {
             if (!error) { showToast("Historia Guardada"); cerrarHistoria(); await cargarDesdeNube(); }
         }
 
+        // RENDERIZADO "BLINDADO" (NO FALLA SI HAY DATOS VACÍOS)
         function renderExps() {
             const body = document.getElementById('exp-list');
-            const filtrados = REPOSITORIO.filter(exp => 
-                exp.id_gte.toLowerCase().includes(filtroBusqueda) || 
-                exp.nombre_paciente.toLowerCase().includes(filtroBusqueda)
-            );
+            if (!body) return;
+
+            const filtrados = REPOSITORIO.filter(exp => {
+                const s = filtroBusqueda.toLowerCase();
+                return (exp.id_gte || "").toLowerCase().includes(s) || 
+                       (exp.nombre_paciente || "").toLowerCase().includes(s) ||
+                       (exp.institucion_educativa || "").toLowerCase().includes(s);
+            });
+
             body.innerHTML = filtrados.map(exp => {
                 const myCase = exp.psico_asignado_id === session.user;
                 return `
                 <tr class="hover:bg-slate-50 border-b">
-                    <td><div class="exp-box"><span class="exp-prefix">ID</span><span class="exp-number">${exp.id_gte}</span></div></td>
-                    <td><span class="font-black text-gte-blue uppercase text-[12px]">${exp.nombre_paciente}</span></td>
-                    <td><span class="text-slate-400 font-bold uppercase text-[9px]">${exp.institucion_educativa}</span></td>
-                    <td><span class="fase-badge">${exp.fase_actual}</span></td>
+                    <td><div class="exp-box"><span class="exp-prefix">ID</span><span class="exp-number">${exp.id_gte || 'N/I'}</span></div></td>
+                    <td><span class="font-black text-gte-blue uppercase text-[12px]">${exp.nombre_paciente || 'N/I'}</span></td>
+                    <td><span class="text-slate-400 font-bold uppercase text-[9px]">${exp.institucion_educativa || 'N/I'}</span></td>
+                    <td><span class="fase-badge">${exp.fase_actual || '3'}</span></td>
                     <td class="text-center">
                         ${myCase ? `<select onchange="updateSeguimiento('${exp.id_gte}', this.value)" class="text-[9px] p-1 border rounded-lg font-black bg-white">
                                 ${SEGUIMIENTO_OPCIONES.map(opt => `<option value="${opt}" ${exp.seguimiento === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                            </select>` : `<span class="text-[8px] font-black uppercase text-slate-400">${exp.seguimiento}</span>`}
+                            </select>` : `<span class="text-[8px] font-black uppercase text-slate-400">${exp.seguimiento || 'Sin Iniciar'}</span>`}
                     </td>
                     <td>
                         ${(!exp.psico_asignado_id && session.rol === 'ESPECIALISTA') ? `<button onclick="adoptar('${exp.id_gte}')" class="btn-gte-orange text-[9px]">Adoptar</button>` 
@@ -284,6 +268,7 @@ async function handleExcel(e) {
 
         function verHistoria(id) {
             const exp = REPOSITORIO.find(e => e.id_gte === id);
+            if(!exp) return;
             activeExpId = id;
             document.getElementById('modal-paciente-id').innerText = `EXPEDIENTE: ${id}`;
             document.getElementById('modal-evolucion').value = exp.evolucion_clinica || "";
@@ -294,17 +279,25 @@ async function handleExcel(e) {
             const stats = [
                 { l: "Total Casos", v: REPOSITORIO.length, c: "gte-blue" },
                 { l: "En Consulta", v: REPOSITORIO.filter(e => e.psico_asignado_id).length, c: "blue-500" },
-                { l: "Altas", v: REPOSITORIO.filter(e => e.seguimiento === "Alta").length, c: "green-600" },
-                { l: "Libres", v: REPOSITORIO.filter(e => !e.psico_asignado_id).length, c: "gte-orange" }
+                { l: "Altas Clínicas", v: REPOSITORIO.filter(e => e.seguimiento === "Alta").length, c: "green-600" },
+                { l: "Pendientes", v: REPOSITORIO.filter(e => !e.psico_asignado_id).length, c: "gte-orange" }
             ];
             document.getElementById('stats-grid').innerHTML = stats.map(x => `
-                <div class="kpi-card">
-                    <p class="text-[9px] font-black text-slate-400 uppercase">${x.l}</p>
+                <div class="kpi-card shadow-sm">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${x.l}</p>
                     <h3 class="text-2xl font-black text-${x.c} mt-1">${x.v}</h3>
                 </div>`).join('');
         }
 
-        function switchTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            // Pequeño hack para activar el botón visualmente
+            const btns = document.querySelectorAll('.nav-button');
+            btns.forEach(btn => { if(btn.innerText.includes("Estadísticas") && id === 'tab-master-stats') btn.classList.add('active'); });
+        }
+
         function showToast(m) { const t = document.getElementById('gte-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2500); }
         function handleBusqueda(v) { filtroBusqueda = v.toLowerCase().trim(); renderExps(); }
         function cerrarHistoria() { document.getElementById('modal-historia').style.display = 'none'; }
