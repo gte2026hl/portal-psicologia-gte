@@ -3,305 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTE 2026 - Portal Clínico de Gestión Municipal</title>
+    <title>GTE 2026 - Gestión Municipal</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap');
-        :root { --gte-blue: #003366; --gte-orange: #FF6600; --gte-gold: #D4AF37; --gte-bg: #f8fafc; }
-        body { font-family: 'Open Sans', sans-serif; background-color: var(--gte-bg); margin: 0; overflow-x: hidden; }
-        h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
-        .text-gte-blue { color: var(--gte-blue); }
-        .bg-gte-blue { background-color: var(--gte-blue); }
-        .text-gte-orange { color: var(--gte-orange); }
-        .btn-gte-orange { background-color: var(--gte-orange); color: white; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer; }
-        .btn-gte-orange:hover { background-color: var(--gte-blue); transform: translateY(-1px); }
-        .btn-gte-blue { background-color: var(--gte-blue); color: white; transition: all 0.2s ease; font-weight: 800; border-radius: 12px; border: none; padding: 12px 24px; cursor: pointer; }
-        .nav-button { width: 100%; text-align: left; padding: 16px 24px; display: flex; align-items: center; gap: 14px; color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 700; transition: all 0.3s ease; border-left: 4px solid transparent; cursor: pointer; background: transparent; }
-        .nav-button:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
-        .nav-button.active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid var(--gte-orange); color: white; }
-        .content-card { background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); border: 1px solid #eef2f6; }
-        .form-input { width: 100%; border: 2px solid #f1f5f9; border-radius: 12px; padding: 10px 14px; font-size: 14px; outline: none; transition: 0.2s; color: #1e293b; background: #f8fafc; }
-        .kpi-card { background: white; padding: 20px; border-radius: 18px; border: 1px solid #eef2f6; transition: 0.3s; position: relative; overflow: hidden; }
-        .kpi-card:hover { transform: translateY(-3px); border-color: var(--gte-orange); }
-        #gte-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: var(--gte-blue); color: white; padding: 12px 30px; border-radius: 50px; font-weight: 800; font-size: 10px; text-transform: uppercase; border: 2px solid var(--gte-orange); z-index: 10000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-        .gte-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        .gte-table th { padding: 10px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; border-bottom: 2px solid #f1f5f9; text-align: left; }
-        .gte-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
-        .exp-prefix { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
-        .exp-number { font-size: 14px; font-weight: 900; color: var(--gte-orange); }
-        .fase-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; font-weight: 900; font-size: 12px; background: #fff7ed; color: var(--gte-orange); border: 2px solid #ffedd5; }
-        .clinical-modal { position: fixed; inset: 0; background: rgba(0, 51, 102, 0.9); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .clinical-box { background: white; width: 100%; max-width: 800px; border-radius: 30px; overflow: hidden; }
+        :root { --gte-blue: #003366; --gte-orange: #FF6600; --gte-bg: #f8fafc; }
+        body { font-family: 'Open Sans', sans-serif; background-color: var(--gte-bg); margin: 0; }
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+        
+        /* Estilos de Componentes */
+        .btn-gte-orange { background: var(--gte-orange); color: white; font-weight: 800; border-radius: 12px; transition: 0.3s; }
+        .btn-gte-orange:hover { background: var(--gte-blue); transform: translateY(-2px); }
+        .nav-button { width: 100%; text-align: left; padding: 14px 20px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: #94a3b8; transition: 0.3s; border-radius: 12px; }
+        .nav-button.active { background: rgba(255,102,0,0.1); color: var(--gte-orange); }
+        .form-input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; outline: none; transition: 0.3s; }
+        .form-input:focus { border-color: var(--gte-orange); }
+        .clinical-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        #gte-toast { position: fixed; bottom: 20px; right: 20px; background: var(--gte-blue); color: white; padding: 15px 25px; border-radius: 10px; border-left: 5px solid var(--gte-orange); display: none; z-index: 10001; font-weight: 800; font-size: 12px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
     <div id="login-screen" class="fixed inset-0 z-[100] bg-[#003366] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-[45px] shadow-2xl overflow-hidden">
-            <div class="h-4 w-full bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600"></div>
-            <div class="p-12 text-center">
-                <h1 class="text-3xl font-black text-[#003366] mb-2 uppercase tracking-tighter">Guacara Te Escucha 2026</h1>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Portal Clínico Municipal</p>
-                <div class="space-y-6 text-left">
-                    <input type="text" id="user_id" class="form-input font-bold" placeholder="Usuario">
-                    <input type="password" id="user_pass" class="form-input font-bold" placeholder="••••••••">
-                    <button onclick="accesoUniversal()" class="w-full btn-gte-blue py-4 uppercase text-xs tracking-widest shadow-lg">Ingresar</button>
-                </div>
+        <div class="bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10 text-center">
+            <h1 class="text-2xl font-black text-gte-blue uppercase tracking-tighter">Guacara Te Escucha</h1>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-8">Portal de Gestión Clínica 2026</p>
+            <div class="space-y-4">
+                <input type="email" id="login-email" class="form-input" placeholder="Correo Institucional">
+                <input type="password" id="login-pass" class="form-input" placeholder="Contraseña">
+                <button onclick="ejecutarLogin()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-lg">Entrar al Sistema</button>
             </div>
         </div>
     </div>
 
-    <div id="gte-toast">Operación Exitosa</div>
-
-    <div id="modal-historia" class="clinical-modal">
-        <div class="clinical-box flex flex-col max-h-[90vh] shadow-2xl">
-            <div class="bg-gte-blue p-6 text-white flex justify-between items-center">
-                <div>
-                    <h2 class="text-xl font-black uppercase tracking-tight">Evolución Psicológica</h2>
-                    <p id="modal-paciente-id" class="text-gte-orange font-bold text-[9px] uppercase tracking-widest">---</p>
-                </div>
-                <button onclick="cerrarHistoria()" class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded-lg text-[10px] font-bold transition">CERRAR</button>
-            </div>
-            <div class="p-8 overflow-y-auto flex-grow space-y-6 bg-white">
-                <textarea id="modal-evolucion" class="form-input h-64 resize-none font-semibold text-slate-700 leading-relaxed" placeholder="Documente detalladamente los hallazgos..."></textarea>
-            </div>
-            <div class="p-6 bg-slate-50 border-t">
-                <button onclick="guardarEvolucion()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest shadow-xl font-black">Actualizar Historia en la Nube</button>
+    <div id="modal-setup" class="clinical-modal">
+        <div class="bg-white p-10 rounded-[30px] max-w-md w-full shadow-2xl border-4 border-gte-orange">
+            <h2 class="text-xl font-black text-gte-blue uppercase text-center mb-2">Activación de Cuenta</h2>
+            <p class="text-[10px] text-slate-400 text-center mb-6 uppercase font-bold">Por seguridad, actualiza tus datos de acceso.</p>
+            <div class="space-y-4">
+                <input type="text" id="setup-nombre" class="form-input" placeholder="Tu Nombre y Apellido">
+                <input type="password" id="setup-pass1" class="form-input" placeholder="Nueva Contraseña">
+                <input type="password" id="setup-pass2" class="form-input" placeholder="Confirmar Contraseña">
+                <button onclick="guardarConfiguracionInicial()" class="w-full btn-gte-orange py-4 text-xs uppercase tracking-widest">Activar Perfil</button>
             </div>
         </div>
     </div>
 
-    <nav id="sidebar" class="hidden w-full md:w-72 bg-[#003366] text-white flex flex-col sticky top-0 md:h-screen z-50">
-        <div class="p-8">
-            <h2 class="text-xl font-black uppercase leading-tight tracking-tighter">GUACARA<br><span class="text-gte-orange">TE ESCUCHA</span></h2>
-            <div class="mt-8 flex items-center gap-3 bg-white/5 p-3 rounded-2xl">
-                <div id="user-display-name" class="text-[11px] font-black truncate">Cargando...</div>
-            </div>
+    <nav id="sidebar" class="hidden w-full md:w-64 bg-white border-r h-screen sticky top-0 flex flex-col p-6">
+        <div class="mb-10">
+            <h2 class="text-lg font-black text-gte-blue leading-tight uppercase">GTE<span class="text-gte-orange">2026</span></h2>
+            <p id="display-user-rol" class="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1">Cargando...</p>
         </div>
-        <div id="nav-menu" class="flex-grow space-y-1 px-4 py-2"></div>
-        <div class="p-8"><button onclick="cerrarSesion()" class="w-full py-3 bg-red-500/10 rounded-xl text-[9px] font-black text-red-400 uppercase">Cerrar Sesión</button></div>
+        
+        <div id="nav-menu" class="flex-grow space-y-2">
+            </div>
+
+        <div class="pt-6 border-t">
+            <div class="text-[10px] font-bold text-slate-400 mb-2 uppercase" id="display-user-name">Usuario</div>
+            <button onclick="cerrarSesion()" class="w-full py-3 bg-red-50 rounded-xl text-[10px] font-black text-red-500 uppercase">Salir</button>
+        </div>
     </nav>
 
-    <main id="main-content" class="hidden flex-grow p-4 md:p-6 lg:p-8 overflow-y-auto w-full">
-        <section id="tab-expedientes" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
-            <header class="mb-6 flex justify-between items-end">
+    <main id="main-content" class="hidden flex-grow p-8 overflow-y-auto">
+        
+        <section id="tab-master-stats" class="tab-content hidden animate-fade">
+            <h2 class="text-3xl font-black text-gte-blue mb-8 uppercase tracking-tighter">Panel de Control Municipal</h2>
+            <div id="kpi-grid" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
+        </section>
+
+        <section id="tab-repositorio" class="tab-content hidden animate-fade">
+            <div class="flex justify-between items-end mb-6">
                 <div>
-                    <h2 class="text-3xl font-black text-[#003366] uppercase tracking-tight">Repositorio Maestro</h2>
-                    <p class="text-slate-500 uppercase text-[8px] font-bold tracking-widest">Sincronización en Tiempo Real</p>
+                    <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Expedientes</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Base de Datos Centralizada</p>
                 </div>
-                <div id="master-actions" class="hidden flex gap-3">
-                    <button onclick="document.getElementById('bulk-input').click()" class="bg-white px-4 py-2 rounded-lg text-[9px] border-2 border-blue-600 font-black text-blue-600">📊 CARGA EXCEL</button>
-                    <input type="file" id="bulk-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcel(event)">
+                <div id="master-only-upload" class="hidden">
+                    <input type="file" id="excel-file" class="hidden" accept=".xlsx" onchange="procesarCargaMaestra(event)">
+                    <button onclick="document.getElementById('excel-file').click()" class="bg-white border-2 border-gte-blue text-gte-blue px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-gte-blue hover:text-white transition">📊 Carga Maestra</button>
                 </div>
-            </header>
-            <div class="mb-4"><input type="text" id="busqueda-input" oninput="handleBusqueda(this.value)" class="form-input" placeholder="Buscar por nombre, expediente o escuela..."></div>
-            <div class="content-card overflow-hidden">
-                <table class="gte-table">
-                    <thead><tr><th>Expediente</th><th>Estudiante</th><th>Institución</th><th>Fase</th><th class="text-center">Estatus</th><th>Acción</th></tr></thead>
-                    <tbody id="exp-list"></tbody>
+            </div>
+            <div class="bg-white rounded-[20px] shadow-sm border overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b">
+                        <tr class="text-[10px] font-black text-slate-400 uppercase">
+                            <th class="p-4">ID Expediente</th>
+                            <th class="p-4">Paciente</th>
+                            <th class="p-4">Escuela</th>
+                            <th class="p-4">Fase</th>
+                            <th class="p-4">Estatus</th>
+                            <th class="p-4 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-expedientes" class="text-sm"></tbody>
                 </table>
             </div>
         </section>
 
-        <section id="tab-master-stats" class="tab-content hidden animate-fade max-w-[1400px] mx-auto">
-             <header class="mb-8"><h2 class="text-3xl font-black text-gte-blue uppercase tracking-tight">Consola de Control Municipal</h2></header>
-             <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+        <section id="tab-equipo" class="tab-content hidden animate-fade">
+            <h2 class="text-3xl font-black text-gte-blue mb-8 uppercase tracking-tighter">Gestión de Especialistas</h2>
+            <div id="lista-especialistas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </section>
+
     </main>
 
+    <div id="gte-toast">Operación Exitosa</div>
+
     <script>
-        const SUPABASE_URL = "https://mltfjgkbparwwofgknjg.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_RSR809FqZWUorWzfJnjomA_gA33qeLK";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // CONFIGURACIÓN SUPABASE
+        const _supabase = supabase.createClient("https://mltfjgkbparwwofgknjg.supabase.co", "sb_publishable_RSR809FqZWUorWzfJnjomA_gA33qeLK");
 
-        const DB_BASE = {
-            master: { user: "admin_master", pass: "gte2026master", nombre: "MASTER ADMIN" },
-            especialistas: Array.from({ length: 20 }, (_, i) => ({
-                user: `psic_${String(i + 1).padStart(3, '0')}`,
-                pass: "1234",
-                nombre: `Psicólogo GTE ${i + 1}`
-            }))
-        };
+        let usuarioActual = null;
+        let repositorioGlobal = [];
 
-        const SEGUIMIENTO_OPCIONES = ["Sin Iniciar", "1era Consulta", "2da Consulta", "3era Consulta", "4ta Consulta", "Derivación", "Cerrado", "Alta"];
-        let REPOSITORIO = [];
-        let session = null;
-        let filtroBusqueda = "";
-        let activeExpId = null;
+        // 1. LÓGICA DE LOGIN Y ROLES
+        async function ejecutarLogin() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
 
-        function accesoUniversal() {
-            const u = document.getElementById('user_id').value.trim().toLowerCase();
-            const p = document.getElementById('user_pass').value;
-            if (u === DB_BASE.master.user && p === DB_BASE.master.pass) {
-                session = { user: u, nombre: DB_BASE.master.nombre, rol: "MASTER" };
-                initInterface();
+            const { data: { user }, error: authError } = await _supabase.auth.signInWithPassword({ email, password: pass });
+
+            if (authError) { alert("❌ Acceso denegado: " + authError.message); return; }
+
+            // Buscamos perfil en la tabla 'usuarios'
+            const { data: perfil } = await _supabase.from('usuarios').select('*').eq('id', user.id).single();
+
+            usuarioActual = perfil;
+
+            if (perfil.debe_cambiar_pass) {
+                document.getElementById('modal-setup').style.display = 'flex';
             } else {
-                const esp = DB_BASE.especialistas.find(e => e.user === u && p === e.pass);
-                if (esp) {
-                    session = { user: u, nombre: esp.nombre, rol: "ESPECIALISTA" };
-                    initInterface();
-                } else alert("❌ Credenciales Incorrectas");
+                iniciarApp();
             }
         }
 
-        async function initInterface() {
-            document.getElementById('login-screen').style.display = 'none';
+        // 2. CONFIGURACIÓN DE INTERFAZ
+        function iniciarApp() {
+            document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-display-name').innerText = session.nombre;
-            const menu = document.getElementById('nav-menu');
             
-            if (session.rol === "MASTER") {
-                document.getElementById('master-actions').classList.remove('hidden');
+            document.getElementById('display-user-name').innerText = usuarioActual.nombre;
+            document.getElementById('display-user-rol').innerText = usuarioActual.rol + " • GTE 2026";
+
+            const menu = document.getElementById('nav-menu');
+            if (usuarioActual.rol === 'MASTER') {
+                document.getElementById('master-only-upload').classList.remove('hidden');
                 menu.innerHTML = `
-                    <button onclick="switchTab('tab-master-stats')" class="nav-button active">📊 Estadísticas</button>
-                    <button onclick="switchTab('tab-expedientes')" class="nav-button">📁 Repositorio Maestro</button>
+                    <button onclick="cambiarTab('tab-master-stats')" class="nav-button active">📊 Estadísticas</button>
+                    <button onclick="cambiarTab('tab-repositorio')" class="nav-button">📁 Repositorio Maestro</button>
+                    <button onclick="cambiarTab('tab-equipo')" class="nav-button">👥 Gestión de Equipo</button>
                 `;
-                switchTab('tab-master-stats');
+                cambiarTab('tab-master-stats');
+                cargarEstadisticas();
+                cargarEquipo();
             } else {
-                menu.innerHTML = `<button onclick="switchTab('tab-expedientes')" class="nav-button active">📁 Casos Disponibles</button>`;
-                switchTab('tab-expedientes');
+                menu.innerHTML = `
+                    <button onclick="cambiarTab('tab-repositorio')" class="nav-button active">📁 Casos Disponibles</button>
+                    <button onclick="cambiarTab('tab-mis-casos')" class="nav-button">💼 Mis Pacientes</button>
+                `;
+                cambiarTab('tab-repositorio');
             }
-            await cargarDesdeNube();
+            cargarExpedientes();
         }
 
-        async function cargarDesdeNube() {
-            console.log("⏳ Descargando datos de Supabase...");
-            const { data, error } = await _supabase.from('expedientes').select('*').order('created_at', { ascending: false });
-            if (error) { console.error("Error al cargar:", error); return; }
-            REPOSITORIO = data || [];
-            console.log("✅ Datos recibidos:", REPOSITORIO.length);
-            renderExps();
-            if (session.rol === "MASTER") actualizarKPIs();
-        }
-
-        // CARGA EXCEL CORREGIDA (ÍNDICES REALES DEL REPOSITORIO MATER)
-        async function handleExcel(e) {
+        // 3. CARGA MAESTRA EXCEL (LÓGICA SHEETJS)
+        async function procesarCargaMaestra(e) {
             const file = e.target.files[0];
-            if(!file) return;
             const reader = new FileReader();
             reader.onload = async (evt) => {
-                const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let hIdx = rows.findIndex(r => r && r.some(c => String(c).toLowerCase().includes("exp")));
-                if(hIdx === -1) { alert("❌ No encontré la columna Expediente"); return; }
+                const wb = XLSX.read(evt.target.result, { type: 'binary' });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const data = XLSX.utils.sheet_to_json(ws);
 
-                const mapaLimpio = new Map();
-                for (let i = hIdx + 1; i < rows.length; i++) {
-                    const r = rows[i]; if (!r || !r[1]) continue;
-                    
-                    const id_gte = String(r[1]).trim(); // Columna 1 es el Expediente
-                    mapaLimpio.set(id_gte, {
-                        fase_actual: String(r[0] || "3").trim(), // Columna 0 es Fase
-                        id_gte: id_gte,
-                        nombre_paciente: String(r[2] || "N/I").trim().toUpperCase(), // Columna 2 es Nombre
-                        institucion_educativa: String(r[3] || "N/I").trim().toUpperCase(), // Columna 3 es Escuela
-                        cedula_paciente: String(r[4] || "N/I").trim(), // Columna 4 es CI
-                        edad_paciente: parseInt(r[5]) || 0, // Columna 5 es Edad
-                        seguimiento: "Sin Iniciar"
-                    });
-                }
+                // Mapeo meticuloso al esquema de Supabase
+                const lotes = data.map(f => ({
+                    id_gte: String(f['EXPEDIENTE'] || f['EXP']).trim(),
+                    fase_actual: String(f['FASE'] || '3'),
+                    nombre_paciente: f['NOMBRE Y APELLIDO'] || 'N/I',
+                    institucion_educativa: f['INSTITUCIÓN'] || 'N/I',
+                    cedula_paciente: String(f['CÉDULA'] || 'N/I'),
+                    edad_paciente: parseInt(f['EDAD']) || 0,
+                    seguimiento: 'Sin Iniciar'
+                }));
+
+                const { error } = await _supabase.from('expedientes').upsert(lotes, { onConflict: 'id_gte' });
                 
-                const datos = Array.from(mapaLimpio.values());
-                const { error } = await _supabase.from('expedientes').upsert(datos, { onConflict: 'id_gte' });
-                if (error) alert("Error: " + error.message);
-                else { showToast(`✅ Sincronizados ${datos.length} expedientes`); await cargarDesdeNube(); }
+                if(!error) {
+                    lanzarToast(`✅ ${lotes.length} CASOS CARGADOS`);
+                    cargarExpedientes();
+                    if(usuarioActual.rol === 'MASTER') cargarEstadisticas();
+                } else {
+                    alert("Error en carga: " + error.message);
+                }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsBinaryString(file);
         }
 
-        async function adoptar(id_gte) {
-            const { error } = await _supabase.from('expedientes')
-                .update({ psico_asignado_id: session.user, psico_asignado_nombre: session.nombre, seguimiento: '1era Consulta' })
-                .eq('id_gte', id_gte);
-            if (!error) { showToast("Caso Adoptado"); await cargarDesdeNube(); }
-        }
-
-        async function updateSeguimiento(id_gte, val) {
-            await _supabase.from('expedientes').update({ seguimiento: val }).eq('id_gte', id_gte);
-            showToast("Estatus Actualizado");
-            await cargarDesdeNube();
-        }
-
-        async function guardarEvolucion() {
-            const txt = document.getElementById('modal-evolucion').value;
-            const { error } = await _supabase.from('expedientes').update({ evolucion_clinica: txt }).eq('id_gte', activeExpId);
-            if (!error) { showToast("Historia Guardada"); cerrarHistoria(); await cargarDesdeNube(); }
-        }
-
-        // RENDERIZADO "BLINDADO" (NO FALLA SI HAY DATOS VACÍOS)
-        function renderExps() {
-            const body = document.getElementById('exp-list');
-            if (!body) return;
-
-            const filtrados = REPOSITORIO.filter(exp => {
-                const s = filtroBusqueda.toLowerCase();
-                return (exp.id_gte || "").toLowerCase().includes(s) || 
-                       (exp.nombre_paciente || "").toLowerCase().includes(s) ||
-                       (exp.institucion_educativa || "").toLowerCase().includes(s);
-            });
-
-            body.innerHTML = filtrados.map(exp => {
-                const myCase = exp.psico_asignado_id === session.user;
-                return `
-                <tr class="hover:bg-slate-50 border-b">
-                    <td><div class="exp-box"><span class="exp-prefix">ID</span><span class="exp-number">${exp.id_gte || 'N/I'}</span></div></td>
-                    <td><span class="font-black text-gte-blue uppercase text-[12px]">${exp.nombre_paciente || 'N/I'}</span></td>
-                    <td><span class="text-slate-400 font-bold uppercase text-[9px]">${exp.institucion_educativa || 'N/I'}</span></td>
-                    <td><span class="fase-badge">${exp.fase_actual || '3'}</span></td>
-                    <td class="text-center">
-                        ${myCase ? `<select onchange="updateSeguimiento('${exp.id_gte}', this.value)" class="text-[9px] p-1 border rounded-lg font-black bg-white">
-                                ${SEGUIMIENTO_OPCIONES.map(opt => `<option value="${opt}" ${exp.seguimiento === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                            </select>` : `<span class="text-[8px] font-black uppercase text-slate-400">${exp.seguimiento || 'Sin Iniciar'}</span>`}
+        // 4. GESTIÓN DE EXPEDIENTES
+        async function cargarExpedientes() {
+            const { data } = await _supabase.from('expedientes').select('*').order('id_gte', { ascending: true });
+            repositorioGlobal = data;
+            const body = document.getElementById('lista-expedientes');
+            body.innerHTML = data.map(exp => `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4"><span class="font-black text-gte-orange">${exp.id_gte}</span></td>
+                    <td class="p-4 font-bold text-gte-blue uppercase text-xs">${exp.nombre_paciente}</td>
+                    <td class="p-4 text-[10px] font-bold text-slate-400 uppercase">${exp.institucion_educativa}</td>
+                    <td class="p-4"><span class="bg-orange-50 text-orange-600 px-2 py-1 rounded-lg font-black text-xs">${exp.fase_actual}</span></td>
+                    <td class="p-4 text-[10px] font-black uppercase text-slate-400">${exp.seguimiento}</td>
+                    <td class="p-4 text-right">
+                        ${!exp.psico_asignado_id && usuarioActual.rol === 'PSICOLOGO' 
+                            ? `<button onclick="adoptarCaso('${exp.id_gte}')" class="btn-gte-orange px-4 py-1 text-[9px] uppercase">Adoptar</button>` 
+                            : `<span class="text-[9px] font-bold italic text-slate-300">${exp.psico_asignado_nombre || 'Disponible'}</span>`}
                     </td>
-                    <td>
-                        ${(!exp.psico_asignado_id && session.rol === 'ESPECIALISTA') ? `<button onclick="adoptar('${exp.id_gte}')" class="btn-gte-orange text-[9px]">Adoptar</button>` 
-                        : (myCase ? `<button onclick="verHistoria('${exp.id_gte}')" class="btn-gte-blue text-[9px] px-4 py-1">Evolución</button>` 
-                        : `<span class="text-[9px] font-bold text-slate-300 uppercase italic">${exp.psico_asignado_nombre || 'Disponible'}</span>`)}
-                    </td>
-                </tr>`;
-            }).join('');
+                </tr>
+            `).join('');
         }
 
-        function verHistoria(id) {
-            const exp = REPOSITORIO.find(e => e.id_gte === id);
-            if(!exp) return;
-            activeExpId = id;
-            document.getElementById('modal-paciente-id').innerText = `EXPEDIENTE: ${id}`;
-            document.getElementById('modal-evolucion').value = exp.evolucion_clinica || "";
-            document.getElementById('modal-historia').style.display = 'flex';
+        // 5. FUNCIONES DE PERFIL
+        async function guardarConfiguracionInicial() {
+            const n = document.getElementById('setup-nombre').value;
+            const p1 = document.getElementById('setup-pass1').value;
+            const p2 = document.getElementById('setup-pass2').value;
+
+            if(!n || p1 !== p2 || p1.length < 6) { alert("Revisa los datos (mínimo 6 caracteres en clave)"); return; }
+
+            // Actualizar tabla pública
+            await _supabase.from('usuarios').update({ nombre: n, debe_cambiar_pass: false }).eq('id', usuarioActual.id);
+            // Actualizar clave en Auth
+            await _supabase.auth.updateUser({ password: p1 });
+
+            location.reload();
         }
 
-        function actualizarKPIs() {
-            const stats = [
-                { l: "Total Casos", v: REPOSITORIO.length, c: "gte-blue" },
-                { l: "En Consulta", v: REPOSITORIO.filter(e => e.psico_asignado_id).length, c: "blue-500" },
-                { l: "Altas Clínicas", v: REPOSITORIO.filter(e => e.seguimiento === "Alta").length, c: "green-600" },
-                { l: "Pendientes", v: REPOSITORIO.filter(e => !e.psico_asignado_id).length, c: "gte-orange" }
-            ];
-            document.getElementById('stats-grid').innerHTML = stats.map(x => `
-                <div class="kpi-card shadow-sm">
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${x.l}</p>
-                    <h3 class="text-2xl font-black text-${x.c} mt-1">${x.v}</h3>
-                </div>`).join('');
-        }
-
-        function switchTab(id) {
+        // UTILITARIOS
+        function cambiarTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            // Pequeño hack para activar el botón visualmente
-            const btns = document.querySelectorAll('.nav-button');
-            btns.forEach(btn => { if(btn.innerText.includes("Estadísticas") && id === 'tab-master-stats') btn.classList.add('active'); });
+            event?.currentTarget?.classList?.add('active');
         }
 
-        function showToast(m) { const t = document.getElementById('gte-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2500); }
-        function handleBusqueda(v) { filtroBusqueda = v.toLowerCase().trim(); renderExps(); }
-        function cerrarHistoria() { document.getElementById('modal-historia').style.display = 'none'; }
-        function cerrarSesion() { location.reload(); }
+        function lanzarToast(m) {
+            const t = document.getElementById('gte-toast');
+            t.innerText = m; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        function cerrarSesion() { _supabase.auth.signOut(); location.reload(); }
+
     </script>
 </body>
 </html>
