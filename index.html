@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap');
@@ -22,6 +24,7 @@
         .form-input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; outline: none; transition: 0.3s; font-size: 13px; }
         .form-input:focus { border-color: var(--gte-orange); }
         #gte-toast { position: fixed; bottom: 20px; right: 20px; background: var(--gte-blue); color: white; padding: 15px 25px; border-radius: 10px; border-left: 5px solid var(--gte-orange); display: none; z-index: 10001; font-weight: 800; font-size: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -38,7 +41,7 @@
         </div>
     </div>
 
-    <nav id="sidebar" class="hidden w-full md:w-64 bg-white border-r h-screen sticky top-0 flex flex-col p-6 shadow-sm">
+    <nav id="sidebar" class="hidden no-print w-full md:w-64 bg-white border-r h-screen sticky top-0 flex flex-col p-6 shadow-sm">
         <div class="mb-10">
             <h2 class="text-lg font-black text-gte-blue leading-tight uppercase">GTE<span class="text-gte-orange">2026</span></h2>
             <p id="display-user-rol" class="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1">ROL</p>
@@ -53,8 +56,21 @@
     <main id="main-content" class="hidden flex-grow p-8 overflow-y-auto">
         
         <section id="tab-master-stats" class="tab-content hidden">
-            <h2 class="text-3xl font-black text-gte-blue mb-8 uppercase tracking-tighter">Panel de Gestión</h2>
-            <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black text-gte-blue uppercase tracking-tighter">Panel de Gestión Estadística</h2>
+                <button onclick="exportarPDF()" class="no-print bg-gte-blue text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg">Descargar Reporte PDF</button>
+            </div>
+            
+            <div id="reporte-pdf">
+                <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"></div>
+                
+                <div class="bg-white p-8 rounded-[30px] border border-slate-100 shadow-sm">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest">Distribución por Institución Educativa</h4>
+                    <div class="h-[400px]">
+                        <canvas id="chartInstituciones"></canvas>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="tab-repositorio" class="tab-content hidden">
@@ -100,15 +116,11 @@
 
         let usuarioActual = null;
         let todosLosExpedientes = [];
+        let chartInst = null;
         
         const ESTATUS_CLINICOS = [
-            "Sin Iniciar", 
-            "1ra Cita", 
-            "2da Cita", 
-            "3ra Cita", 
-            "4ta Cita", 
-            "Derivación (SMPNNA)", 
-            "Alta Psicológica"
+            "Sin Iniciar", "1ra Cita", "2da Cita", "3ra Cita", "4ta Cita", 
+            "Derivación (SMPNNA)", "Alta Psicológica"
         ];
 
         async function ejecutarLogin() {
@@ -166,7 +178,6 @@
             const body = document.getElementById('lista-expedientes');
             body.innerHTML = datos.map(exp => {
                 const esMio = exp.psico_asignado_id === usuarioActual.id;
-                
                 return `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td class="p-5 font-black text-gte-orange text-[11px]">${exp.id_gte}</td>
@@ -235,18 +246,75 @@
             reader.readAsBinaryString(file);
         }
 
+        // LÓGICA ESTADÍSTICA ACTUALIZADA (Citas Acumuladas + Psicólogos + Gráficos)
         function cargarEstadisticas(data) {
+            // 1. Contador Acumulativo de Citas
+            const pesoCitas = { "1ra Cita": 1, "2da Cita": 2, "3ra Cita": 3, "4ta Cita": 4, "Alta Psicológica": 4, "Derivación (SMPNNA)": 1 };
+            let impactoTotal = data.reduce((acc, exp) => acc + (pesoCitas[exp.seguimiento] || 0), 0);
+
+            // 2. Conteo de Psicólogos Activos (IDs únicos que tienen asignado al menos un caso)
+            const psicologosActivos = new Set(data.filter(x => x.psico_asignado_id).map(x => x.psico_asignado_id)).size;
+
             const stats = [
-                { t: "Total Casos", v: data.length, c: "text-gte-blue" },
-                { t: "En Atención", v: data.filter(x => x.psico_asignado_id).length, c: "text-blue-500" },
-                { t: "Pendientes", v: data.filter(x => !x.psico_asignado_id).length, c: "text-gte-orange" },
-                { t: "Altas", v: data.filter(x => x.seguimiento === "Alta Psicológica").length, c: "text-green-600" }
+                { t: "Total Expedientes", v: data.length, c: "text-gte-blue" },
+                { t: "Impacto (Citas Ofrecidas)", v: impactoTotal, c: "text-gte-orange" },
+                { t: "Psicólogos Activos", v: psicologosActivos, c: "text-blue-500" },
+                { t: "Fase 4 (Críticos)", v: data.filter(x => x.fase_actual == "4").length, c: "text-red-600" }
             ];
+
             document.getElementById('kpi-grid').innerHTML = stats.map(s => `
-                <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm">
-                    <p class="text-[9px] font-black text-slate-400 uppercase">${s.t}</p>
+                <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p>
                     <h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3>
                 </div>`).join('');
+
+            renderizarGraficoInstituciones(data);
+        }
+
+        function renderizarGraficoInstituciones(data) {
+            const ctx = document.getElementById('chartInstituciones').getContext('2d');
+            
+            // Agrupar por institución
+            const instMap = {};
+            data.forEach(x => {
+                const inst = x.institucion_educativa || 'OTRA';
+                instMap[inst] = (instMap[inst] || 0) + 1;
+            });
+
+            const labels = Object.keys(instMap).sort((a,b) => instMap[b] - instMap[a]).slice(0, 10);
+            const valores = labels.map(l => instMap[l]);
+
+            if (chartInst) chartInst.destroy();
+            chartInst = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Casos',
+                        data: valores,
+                        backgroundColor: '#FF6600',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function exportarPDF() {
+            const element = document.getElementById('reporte-pdf');
+            const opt = {
+                margin: 0.5,
+                filename: 'Reporte_GTE_2026.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
         }
 
         function cambiarTab(id) {
