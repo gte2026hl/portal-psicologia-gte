@@ -187,7 +187,28 @@
                 <div class="md:col-span-1"><label class="text-[9px] font-black uppercase ml-2">Teléfono / Informante</label>
                     <input type="text" id="cs-tlf" class="form-input" placeholder="04XX-XXXXXXX"></div>
                 <div class="md:col-span-1"><label class="text-[9px] font-black uppercase ml-2">Sector</label>
-                    <input type="text" id="cs-sector" class="form-input" placeholder="Comunidad"></div>
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+        <label class="text-[9px] font-black uppercase ml-2 text-slate-400">Indicar Territorio</label>
+        <select id="reg-territorio" onchange="cargarSectores()" class="form-input font-bold text-gte-blue">
+            <option value="">Seleccione Territorio...</option>
+            <option value="ARAGÜITA">ARAGÜITA</option>
+            <option value="CENTRO">CENTRO</option>
+            <option value="CIUDAD ALIANZA">CIUDAD ALIANZA</option>
+            <option value="SAMÁN">SAMÁN</option>
+            <option value="SUR">SUR</option>
+            <option value="TOCO">TOCO</option>
+            <option value="VIGIRIMA">VIGIRIMA</option>
+            <option value="YAGUA">YAGUA</option>
+        </select>
+    </div>
+    <div>
+        <label class="text-[9px] font-black uppercase ml-2 text-slate-400">Sector Estandarizado</label>
+        <select id="reg-sector" class="form-input font-bold text-gte-orange" disabled>
+            <option value="">Primero elija territorio...</option>
+        </select>
+    </div>
+</div>
                 
                 <input type="text" id="cs-calle" class="form-input" placeholder="Calle / Avenida">
                 <input type="text" id="cs-casa" class="form-input" placeholder="Casa N°">
@@ -237,6 +258,25 @@
         const SUPABASE_URL = "https://mltfjgkbparwwofgknjg.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sdGZqZ2ticGFyd3dvZmdrbmpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MjExNTIsImV4cCI6MjA5Mzk5NzE1Mn0.LZQESe5Nvuor2apbAdhfHlCr_hBtI-pb6wTEKAK0ldU";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // --- DATA DE SECTORES Y FUNCIÓN DINÁMICA ---
+const sectoresData = {
+    "ARAGÜITA": ["13 de Mayo", "19 de Julio", "Cacique de Guacara", "Dios Todopoderoso", "El Libertador", "El Milagro", "Ezequiel Zamora", "Guaicaipuro", "Guaicaipuro Bolivariano", "José Gregorio Guitián", "Juventud 1", "Juventud 2", "La Ceiba 2", "La Ceiba 2021", "La Floresta Sur", "La Franja", "Mocundo", "Nuestra Señora de la Coromoto", "Rafael Caldera", "Santa Bárbara 1", "Santa Bárbara 2", "Santa Eduviges", "Simón Bolívar Sur", "Tesoro del Indio Lote 2", "Tesoro del Indio Lote 3", "Tricentenario"],
+    "CENTRO": ["1ero de Mayo", "Casitas de Malavé Villalba", "El Cumbe", "El Placer", "La Coromoto", "La Florida", "La Goajira", "La Tigrera", "Las Casitas San Agustín", "Los Naranjillos", "Malavé Villalba 123", "Malavé Villalba 4567", "Mocundo Centro", "San Agustín", "Urb. Loma Linda"],
+    "CIUDAD ALIANZA": ["1era Etapa 1", "1ra Etapa 2", "2da Etapa", "3ra Etapa", "4F Alianza Gardens", "4ta Etapa A", "4ta Etapa B", "5ta Etapa", "Aguamarina", "Aguasal", "Brisa del Lago", "Conjunto Residencial Villa Alianza II", "José Laurencio Silva", "Prado del Lago", "Villa Alianza 1, Casas Dignas", "Villa Alianza Viviendas Dignas", "Villas del Lago y Río Verde"],
+    "SAMÁN": ["Apamates", "Bosques del Samán", "Ceiba del Samán", "El Prado", "Enmanuel", "Lagunas del Samán", "Los Girasoles del Samán", "Sector 1", "Sector 2", "Sector 3", "Sector 4", "Sector 5", "Sector 6", "Sector 7", "Sector 8", "Sector 9", "Sector 10", "Sector 11", "Sector 12", "Villas de Capreminfra"],
+    "SUR": ["Amazonia", "Banco Obrero", "Cristo Salva", "La Lucha", "Lago Jardín", "Libertad 1", "Libertad 2", "Macario Escorcha", "Nueva Guacara", "Turumo 1", "Turumo 2", "Villa Guacara"],
+    "TOCO": ["Cardonal 1", "Cardonal 2", "La Alegría", "La Emboscada", "La Floresta Norte", "Los Caobos", "Los Naranjos Norte", "Negro Primero", "Perrote 1", "Perrote 2", "Perrote 3", "Perrote 4", "San Rafael", "Simón Bolívar Norte", "Toco Norte", "Toquito La Milagrosa", "Urb. La Emboscada", "Urb. Las Brisas", "Valles de Naranjal", "Victoria de Guacara", "Villa Tarento"],
+    "VIGIRIMA": ["Avispero Norte", "Bolivariano I", "Bolivariano II", "Brisas del Mayei", "Cacho Mocho", "Colinas de Tronconero", "Colinas del Toco Ojo de Agua", "Diego Ibarra", "El Chaparral", "El Sisal", "Flor de la Manga", "La Compañía", "La Morita", "La Vecindad", "Mata Redonda", "Peñita Agrícola", "Peñita el Viento", "Petroglifos de Ojo de Agua", "Ramón Cruces", "Tronconero", "Tronconero Norte", "Tronconero Sur", "Valle Dorado", "Valles de Vigirima", "Vigirima Centro", "Villas del Toco"],
+    "YAGUA": ["Araguaney II A", "Araguaney II B", "Araguaney Primero", "Campo Amor", "El Cabrito", "El Limón", "El Naranjal", "El Porvenir", "La Manga", "La Milagrosa", "La Primavera", "Las Malvinas", "Las Mandarinas", "Los Almendrones", "Los Cedros", "Los Girasoles de Yagua", "Los Mangos", "Los Merecures", "Los Naranjos", "Maracaibero", "Quebrada Honda", "Samán Azucena", "San Esteban", "Valles de Yagua"]
+};
+
+function cargarSectores() {
+    const t = document.getElementById('reg-territorio').value, s = document.getElementById('reg-sector');
+    s.innerHTML = '<option value="">Seleccione Sector...</option>';
+    if (t && sectoresData[t]) { s.disabled = false; sectoresData[t].forEach(sec => { let opt = document.createElement('option'); opt.value = sec; opt.innerHTML = sec; s.appendChild(opt); }); } 
+    else { s.disabled = true; }
+}
 
         let usuarioActual = null;
         let todosLosExpedientes = [];
@@ -359,13 +399,23 @@
             document.getElementById('modal-demograficos').style.display = 'flex';
         }
 
-        async function guardarCaracterizacion() {
-            animarCarga(40);
-            const d = {
-                id_gte: expActivo, nombres: document.getElementById('cs-nombres').value.toUpperCase(), apellidos: document.getElementById('cs-apellidos').value.toUpperCase(), 
-                sexo: document.getElementById('cs-sexo').value, fecha_nacimiento: document.getElementById('cs-fecha-nac').value,
-                telefono_contacto: document.getElementById('cs-tlf').value, sector: document.getElementById('cs-sector').value, calle: document.getElementById('cs-calle').value,
-                casa: document.getElementById('cs-casa').value, informante: document.getElementById('cs-informante').value, 
+async function guardarCaracterizacion() {
+    animarCarga(40);
+    const d = {
+        id_gte: expActivo, 
+        nombres: document.getElementById('cs-nombres').value.toUpperCase(), 
+        apellidos: document.getElementById('cs-apellidos').value.toUpperCase(), 
+        sexo: document.getElementById('cs-sexo').value, 
+        fecha_nacimiento: document.getElementById('cs-fecha-nac').value,
+        telefono_contacto: document.getElementById('cs-tlf').value, 
+        
+        // AQUÍ PEGAS LA LÍNEA (Sustituyendo a la antigua de 'cs-sector')
+        sector: document.getElementById('reg-sector').value, 
+        
+        calle: document.getElementById('cs-calle').value,
+        casa: document.getElementById('cs-casa').value,
+        informante: document.getElementById('cs-informante').value, 
+         
                 madre_nombre: document.getElementById('cs-m-nombre').value, madre_ci: document.getElementById('cs-m-ci').value,
                 madre_edad: parseInt(document.getElementById('cs-m-edad').value) || 0, madre_escolaridad: document.getElementById('cs-m-escolaridad').value,
                 madre_ocupacion: document.getElementById('cs-m-ocupacion').value, madre_vive_con_nino: document.getElementById('cs-m-vive').checked,
@@ -415,47 +465,49 @@
             lanzarToast("ESTATUS ACTUALIZADO"); cargarExpedientes();
         }
 
-        function cargarEstadisticas(data) {
-            const peso = { "1ra Cita": 1, "2da Cita": 2, "3ra Cita": 3, "4ta Cita": 4, "Alta Psicológica": 4, "Derivación (SMPNNA)": 1 };
-            
-            // 1. Cálculo de Impacto Acumulado (Citas)
-            const citas = data.reduce((acc, x) => acc + (peso[x.seguimiento] || 0), 0);
-            
-            // 2. Conteo de Psicólogos únicos
-            const psicos = new Set(data.filter(x => x.psico_asignado_id).map(x => x.psico_asignado_id)).size;
-            
-            // 3. NUEVO: Conteo de Derivaciones SMPNNA
-            const derivaciones = data.filter(x => x.seguimiento === "Derivación (SMPNNA)").length;
+        // Agregamos "async" al principio para que funcione la carga de Supabase
+async function cargarEstadisticas(data) {
+    const peso = { "1ra Cita": 1, "2da Cita": 2, "3ra Cita": 3, "4ta Cita": 4, "Alta Psicológica": 4, "Derivación (SMPNNA)": 1 };
+    
+    // 1. Cálculo de Impacto Acumulado (Citas)
+    const citas = data.reduce((acc, x) => acc + (peso[x.seguimiento] || 0), 0);
+    
+    // 2. Conteo de Psicólogos únicos
+    const psicos = new Set(data.filter(x => x.psico_asignado_id).map(x => x.psico_asignado_id)).size;
+    
+    // 3. Conteo de Derivaciones SMPNNA
+    const derivaciones = data.filter(x => x.seguimiento === "Derivación (SMPNNA)").length;
 
-            // 4. Definición de los KPIs que se mostrarán en los cuadros
-            const kpis = [
-                { t: "Expedientes", v: data.length, c: "text-gte-blue" },
-                { t: "Impacto (Citas)", v: citas, c: "text-gte-orange" },
-                { t: "Especialistas", v: psicos, c: "text-blue-500" },
-                { t: "Derivaciones SMPNNA", v: derivaciones, c: "text-purple-600" }, // <--- Agregado
-                { t: "Fase 3", v: data.filter(x => x.fase_actual == "3").length, c: "text-red-600" },
-                { t: "Fase 2", v: data.filter(x => x.fase_actual == "2").length, c: "text-yellow-600" }
-            ];
+    // 4. Definición de los KPIs
+    const kpis = [
+        { t: "Expedientes", v: data.length, c: "text-gte-blue" },
+        { t: "Impacto (Citas)", v: citas, c: "text-gte-orange" },
+        { t: "Especialistas", v: psicos, c: "text-blue-500" },
+        { t: "Derivaciones SMPNNA", v: derivaciones, c: "text-purple-600" },
+        { t: "Fase 3", v: data.filter(x => x.fase_actual == "3").length, c: "text-red-600" },
+        { t: "Fase 2", v: data.filter(x => x.fase_actual == "2").length, c: "text-yellow-600" }
+    ];
 
-            // Renderizado en el grid
-            document.getElementById('kpi-grid').innerHTML = kpis.map(s => `
-                <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center">
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p>
-                    <h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3>
-                </div>`).join('');
+    // Renderizado en el grid
+    document.getElementById('kpi-grid').innerHTML = kpis.map(s => `
+        <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p>
+            <h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3>
+        </div>`).join('');
 
-            renderChart(data);
-        }
+    // --- AQUÍ PEGAS LO PRIMERO (Sustituye a renderChart) ---
+    const { data: socialData } = await _supabase.from('caracterizacion_social').select('sector');
+    const map = {}; 
+    if(socialData) socialData.forEach(x => { if(x.sector) map[x.sector] = (map[x.sector] || 0) + 1; });
+    const labels = Object.keys(map).sort((a,b) => map[b] - map[a]).slice(0, 10);
 
-        function renderChart(data) {
-            const ctx = document.getElementById('chartInstituciones').getContext('2d');
-            const instMap = {};
-            data.forEach(x => instMap[x.institucion_educativa] = (instMap[x.institucion_educativa] || 0) + 1);
-            const labels = Object.keys(instMap).sort((a,b) => instMap[b] - instMap[a]).slice(0, 10);
-            if(chartInst) chartInst.destroy();
-            chartInst = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Casos', data: labels.map(l => instMap[l]), backgroundColor: '#FFD700', borderRadius: 5 }] }, options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-        }
-
+    if(chartInst) chartInst.destroy();
+    chartInst = new Chart(document.getElementById('chartInstituciones').getContext('2d'), { 
+        type: 'bar', 
+        data: { labels, datasets: [{ label: 'Casos Reales', data: labels.map(l => map[l]), backgroundColor: '#FFD700', borderRadius: 5 }] }, 
+        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } } 
+    });
+}
         async function procesarCargaMaestra(e) {
     animarCarga(10);
     const file = e.target.files[0];
