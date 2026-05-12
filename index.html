@@ -399,23 +399,19 @@ function cargarSectores() {
             document.getElementById('modal-demograficos').style.display = 'flex';
         }
 
-async function guardarCaracterizacion() {
-    animarCarga(40);
+        async function guardarCaracterizacion() {
+           animarCarga(40);
     const d = {
         id_gte: expActivo, 
-        nombres: document.getElementById('cs-nombres').value.toUpperCase(), 
-        apellidos: document.getElementById('cs-apellidos').value.toUpperCase(), 
-        sexo: document.getElementById('cs-sexo').value, 
-        fecha_nacimiento: document.getElementById('cs-fecha-nac').value,
-        telefono_contacto: document.getElementById('cs-tlf').value, 
-        
-        // AQUÍ PEGAS LA LÍNEA (Sustituyendo a la antigua de 'cs-sector')
-        sector: document.getElementById('reg-sector').value, 
-        
-        calle: document.getElementById('cs-calle').value,
-        casa: document.getElementById('cs-casa').value,
-        informante: document.getElementById('cs-informante').value, 
-         
+                nombres: document.getElementById('cs-nombres').value.toUpperCase(), 
+                apellidos: document.getElementById('cs-apellidos').value.toUpperCase(), 
+                sexo: document.getElementById('cs-sexo').value, 
+                fecha_nacimiento: document.getElementById('cs-fecha-nac').value,
+                telefono_contacto: document.getElementById('cs-tlf').value, 
+                sector: document.getElementById('reg-sector').value, 
+                calle: document.getElementById('cs-calle').value,
+                casa: document.getElementById('cs-casa').value,
+                informante: document.getElementById('cs-informante').value, 
                 madre_nombre: document.getElementById('cs-m-nombre').value, madre_ci: document.getElementById('cs-m-ci').value,
                 madre_edad: parseInt(document.getElementById('cs-m-edad').value) || 0, madre_escolaridad: document.getElementById('cs-m-escolaridad').value,
                 madre_ocupacion: document.getElementById('cs-m-ocupacion').value, madre_vive_con_nino: document.getElementById('cs-m-vive').checked,
