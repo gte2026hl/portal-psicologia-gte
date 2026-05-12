@@ -302,21 +302,23 @@
         }
 
         async function cargarExpedientes() {
-    // Pedimos un rango amplio para superar el límite de 1,000 por defecto
-    const { data, error } = await _supabase
-        .from('expedientes')
-        .select('*')
-        .order('id_gte', { ascending: true })
-        .range(0, 20000); // <--- Ajuste para ver hasta 20k registros
-
-    if (error) console.error("Error al cargar:", error);
-    
-    todosLosExpedientes = data || [];
-    renderizarTabla(todosLosExpedientes);
-    
-    if(usuarioActual.rol === 'MASTER') cargarEstadisticas(todosLosExpedientes);
-    if(document.getElementById('tab-mis-pacientes').style.display !== 'none') renderizarMisPacientes();
-}
+            animarCarga(20);
+            let allData = [], from = 0, to = 999, finished = false;
+            while (!finished) {
+                const { data, error } = await _supabase.from('expedientes').select('*').order('id_gte', { ascending: true }).range(from, to);
+                if (error || data.length === 0) { finished = true; } 
+                else {
+                    allData = allData.concat(data);
+                    if (data.length < 1000) finished = true;
+                    else { from += 1000; to += 1000; }
+                }
+            }
+            todosLosExpedientes = allData;
+            renderizarTabla(todosLosExpedientes);
+            if(usuarioActual.rol === 'MASTER') cargarEstadisticas(todosLosExpedientes);
+            if(document.getElementById('tab-mis-pacientes').style.display !== 'none') renderizarMisPacientes();
+            animarCarga(100);
+        }
 
         function renderizarTabla(datos) {
             const b = document.getElementById('lista-expedientes');
