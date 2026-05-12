@@ -302,12 +302,21 @@
         }
 
         async function cargarExpedientes() {
-            const { data } = await _supabase.from('expedientes').select('*').order('id_gte', { ascending: true });
-            todosLosExpedientes = data || [];
-            renderizarTabla(todosLosExpedientes);
-            if(usuarioActual.rol === 'MASTER') cargarEstadisticas(todosLosExpedientes);
-            if(document.getElementById('tab-mis-pacientes').style.display !== 'none') renderizarMisPacientes();
-        }
+    // Pedimos un rango amplio para superar el límite de 1,000 por defecto
+    const { data, error } = await _supabase
+        .from('expedientes')
+        .select('*')
+        .order('id_gte', { ascending: true })
+        .range(0, 20000); // <--- Ajuste para ver hasta 20k registros
+
+    if (error) console.error("Error al cargar:", error);
+    
+    todosLosExpedientes = data || [];
+    renderizarTabla(todosLosExpedientes);
+    
+    if(usuarioActual.rol === 'MASTER') cargarEstadisticas(todosLosExpedientes);
+    if(document.getElementById('tab-mis-pacientes').style.display !== 'none') renderizarMisPacientes();
+}
 
         function renderizarTabla(datos) {
             const b = document.getElementById('lista-expedientes');
@@ -423,21 +432,46 @@
         }
 
         async function procesarCargaMaestra(e) {
-            animarCarga(40);
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
-                const wb = XLSX.read(evt.target.result, { type: 'binary' });
-                const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                const lotes = raw.map(f => {
-                    const r = {}; Object.keys(f).forEach(k => r[k.trim().toUpperCase()] = f[k]);
-                    return { id_gte: String(r['EXPEDIENTE'] || '').trim(), fase_actual: String(r['FASE'] || '3').trim(), nombre_paciente: String(r['NOMBRE Y APELLIDO'] || '').trim().toUpperCase(), institucion_educativa: String(r['INSTITUCIÓN'] || '').trim().toUpperCase(), cedula_paciente: String(r['CÉDULA'] || '').trim(), edad_paciente: parseInt(r['EDAD']) || 0, seguimiento: 'Sin Iniciar' };
-                }).filter(x => x.id_gte !== '');
-                await _supabase.from('expedientes').upsert(lotes, { onConflict: 'id_gte' });
-                animarCarga(100); lanzarToast("SINCRONIZADO"); cargarExpedientes();
+    animarCarga(10);
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+        const wb = XLSX.read(evt.target.result, { type: 'binary' });
+        const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        
+        const lotesCompletos = raw.map(f => {
+            const r = {}; Object.keys(f).forEach(k => r[k.trim().toUpperCase()] = f[k]);
+            return { 
+                id_gte: String(r['EXPEDIENTE'] || '').trim(), 
+                fase_actual: String(r['FASE'] || '3').trim(), 
+                nombre_paciente: String(r['NOMBRE Y APELLIDO'] || '').trim().toUpperCase(), 
+                institucion_educativa: String(r['INSTITUCIÓN'] || '').trim().toUpperCase(), 
+                cedula_paciente: String(r['CÉDULA'] || '').trim(), 
+                edad_paciente: parseInt(r['EDAD']) || 0, 
+                seguimiento: 'Sin Iniciar' 
             };
-            reader.readAsBinaryString(file);
+        }).filter(x => x.id_gte !== '');
+
+        // PROCESO DE CARGA POR BLOQUES (Para evitar que la nube rebote el archivo)
+        const TAMAÑO_BLOQUE = 500;
+        for (let i = 0; i < lotesCompletos.length; i += TAMAÑO_BLOQUE) {
+            const bloque = lotesCompletos.slice(i, i + TAMAÑO_BLOQUE);
+            const porcentaje = Math.round(((i + bloque.length) / lotesCompletos.length) * 100);
+            
+            animarCarga(porcentaje); // La barra de arriba te dirá cuánto falta real
+            const { error } = await _supabase.from('expedientes').upsert(bloque, { onConflict: 'id_gte' });
+            
+            if (error) {
+                alert("Error en bloque " + i + ": " + error.message);
+                break;
+            }
         }
+
+        lanzarToast("REPOSITORIO SINCRONIZADO: " + lotesCompletos.length + " REGISTROS");
+        cargarExpedientes();
+    };
+    reader.readAsBinaryString(file);
+}
 
         function cambiarTab(id) {
             animarCarga(50);
