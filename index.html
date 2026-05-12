@@ -24,7 +24,7 @@
         body { font-family: 'Open Sans', sans-serif; background-color: var(--gte-bg); margin: 0; overflow-x: hidden; }
         h1, h2, h3 { font-family: 'Poppins', sans-serif; }
         
-        /* Identidad HDC2026 con Degradado Dorado-Naranja */
+        /* Identidad HDC2026 */
         .gradient-border { 
             border-top: 8px solid;
             border-image: linear-gradient(to right, var(--gte-gold), var(--gte-orange)) 1; 
@@ -243,7 +243,6 @@
         let chartInst = null;
         let expActivo = null;
 
-        // Persistencia de Sesión al Recargar
         window.onload = async () => {
             animarCarga(30);
             const { data: { session } } = await _supabase.auth.getSession();
@@ -275,7 +274,7 @@
             const e = document.getElementById('login-email').value;
             const p = document.getElementById('login-pass').value;
             const { data: { user }, error } = await _supabase.auth.signInWithPassword({ email: e, password: p });
-            if (error) { animarCarga(100); return alert("Credenciales inválidas."); }
+            if (error) { animarCarga(100); return alert("Error de acceso."); }
             const { data: per } = await _supabase.from('usuarios').select('*').eq('id', user.id);
             usuarioActual = per[0];
             animarCarga(100); iniciarApp();
@@ -340,7 +339,7 @@
                     <td class="p-5"><select onchange="actualizarEstatus('${exp.id_gte}', this.value)" class="text-[10px] font-black uppercase p-1 border-2 border-blue-100 rounded-lg outline-none">
                         ${estatus.map(e => `<option value="${e}" ${exp.seguimiento === e ? 'selected' : ''}>${e}</option>`).join('')}
                     </select></td>
-                    <td class="p-5 text-right"><button onclick="abrirAtencion('${exp.id_gte}')" class="btn-gte-orange px-4 py-2 text-[9px] uppercase">Atender</button></td>
+                    <td class="p-5 text-right"><button onclick="abrirAtencion('${exp.id_gte}')" class="btn-gte-orange px-4 py-2 text-[9px] uppercase">Portal Atención</button></td>
                 </tr>`).join('');
         }
 
@@ -352,32 +351,31 @@
         async function guardarCaracterizacion() {
             animarCarga(40);
             const d = {
-                id_gte: expActivo,
-                nombres: document.getElementById('cs-nombres').value.toUpperCase(),
-                apellidos: document.getElementById('cs-apellidos').value.toUpperCase(),
-                sexo: document.getElementById('cs-sexo').value,
-                fecha_nacimiento: document.getElementById('cs-fecha-nac').value,
-                telefono_contacto: document.getElementById('cs-tlf').value,
-                sector: document.getElementById('cs-sector').value,
-                calle: document.getElementById('cs-calle').value,
-                casa: document.getElementById('cs-casa').value,
-                informante: document.getElementById('cs-informante').value,
-                madre_nombre: document.getElementById('cs-m-nombre').value,
-                madre_ci: document.getElementById('cs-m-ci').value,
-                madre_edad: parseInt(document.getElementById('cs-m-edad').value) || 0,
-                madre_escolaridad: document.getElementById('cs-m-escolaridad').value,
-                madre_ocupacion: document.getElementById('cs-m-ocupacion').value,
-                madre_vive_con_nino: document.getElementById('cs-m-vive').checked,
-                padre_nombre: document.getElementById('cs-p-nombre').value,
-                padre_ci: document.getElementById('cs-p-ci').value,
-                padre_edad: parseInt(document.getElementById('cs-p-edad').value) || 0,
-                padre_escolaridad: document.getElementById('cs-p-escolaridad').value,
-                padre_ocupacion: document.getElementById('cs-p-ocupacion').value,
+                id_gte: expActivo, nombres: document.getElementById('cs-nombres').value.toUpperCase(), apellidos: document.getElementById('cs-apellidos').value.toUpperCase(), 
+                sexo: document.getElementById('cs-sexo').value, fecha_nacimiento: document.getElementById('cs-fecha-nac').value,
+                telefono_contacto: document.getElementById('cs-tlf').value, sector: document.getElementById('cs-sector').value, calle: document.getElementById('cs-calle').value,
+                casa: document.getElementById('cs-casa').value, informante: document.getElementById('cs-informante').value, 
+                madre_nombre: document.getElementById('cs-m-nombre').value, madre_ci: document.getElementById('cs-m-ci').value,
+                madre_edad: parseInt(document.getElementById('cs-m-edad').value) || 0, madre_escolaridad: document.getElementById('cs-m-escolaridad').value,
+                madre_ocupacion: document.getElementById('cs-m-ocupacion').value, madre_vive_con_nino: document.getElementById('cs-m-vive').checked,
+                padre_nombre: document.getElementById('cs-p-nombre').value, padre_ci: document.getElementById('cs-p-ci').value, padre_edad: parseInt(document.getElementById('cs-p-edad').value) || 0,
+                padre_escolaridad: document.getElementById('cs-p-escolaridad').value, padre_ocupacion: document.getElementById('cs-p-ocupacion').value,
                 padre_vive_con_nino: document.getElementById('cs-p-vive').checked
             };
             const { error } = await _supabase.from('caracterizacion_social').upsert(d, { onConflict: 'id_gte' });
+            
             if (!error) {
-                animarCarga(100); lanzarToast("PORTAL SOCIAL SINCRONIZADO");
+                // --- INTEGRACIÓN GOOGLE SHEETS ---
+                const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwhtkeifSrt6j4Wr7-CPFfByrVdlcr5f-y_AbNq5G25o_d8omjM-p7Yfp6ln7OUndzO/exec";
+                fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    body: JSON.stringify(d)
+                }).then(() => console.log("Sincronizado con Google Sheets"));
+                // --------------------------------
+
+                animarCarga(100); lanzarToast("PORTAL 1 SINCRONIZADO");
                 document.getElementById('modal-demograficos').style.display = 'none';
                 document.getElementById('modal-historia').style.display = 'flex';
             } else alert(error.message);
@@ -386,16 +384,13 @@
         async function guardarHistoriaClinica() {
             animarCarga(40);
             const d = {
-                id_gte: expActivo, psico_id: usuarioActual.id, motivo_consulta: document.getElementById('hc-motivo').value, 
-                examen_mental: document.getElementById('hc-examen-mental').value, apariencia_fisica: document.getElementById('hc-apariencia').value, 
-                entrevista_notas: document.getElementById('hc-notas').value,
-                desarrollo_psicomotor: { nota: document.getElementById('hc-psicomotor').value },
-                lenguaje: { nota: document.getElementById('hc-lenguaje').value },
-                habitos: { nota: document.getElementById('hc-habitos').value },
-                escolaridad: { nota: document.getElementById('hc-escolaridad').value }
+                id_gte: expActivo, psico_id: usuarioActual.id, motivo_consulta: document.getElementById('hc-motivo').value, examen_mental: document.getElementById('hc-examen-mental').value,
+                apariencia_fisica: document.getElementById('hc-apariencia').value, entrevista_notas: document.getElementById('hc-notas').value,
+                desarrollo_psicomotor: { nota: document.getElementById('hc-psicomotor').value }, lenguaje: { nota: document.getElementById('hc-lenguaje').value },
+                habitos: { nota: document.getElementById('hc-habitos').value }, escolaridad: { nota: document.getElementById('hc-escolaridad').value }
             };
             const { error } = await _supabase.from('historias_clinicas').insert(d);
-            if (!error) { animarCarga(100); lanzarToast("HISTORIA CLÍNICA GUARDADA"); cerrarModales(); cargarExpedientes(); }
+            if (!error) { animarCarga(100); lanzarToast("ATENCIÓN FINALIZADA"); cerrarModales(); cargarExpedientes(); }
             else alert(error.message);
         }
 
@@ -413,17 +408,8 @@
             const peso = { "1ra Cita": 1, "2da Cita": 2, "3ra Cita": 3, "4ta Cita": 4, "Alta Psicológica": 4, "Derivación (SMPNNA)": 1 };
             const citas = data.reduce((acc, x) => acc + (peso[x.seguimiento] || 0), 0);
             const psicos = new Set(data.filter(x => x.psico_asignado_id).map(x => x.psico_asignado_id)).size;
-            const kpis = [
-                { t: "Expedientes", v: data.length, c: "text-gte-blue" }, 
-                { t: "Impacto (Citas)", v: citas, c: "text-gte-orange" }, 
-                { t: "Especialistas", v: psicos, c: "text-blue-500" }, 
-                { t: "Fase 4", v: data.filter(x => x.fase_actual == "4").length, c: "text-red-600" }
-            ];
-            document.getElementById('kpi-grid').innerHTML = kpis.map(s => `
-                <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center">
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p>
-                    <h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3>
-                </div>`).join('');
+            const kpis = [{ t: "Expedientes", v: data.length, c: "text-gte-blue" }, { t: "Impacto (Citas)", v: citas, c: "text-gte-orange" }, { t: "Especialistas", v: psicos, c: "text-blue-500" }, { t: "Fase 4", v: data.filter(x => x.fase_actual == "4").length, c: "text-red-600" }];
+            document.getElementById('kpi-grid').innerHTML = kpis.map(s => `<div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p><h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3></div>`).join('');
             renderChart(data);
         }
 
@@ -433,11 +419,7 @@
             data.forEach(x => instMap[x.institucion_educativa] = (instMap[x.institucion_educativa] || 0) + 1);
             const labels = Object.keys(instMap).sort((a,b) => instMap[b] - instMap[a]).slice(0, 10);
             if(chartInst) chartInst.destroy();
-            chartInst = new Chart(ctx, { 
-                type: 'bar', 
-                data: { labels, datasets: [{ label: 'Casos', data: labels.map(l => instMap[l]), backgroundColor: '#FFD700', borderRadius: 5 }] }, 
-                options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } } 
-            });
+            chartInst = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Casos', data: labels.map(l => instMap[l]), backgroundColor: '#FFD700', borderRadius: 5 }] }, options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         }
 
         async function procesarCargaMaestra(e) {
@@ -449,18 +431,10 @@
                 const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                 const lotes = raw.map(f => {
                     const r = {}; Object.keys(f).forEach(k => r[k.trim().toUpperCase()] = f[k]);
-                    return { 
-                        id_gte: String(r['EXPEDIENTE'] || '').trim(), 
-                        fase_actual: String(r['FASE'] || '3').trim(), 
-                        nombre_paciente: String(r['NOMBRE Y APELLIDO'] || '').trim().toUpperCase(), 
-                        institucion_educativa: String(r['INSTITUCIÓN'] || '').trim().toUpperCase(), 
-                        cedula_paciente: String(r['CÉDULA'] || '').trim(), 
-                        edad_paciente: parseInt(r['EDAD']) || 0, 
-                        seguimiento: 'Sin Iniciar' 
-                    };
+                    return { id_gte: String(r['EXPEDIENTE'] || '').trim(), fase_actual: String(r['FASE'] || '3').trim(), nombre_paciente: String(r['NOMBRE Y APELLIDO'] || '').trim().toUpperCase(), institucion_educativa: String(r['INSTITUCIÓN'] || '').trim().toUpperCase(), cedula_paciente: String(r['CÉDULA'] || '').trim(), edad_paciente: parseInt(r['EDAD']) || 0, seguimiento: 'Sin Iniciar' };
                 }).filter(x => x.id_gte !== '');
                 await _supabase.from('expedientes').upsert(lotes, { onConflict: 'id_gte' });
-                animarCarga(100); lanzarToast("REPOSITORIO SINCRONIZADO"); cargarExpedientes();
+                animarCarga(100); lanzarToast("SINCRONIZADO"); cargarExpedientes();
             };
             reader.readAsBinaryString(file);
         }
@@ -477,39 +451,17 @@
 
         function filtrarTabla() {
             const b = document.getElementById('buscador-input').value.toLowerCase();
-            renderizarTabla(todosLosExpedientes.filter(x => 
-                x.nombre_paciente.toLowerCase().includes(b) || 
-                x.id_gte.toLowerCase().includes(b) || 
-                x.cedula_paciente.includes(b) || 
-                x.institucion_educativa.toLowerCase().includes(b)
-            ));
+            renderizarTabla(todosLosExpedientes.filter(x => x.nombre_paciente.toLowerCase().includes(b) || x.id_gte.toLowerCase().includes(b) || x.cedula_paciente.includes(b) || x.institucion_educativa.toLowerCase().includes(b)));
         }
 
         function generarPDF() {
             const area = document.getElementById('reporte-area');
-            html2pdf().set({ 
-                margin: 0.5, 
-                filename: 'GTE_Reporte_HDC2026.pdf', 
-                html2canvas: { scale: 2 }, 
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
-            }).from(area).save();
+            html2pdf().set({ margin: 0.5, filename: 'GTE_Reporte.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(area).save();
         }
 
-        function cerrarModales() { 
-            document.getElementById('modal-demograficos').style.display = 'none'; 
-            document.getElementById('modal-historia').style.display = 'none'; 
-        }
-
-        function lanzarToast(m) { 
-            const t = document.getElementById('gte-toast'); 
-            t.innerText = m; t.style.display = 'block'; 
-            setTimeout(() => t.style.display = 'none', 3000); 
-        }
-
-        async function cerrarSesion() { 
-            await _supabase.auth.signOut(); 
-            location.reload(); 
-        }
+        function cerrarModales() { document.getElementById('modal-demograficos').style.display = 'none'; document.getElementById('modal-historia').style.display = 'none'; }
+        function lanzarToast(m) { const t = document.getElementById('gte-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
+        async function cerrarSesion() { await _supabase.auth.signOut(); location.reload(); }
     </script>
 </body>
 </html>
