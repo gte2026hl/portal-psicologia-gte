@@ -417,10 +417,33 @@
 
         function cargarEstadisticas(data) {
             const peso = { "1ra Cita": 1, "2da Cita": 2, "3ra Cita": 3, "4ta Cita": 4, "Alta Psicológica": 4, "Derivación (SMPNNA)": 1 };
+            
+            // 1. Cálculo de Impacto Acumulado (Citas)
             const citas = data.reduce((acc, x) => acc + (peso[x.seguimiento] || 0), 0);
+            
+            // 2. Conteo de Psicólogos únicos
             const psicos = new Set(data.filter(x => x.psico_asignado_id).map(x => x.psico_asignado_id)).size;
-            const kpis = [{ t: "Expedientes", v: data.length, c: "text-gte-blue" }, { t: "Impacto (Citas)", v: citas, c: "text-gte-orange" }, { t: "Especialistas", v: psicos, c: "text-blue-500" }, { t: "Fase 3", v: data.filter(x => x.fase_actual == "4").length, c: "text-red-600" }];
-            document.getElementById('kpi-grid').innerHTML = kpis.map(s => `<div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p><h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3></div>`).join('');
+            
+            // 3. NUEVO: Conteo de Derivaciones SMPNNA
+            const derivaciones = data.filter(x => x.seguimiento === "Derivación (SMPNNA)").length;
+
+            // 4. Definición de los KPIs que se mostrarán en los cuadros
+            const kpis = [
+                { t: "Expedientes", v: data.length, c: "text-gte-blue" },
+                { t: "Impacto (Citas)", v: citas, c: "text-gte-orange" },
+                { t: "Especialistas", v: psicos, c: "text-blue-500" },
+                { t: "Derivaciones SMPNNA", v: derivaciones, c: "text-purple-600" }, // <--- Agregado
+                { t: "Fase 3", v: data.filter(x => x.fase_actual == "3").length, c: "text-red-600" },
+                { t: "Fase 2", v: data.filter(x => x.fase_actual == "2").length, c: "text-yellow-600" }
+            ];
+
+            // Renderizado en el grid
+            document.getElementById('kpi-grid').innerHTML = kpis.map(s => `
+                <div class="bg-white p-6 rounded-[25px] border border-slate-100 shadow-sm text-center">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${s.t}</p>
+                    <h3 class="text-3xl font-black ${s.c} mt-2">${s.v}</h3>
+                </div>`).join('');
+
             renderChart(data);
         }
 
